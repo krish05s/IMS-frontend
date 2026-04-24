@@ -67,3 +67,23 @@ body {
     width: 180px;
   }
 }
+
+@keyframes drive {
+  0% {
+    transform: translateX(-35px);
+  }
+
+  100% {
+    transform: translateX(65px);
+  }
+}
+
+@keyframes progress {
+  0% {
+    width: 0%;
+  }
+
+  100% {
+    width: 100%;
+  }
+}

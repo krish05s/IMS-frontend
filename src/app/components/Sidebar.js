@@ -84,8 +84,10 @@ export default function Sidebar() {
       {/* Sidebar Panel */}
       <div className={`fixed top-0 left-0 h-full w-64 bg-slate-50 text-slate-700 border-r border-slate-200 p-5 z-50 shadow-sm transition-transform duration-300 md:translate-x-0 flex flex-col ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
         
-        <div className="flex justify-between items-center mb-8 md:block md:mb-6">
-           <h2 className="text-xl font-bold text-orange-600 hidden md:block px-2 mb-2">Micara IMS</h2>
+        <div className="flex justify-between items-center mb-8 md:mb-6">
+           <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm inline-block">
+             <img src="/FINAL_MICARA_LOGO_OPEN black.png" alt="Micara Logo" className="w-32 object-contain" />
+           </div>
            
            <button onClick={() => setIsOpen(false)} className="md:hidden p-2 text-slate-500 hover:text-red-500 bg-slate-200 rounded-md">
              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
