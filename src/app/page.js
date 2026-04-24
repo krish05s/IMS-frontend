@@ -43,12 +43,14 @@ export default function LoginPage() {
 
   const validate = () => {
     const newErrors = {};
+
     if (!formData.email) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.email))
       newErrors.email = "Enter a valid email";
-    if (!formData.password) newErrors.password = "Password is required";
-    else if (formData.password.length < 6)
-      newErrors.password = "Minimum 6 characters";
+
+    if (!formData.password)
+      newErrors.password = "Password is required";
+
     return newErrors;
   };
 
@@ -96,10 +98,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-pink-100 via-white to-green-100 p-5 font-sans">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-pink-100 via-white to-green-100 p-3 sm:p-5 font-sans">
       <div className="flex w-full max-w-3xl min-h-[520px] rounded-2xl overflow-hidden shadow-2xl bg-white">
-        {/* LEFT: Carousel */}
-        <div className="relative w-[45%] min-h-[520px] overflow-hidden flex-shrink-0">
+
+        {/* LEFT: Carousel - Hidden on Mobile */}
+        <div className="relative hidden md:block w-[45%] min-h-[520px] overflow-hidden flex-shrink-0">
           {carouselImages.map((img, i) => (
             <div
               key={i}
@@ -128,24 +131,23 @@ export default function LoginPage() {
         </div>
 
         {/* RIGHT: Form */}
-        <div className="flex-1 flex flex-col items-center justify-center px-10 py-12 bg-white">
-          {/* Logo */}
+        <div className="flex-1 flex flex-col items-center justify-center px-6 sm:px-10 py-10 sm:py-12 bg-white">
           <div className="flex flex-col items-center mb-6">
             <img
               src="/FINAL_MICARA_LOGO_OPEN black.png"
               alt="Micara Laminate"
-              className="w-36 object-contain mb-2"
+              className="w-28 sm:w-36 object-contain mb-2"
             />
           </div>
 
-          <h2 className="text-3xl font-extrabold text-[#1a2340] mb-1 text-center">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1a2340] mb-1 text-center">
             Welcome Back
           </h2>
           <p className="text-sm text-gray-400 mb-7 text-center">
             Please login to your account
           </p>
 
-          <div className="w-full max-w-xs">
+          <div className="w-full max-w-xs sm:max-w-sm">
             {/* Email */}
             <div className="mb-3">
               <input
@@ -181,32 +183,7 @@ export default function LoginPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors bg-transparent border-none cursor-pointer p-1"
               >
-                {showPassword ? (
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" />
-                    <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" />
-                    <line x1="1" y1="1" x2="23" y2="23" />
-                  </svg>
-                ) : (
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                )}
+                {showPassword ? "🙈" : "👁"}
               </button>
               {errors.password && (
                 <p className="text-red-500 text-xs mt-1 ml-1">
@@ -215,69 +192,73 @@ export default function LoginPage() {
               )}
             </div>
 
-            {/* Forgot Password */}
             <div className="text-right mb-5">
               <span className="text-sm text-gray-400 cursor-pointer hover:text-orange-500 transition-colors">
                 Forgot Password
               </span>
             </div>
 
-            {/* Server Message */}
             {serverMessage && (
               <div
                 className={`mb-4 text-sm px-4 py-2.5 rounded-lg border ${serverMessage.includes("successful")
-                  ? "bg-green-50 text-green-700 border-green-200"
-                  : "bg-red-50 text-red-600 border-red-200"
+                    ? "bg-green-50 text-green-700 border-green-200"
+                    : "bg-red-50 text-red-600 border-red-200"
                   }`}
               >
                 {serverMessage}
               </div>
             )}
 
-            {/* Sign In Button */}
             <button
               onClick={handleSubmit}
               disabled={loading}
               className="w-full py-3.5 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 disabled:bg-orange-300 disabled:cursor-not-allowed text-white text-base font-bold rounded-xl transition-all duration-200 shadow-lg shadow-orange-200 tracking-wide"
             >
-              {loading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Signing In...
-                </>
-              ) : (
-                "Sign In"
-              )}
+              {loading ? "Signing In..." : "Sign In"}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Moving Truck Toast Notification */}
-      <div className={`fixed top-5 right-5 bg-white px-6 py-4 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 z-50 flex items-center gap-5 overflow-hidden min-w-[300px] transition-all duration-500 ease-out ${showTruckToast ? 'translate-x-0 opacity-100' : 'translate-x-[120%] opacity-0'}`}>
+      {/* Toast */}
+      <div
+        className={`fixed top-5 right-5 bg-white px-6 py-4 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 z-50 flex items-center gap-5 overflow-hidden min-w-[280px] transition-all duration-500 ease-out ${showTruckToast
+            ? "translate-x-0 opacity-100"
+            : "translate-x-[120%] opacity-0"
+          }`}
+      >
         <div className="relative w-16 h-10 overflow-hidden bg-slate-50 rounded-lg">
-          {/* Grey track */}
           <div className="absolute bottom-1 left-0 w-full h-1 bg-slate-200 rounded-full z-0"></div>
-          {/* Truck */}
-          <div className="absolute left-0 flex items-center h-full z-10" style={{ animation: 'drive 2s linear infinite' }}>
-            <span className="text-3xl inline-block" style={{ transform: 'scaleX(-1)' }}>🚚</span>
+          <div
+            className="absolute left-0 flex items-center h-full z-10"
+            style={{ animation: "drive 2s linear infinite" }}
+          >
+            <span
+              className="text-3xl inline-block"
+              style={{ transform: "scaleX(-1)" }}
+            >
+              🚚
+            </span>
           </div>
         </div>
         <div>
-          <h3 className="font-bold text-slate-800 text-sm">Login Successful!</h3>
-          <p className="text-xs text-slate-500">Routing to dashboard...</p>
+          <h3 className="font-bold text-slate-800 text-sm">
+            Login Successful!
+          </h3>
+          <p className="text-xs text-slate-500"></p>
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @keyframes drive {
           0% { transform: translateX(-35px); }
           100% { transform: translateX(65px); }
         }
-      `}} />
+      `,
+        }}
+      />
     </div>
   );
 }
