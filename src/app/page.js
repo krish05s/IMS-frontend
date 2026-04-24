@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 const carouselImages = [
   {
@@ -181,9 +182,13 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors bg-transparent border-none cursor-pointer p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xl text-gray-400 hover:text-gray-600 transition-colors bg-transparent border-none cursor-pointer p-1"
               >
-                {showPassword ? "🙈" : "👁"}
+                {showPassword ? (
+                  <AiOutlineEyeInvisible />
+                ) : (
+                  <AiOutlineEye />
+                )}
               </button>
               {errors.password && (
                 <p className="text-red-500 text-xs mt-1 ml-1">
@@ -201,8 +206,8 @@ export default function LoginPage() {
             {serverMessage && (
               <div
                 className={`mb-4 text-sm px-4 py-2.5 rounded-lg border ${serverMessage.includes("successful")
-                    ? "bg-green-50 text-green-700 border-green-200"
-                    : "bg-red-50 text-red-600 border-red-200"
+                  ? "bg-green-50 text-green-700 border-green-200"
+                  : "bg-red-50 text-red-600 border-red-200"
                   }`}
               >
                 {serverMessage}
@@ -223,8 +228,8 @@ export default function LoginPage() {
       {/* Toast */}
       <div
         className={`fixed top-5 right-5 bg-white px-6 py-4 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 z-50 flex items-center gap-5 overflow-hidden min-w-[280px] transition-all duration-500 ease-out ${showTruckToast
-            ? "translate-x-0 opacity-100"
-            : "translate-x-[120%] opacity-0"
+          ? "translate-x-0 opacity-100"
+          : "translate-x-[120%] opacity-0"
           }`}
       >
         <div className="relative w-16 h-10 overflow-hidden bg-slate-50 rounded-lg">
