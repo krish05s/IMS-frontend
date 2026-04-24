@@ -2,17 +2,19 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
+import TruckLoader from "../components/TruckLoader";
 
 export default function Settings() {
   useRoleCheck(["admin"]);
   const [vehicles, setVehicles] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVehicle, setCurrentVehicle] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({ vehicle_no: "", owner_name: "", status: 1 });
 
   const fetchVehicles = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/vehicle/read", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/vehicle/read`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await response.json();
@@ -21,6 +23,8 @@ export default function Settings() {
       }
     } catch (error) {
       console.error("Error fetching vehicles:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,19 +45,19 @@ export default function Settings() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const url = currentVehicle 
-       ? `http://localhost:5000/api/vehicle/update/${encodeURIComponent(currentVehicle.vehicle_no)}`
-       : "http://localhost:5000/api/vehicle/create";
+    const url = currentVehicle
+      ? `${process.env.NEXT_PUBLIC_API_URL}/api/vehicle/update/${encodeURIComponent(currentVehicle.vehicle_no)}`
+      : `${process.env.NEXT_PUBLIC_API_URL}/api/vehicle/create`;
     const method = currentVehicle ? "PUT" : "POST";
 
     try {
       const response = await fetch(url, {
-         method,
-         headers: {
-           "Content-Type": "application/json",
-           Authorization: `Bearer ${localStorage.getItem("token")}`
-         },
-         body: JSON.stringify(formData)
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify(formData)
       });
       const data = await response.json();
       if (data.success) {
@@ -69,13 +73,13 @@ export default function Settings() {
 
   const handleToggle = async (vehicle) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/vehicle/update/${encodeURIComponent(vehicle.vehicle_no)}`, {
-         method: "PUT",
-         headers: {
-           "Content-Type": "application/json",
-           Authorization: `Bearer ${localStorage.getItem("token")}`
-         },
-         body: JSON.stringify({ ...vehicle, status: vehicle.status === 1 ? 0 : 1 })
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/vehicle/update/${encodeURIComponent(vehicle.vehicle_no)}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({ ...vehicle, status: vehicle.status === 1 ? 0 : 1 })
       });
       const data = await response.json();
       if (data.success) {
@@ -92,21 +96,25 @@ export default function Settings() {
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
       <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto">
-        <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Setup & Settings</h1>
-            <p className="text-sm text-slate-500 mt-1">Manage system configurations and data</p>
-          </div>
-        </div>
+        {loading ? (
+          <TruckLoader />
+        ) : (
+          <>
+            <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-800">Setup & Settings</h1>
+                <p className="text-sm text-slate-500 mt-1">Manage system configurations and data</p>
+              </div>
+            </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Vehicles Card container (can add more cards here like Company Info, etc) */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-               <h2 className="text-lg font-bold text-slate-800">Vehicles Directory</h2>
-               <button onClick={() => handleOpenModal()} className="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-orange-600 transition shadow-md shadow-orange-500/20">
-                 + Add Vehicle
-               </button>
+              <h2 className="text-lg font-bold text-slate-800">Vehicles Directory</h2>
+              <button onClick={() => handleOpenModal()} className="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-orange-600 transition shadow-md shadow-orange-500/20">
+                + Add Vehicle
+              </button>
             </div>
             <div className="p-0 overflow-y-auto max-h-[400px]">
               <table className="w-full text-left text-sm whitespace-nowrap">
@@ -129,18 +137,20 @@ export default function Settings() {
                         </button>
                       </td>
                       <td className="py-3 px-5 text-right">
-                         <button onClick={() => handleOpenModal(v)} className="text-blue-500 hover:text-blue-700 font-medium">Edit</button>
+                        <button onClick={() => handleOpenModal(v)} className="text-blue-500 hover:text-blue-700 font-medium">Edit</button>
                       </td>
                     </tr>
                   ))}
                   {vehicles.length === 0 && (
-                     <tr><td colSpan="4" className="py-6 text-center text-slate-400">No vehicles saved yet.</td></tr>
+                    <tr><td colSpan="4" className="py-6 text-center text-slate-400">No vehicles saved yet.</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
           </div>
         </div>
+        </>
+        )}
 
         {/* Modal */}
         {isModalOpen && (
@@ -170,9 +180,9 @@ export default function Settings() {
                   />
                 </div>
                 <div className="flex items-center gap-2 mt-2">
-                  <input 
-                    type="checkbox" 
-                    id="statusToggle" 
+                  <input
+                    type="checkbox"
+                    id="statusToggle"
                     checked={Number(formData.status) === 1}
                     onChange={(e) => setFormData({ ...formData, status: e.target.checked ? 1 : 0 })}
                     className="w-4 h-4 rounded text-orange-500"

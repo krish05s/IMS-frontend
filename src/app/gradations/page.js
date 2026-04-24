@@ -2,17 +2,19 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
+import TruckLoader from "../components/TruckLoader";
 
 export default function Gradations() {
   useRoleCheck(["admin"]);
   const [gradations, setGradations] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentGradation, setCurrentGradation] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({ gradationName: "", thickness: "" });
 
   const fetchGradations = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/gradation/read", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gradation/read`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -23,6 +25,8 @@ export default function Gradations() {
       }
     } catch (error) {
       console.error("Error fetching gradations:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,8 +59,8 @@ export default function Gradations() {
     const payload = { gradation: combinedGradation };
 
     const url = currentGradation
-      ? `http://localhost:5000/api/gradation/update/${currentGradation.id}`
-      : "http://localhost:5000/api/gradation/create";
+      ? `${process.env.NEXT_PUBLIC_API_URL}/api/gradation/update/${currentGradation.id}`
+      : `${process.env.NEXT_PUBLIC_API_URL}/api/gradation/create`;
     const method = currentGradation ? "PUT" : "POST";
 
     try {
@@ -83,7 +87,7 @@ export default function Gradations() {
   const handleToggleStatus = async (id, currentStatus) => {
     try {
       const newStatus = currentStatus === 1 ? 0 : 1;
-      const response = await fetch(`http://localhost:5000/api/gradation/status/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gradation/status/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -106,11 +110,15 @@ export default function Gradations() {
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
       <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto">
-        <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Gradations</h1>
-            <p className="text-sm text-slate-500 mt-1">Manage and organize product gradations</p>
-          </div>
+        {loading ? (
+          <TruckLoader />
+        ) : (
+          <>
+            <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-800">Gradations</h1>
+                <p className="text-sm text-slate-500 mt-1">Manage and organize product gradations</p>
+              </div>
           <button
             onClick={() => handleOpenModal()}
             className="bg-orange-500 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-orange-600 transition shadow-md shadow-orange-500/20"
@@ -137,14 +145,12 @@ export default function Gradations() {
                   <td className="py-4 px-6">
                     <button
                       onClick={() => handleToggleStatus(g.id, g.status)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        g.status === 1 ? "bg-green-500" : "bg-slate-300"
-                      }`}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${g.status === 1 ? "bg-green-500" : "bg-slate-300"
+                        }`}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          g.status === 1 ? "translate-x-6" : "translate-x-1"
-                        }`}
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${g.status === 1 ? "translate-x-6" : "translate-x-1"
+                          }`}
                       />
                     </button>
                   </td>
@@ -168,6 +174,8 @@ export default function Gradations() {
             </tbody>
           </table>
         </div>
+        </>
+        )}
 
         {/* Modal */}
         {isModalOpen && (

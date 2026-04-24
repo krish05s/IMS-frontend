@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
+import TruckLoader from "../components/TruckLoader";
 
 function Members() {
   useRoleCheck(["admin"]);
@@ -30,7 +31,7 @@ function Members() {
 
   const [toast, setToast] = useState(null);
 
-  const API_BASE = "http://localhost:5000/api/user";
+  const API_BASE = `${process.env.NEXT_PUBLIC_API_URL}/api/user`;
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -177,49 +178,45 @@ function Members() {
       <Sidebar />
 
       <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto">
-        {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">Members</h1>
-            <p className="text-sm text-slate-500 mt-1">All users list</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="bg-emerald-100 text-emerald-700 text-sm font-semibold px-4 py-1.5 rounded-full">
-              Total: {users.length}
-            </span>
-            {/* ── ADD BUTTON ── */}
-            <button
-              onClick={() => { setAddModal(true); setShowAddPassword(false); }}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-emerald-200"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Add Member
-            </button>
-          </div>
-        </div>
-
-        {/* Toast */}
-        {toast && (
-          <div className={`fixed top-5 right-5 z-50 px-5 py-3 rounded-xl shadow-xl text-white text-sm font-medium transition-all duration-300 flex items-center gap-2 ${toast.type === "success" ? "bg-emerald-500" : "bg-rose-500"}`}>
-            {toast.type === "success" ? "✅" : "❌"} {toast.message}
-          </div>
-        )}
-
-        {/* Table */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          {loading ? (
-            <div className="flex items-center justify-center py-20 text-slate-400">
-              <svg className="animate-spin h-7 w-7 mr-3 text-emerald-500" viewBox="0 0 24 24" fill="none">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-              </svg>
-              Loading...
+        {loading ? (
+          <TruckLoader />
+        ) : (
+          <>
+            {/* Header */}
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-800">Members</h1>
+                <p className="text-sm text-slate-500 mt-1">All users list</p>
+              </div>
+              <div className="flex items-center gap-3">
+                {/* <span className="bg-emerald-100 text-emerald-700 text-sm font-semibold px-4 py-1.5 rounded-full">
+                  Total: {users.length}
+                </span> */}
+                {/* ── ADD BUTTON ── */}
+                <button
+                  onClick={() => { setAddModal(true); setShowAddPassword(false); }}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-emerald-200"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add Member
+                </button>
+              </div>
             </div>
-          ) : error ? (
-            <div className="text-center py-20 text-rose-500">{error}</div>
-          ) : (
+
+            {/* Toast */}
+            {toast && (
+              <div className={`fixed top-5 right-5 z-50 px-5 py-3 rounded-xl shadow-xl text-white text-sm font-medium transition-all duration-300 flex items-center gap-2 ${toast.type === "success" ? "bg-emerald-500" : "bg-rose-500"}`}>
+                {toast.type === "success" ? "✅" : "❌"} {toast.message}
+              </div>
+            )}
+
+            {/* Table */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+              {error ? (
+                <div className="text-center py-20 text-rose-500">{error}</div>
+              ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-slate-50 border-b border-slate-100">
@@ -287,6 +284,8 @@ function Members() {
             </div>
           )}
         </div>
+        </>
+        )}
       </div>
 
       {/* ═══════════ ADD MODAL ═══════════ */}
