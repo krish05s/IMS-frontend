@@ -759,7 +759,7 @@ export default function Sales() {
                     type="submit"
                     className="bg-orange-500 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20"
                   >
-                    {currentSaleId ? "Update Dispatch" : "Save Dispatch"}
+                    {currentSalesId ? "Update Dispatch" : "Save Dispatch"}
                   </button>
                 </div>
               </form>
