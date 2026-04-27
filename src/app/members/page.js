@@ -216,9 +216,9 @@ function Members() {
 
             {/* Filter Bar */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
-              <input type="text" placeholder="Filter by Name..." value={filters.name} onChange={(e) => setFilters({ ...filters, name: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
-              <input type="text" placeholder="Filter by Email..." value={filters.email} onChange={(e) => setFilters({ ...filters, email: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
-              <input type="text" placeholder="Filter by Role..." value={filters.role} onChange={(e) => setFilters({ ...filters, role: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
+              <input type="text" placeholder="Filter by Name..." value={filters.name} onChange={(e) => setFilters({ ...filters, name: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
+              <input type="text" placeholder="Filter by Email..." value={filters.email} onChange={(e) => setFilters({ ...filters, email: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
+              <input type="text" placeholder="Filter by Role..." value={filters.role} onChange={(e) => setFilters({ ...filters, role: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
             </div>
 
             {/* Table */}

@@ -158,7 +158,7 @@ export default function Gradations() {
             placeholder="Filter by Gradation Name..."
             value={filters.gradation}
             onChange={(e) => setFilters({ ...filters, gradation: e.target.value })}
-            className="w-full md:w-1/3 px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+            className="w-full md:w-1/3 px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
           />
         </div>
 
