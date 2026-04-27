@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
 import TruckLoader from "../components/TruckLoader";
+import { toast } from "react-toastify";
 
 function Members() {
   useRoleCheck(["admin"]);
@@ -29,7 +30,9 @@ function Members() {
   const [deleteUser, setDeleteUser] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const [toast, setToast] = useState(null);
+  const [filters, setFilters] = useState({ name: "", email: "", role: "" });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const API_BASE = `${process.env.NEXT_PUBLIC_API_URL}/api/user`;
 
@@ -52,10 +55,9 @@ function Members() {
 
   useEffect(() => { fetchUsers(); }, []);
 
-  const showToast = (message, type = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
-  };
+  useEffect(() => { fetchUsers(); }, []);
+
+  useEffect(() => { setCurrentPage(1); }, [filters]);
 
   // ── Add User ──
   const handleAddChange = (e) => {
@@ -74,15 +76,15 @@ function Members() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast("New user successfully added! ✅");
+        toast.success("New user successfully added! ✅");
         setAddModal(false);
         setAddUser({ name: "", email: "", mobile: "", date_of_birth: "", password: "", role: "user" });
         fetchUsers();
       } else {
-        showToast(data.message, "error");
+        toast.error(data.message);
       }
     } catch {
-      showToast("Add failed", "error");
+      toast.error("Add failed");
     } finally {
       setAddLoading(false);
     }
@@ -100,11 +102,11 @@ function Members() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast(newStatus === 1 ? `${user.name} Active ✅` : `${user.name} Inactive ⛔`);
+        toast.success(newStatus === 1 ? `${user.name} Active ✅` : `${user.name} Inactive ⛔`);
         fetchUsers();
-      } else showToast(data.message, "error");
+      } else toast.error(data.message);
     } catch {
-      showToast("Status update failed", "error");
+      toast.error("Status update failed");
     }
   };
 
@@ -132,12 +134,12 @@ function Members() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast("User updated successfully!");
+        toast.success("User updated successfully!");
         setEditModal(false);
         fetchUsers();
-      } else showToast(data.message, "error");
+      } else toast.error(data.message);
     } catch {
-      showToast("Update failed", "error");
+      toast.error("Update failed");
     } finally {
       setEditLoading(false);
     }
@@ -158,12 +160,12 @@ function Members() {
       });
       const data = await res.json();
       if (data.success) {
-        showToast("User deleted successfully!");
+        toast.success("User deleted successfully!");
         setDeleteModal(false);
         fetchUsers();
-      } else showToast(data.message, "error");
+      } else toast.error(data.message);
     } catch {
-      showToast("Delete failed", "error");
+      toast.error("Delete failed");
     } finally {
       setDeleteLoading(false);
     }
@@ -173,29 +175,36 @@ function Members() {
   const inputCls = "w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition placeholder:text-slate-400";
   const labelCls = "block text-sm font-bold text-slate-700 mb-1.5";
 
+  const filteredUsers = users.filter(u => 
+    u.name?.toLowerCase().includes(filters.name.toLowerCase()) &&
+    u.email?.toLowerCase().includes(filters.email.toLowerCase()) &&
+    u.role?.toLowerCase().includes(filters.role.toLowerCase())
+  );
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
   return (
     <div className="flex min-h-screen bg-slate-100">
       <Sidebar />
 
-      <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto">
+      <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto scrollbar-hide">
         {loading ? (
           <TruckLoader />
         ) : (
           <>
             {/* Header */}
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-slate-800">Members</h1>
-                <p className="text-sm text-slate-500 mt-1">All users list</p>
+                {/* <p className="text-sm text-slate-500 mt-1">All users list</p> */}
               </div>
-              <div className="flex items-center gap-3">
-                {/* <span className="bg-emerald-100 text-emerald-700 text-sm font-semibold px-4 py-1.5 rounded-full">
-                  Total: {users.length}
-                </span> */}
-                {/* ── ADD BUTTON ── */}
+              <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
                 <button
                   onClick={() => { setAddModal(true); setShowAddPassword(false); }}
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-emerald-200"
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-emerald-200 whitespace-nowrap"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -205,85 +214,111 @@ function Members() {
               </div>
             </div>
 
-            {/* Toast */}
-            {toast && (
-              <div className={`fixed top-5 right-5 z-50 px-5 py-3 rounded-xl shadow-xl text-white text-sm font-medium transition-all duration-300 flex items-center gap-2 ${toast.type === "success" ? "bg-emerald-500" : "bg-rose-500"}`}>
-                {toast.type === "success" ? "✅" : "❌"} {toast.message}
-              </div>
-            )}
+            {/* Filter Bar */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
+              <input type="text" placeholder="Filter by Name..." value={filters.name} onChange={(e) => setFilters({ ...filters, name: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
+              <input type="text" placeholder="Filter by Email..." value={filters.email} onChange={(e) => setFilters({ ...filters, email: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
+              <input type="text" placeholder="Filter by Role..." value={filters.role} onChange={(e) => setFilters({ ...filters, role: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
+            </div>
 
             {/* Table */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-              {error ? (
-                <div className="text-center py-20 text-rose-500">{error}</div>
-              ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-slate-50 border-b border-slate-100">
-                  <tr>
-                    {["#", "Name", "Email", "Mobile", "Role", "Status", "Actions"].map((h) => (
-                      <th key={h} className="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {users.map((user, idx) => (
-                    <tr key={user.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-5 py-4 text-slate-400 font-mono text-xs">{idx + 1}</td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 font-bold text-sm flex items-center justify-center uppercase">
-                            {user.name?.charAt(0)}
-                          </div>
-                          <span className="font-medium text-slate-800">{user.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4 text-slate-500">{user.email}</td>
-                      <td className="px-5 py-4 text-slate-500">{user.mobile}</td>
-                      <td className="px-5 py-4">
-                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${user.role === "admin" ? "bg-amber-100 text-amber-700" : "bg-sky-100 text-sky-700"}`}>
-                          {user.role}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleToggleStatus(user)}
-                            className={`relative inline-flex items-center w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none ${user.status == 1 ? "bg-emerald-500" : "bg-slate-300"}`}
-                          >
-                            <span className={`inline-block w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300 ${user.status == 1 ? "translate-x-6" : "translate-x-1"}`} />
-                          </button>
-                          <span className={`text-xs font-semibold ${user.status == 1 ? "text-emerald-600" : "text-slate-400"}`}>
-                            {user.status == 1 ? "Active" : "Inactive"}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => openEdit(user)} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 text-xs font-medium rounded-lg transition-colors">
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            Edit
-                          </button>
-                          <button onClick={() => openDelete(user)} className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-500 text-xs font-medium rounded-lg transition-colors">
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                            Delete
-                          </button>
-                        </div>
-                      </td>
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+              <div className="overflow-x-auto scrollbar-hide">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 border-b border-slate-100 sticky top-0 z-10">
+                    <tr>
+                      {["#", "Name", "Email", "Mobile", "Role", "Status", "Actions"].map((h) => (
+                        <th key={h} className="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-              {users.length === 0 && (
-                <div className="text-center py-16 text-slate-400">No users found</div>
-              )}
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {currentUsers.map((user, idx) => (
+                      <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-5 py-4 text-slate-400 font-mono text-xs whitespace-nowrap">{indexOfFirstItem + idx + 1}</td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 font-bold text-sm flex items-center justify-center uppercase">
+                              {user.name?.charAt(0)}
+                            </div>
+                            <span className="font-medium text-slate-800">{user.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4 text-slate-500">{user.email}</td>
+                        <td className="px-5 py-4 text-slate-500">{user.mobile}</td>
+                        <td className="px-5 py-4">
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${user.role === "admin" ? "bg-amber-100 text-amber-700" : "bg-sky-100 text-sky-700"}`}>
+                            {user.role}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleToggleStatus(user)}
+                              className={`relative inline-flex items-center w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none ${user.status == 1 ? "bg-emerald-500" : "bg-slate-300"}`}
+                            >
+                              <span className={`inline-block w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300 ${user.status == 1 ? "translate-x-6" : "translate-x-1"}`} />
+                            </button>
+                            <span className={`text-xs font-semibold ${user.status == 1 ? "text-emerald-600" : "text-slate-400"}`}>
+                              {user.status == 1 ? "Active" : "Inactive"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => openEdit(user)} title="Edit" className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button onClick={() => openDelete(user)} title="Delete" className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-lg transition-colors">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {filteredUsers.length === 0 && (
+                  <div className="text-center py-16 text-slate-400">No users found</div>
+                )}
+              </div>
+              
+              <div className="flex flex-col px-6 py-4 bg-white border-t border-slate-200">
+                {totalPages > 1 && (
+                  <div className="flex justify-between items-center w-full">
+                    <button 
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                    >
+                      &lt;
+                    </button>
+                    <div className="flex items-center gap-2">
+                      {[...Array(totalPages)].map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setCurrentPage(i + 1)}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-emerald-500 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
+                    </div>
+                    <button 
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                    >
+                      &gt;
+                    </button>
+                  </div>
+                )}
             </div>
-          )}
-        </div>
+          </div>
         </>
         )}
       </div>
