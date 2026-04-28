@@ -11,7 +11,7 @@ export default function Settings() {
   const [currentVehicle, setCurrentVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [formData, setFormData] = useState({ vehicle_no: "", owner_name: "", status: 1 });
 
   const fetchVehicles = async () => {
@@ -165,9 +165,23 @@ export default function Settings() {
               </table>
             </div>
             
-            <div className="flex flex-col px-6 py-4 bg-white border-t border-slate-200">
+            <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-500">Rows per page:</span>
+                <select 
+                  value={itemsPerPage} 
+                  onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                  className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                >
+                  <option value={10}>10</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  <option value={200}>200</option>
+                </select>
+              </div>
+
               {totalPages > 1 && (
-                <div className="flex justify-between items-center w-full">
+                <div className="flex items-center gap-4">
                   <button 
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}

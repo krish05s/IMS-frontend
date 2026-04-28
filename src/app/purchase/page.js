@@ -15,14 +15,23 @@ export default function Purchases() {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ bill_no: "", vehicle_no: "", driver_number: "" });
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Header Data (For Modal)
-  const [formData, setFormData] = useState({ date: "", bill_no: "", vehicle_no: "", driver_number: "" });
+  const [formData, setFormData] = useState({ date: "", bill_no: "", vehicle_no: "", driver_number: "", party_name: "" });
 
   // Expanded Row Items Logic
   const [expandedRowId, setExpandedRowId] = useState(null);
   const [expandedItems, setExpandedItems] = useState([]);
+
+  // Party Logic
+  const [purchaseParties, setPurchaseParties] = useState([]);
+
+  // Modals & Loaders
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [purchaseToDelete, setPurchaseToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchPurchases = async () => {
     try {
@@ -52,12 +61,22 @@ export default function Purchases() {
     }
   };
 
+  const fetchPurchaseParties = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/party/read?type=purchase`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const data = await res.json();
+      if (data.success) setPurchaseParties(data.data);
+    } catch (e) { console.error("Error fetching purchase parties:", e); }
+  };
+
   useEffect(() => {
     setCurrentPage(1);
   }, [filters]);
 
   useEffect(() => {
-    Promise.all([fetchPurchases(), fetchProducts()]).then(() => setLoading(false));
+    Promise.all([fetchPurchases(), fetchProducts(), fetchPurchaseParties()]).then(() => setLoading(false));
   }, []);
 
 
@@ -68,13 +87,14 @@ export default function Purchases() {
       setFormData({
         date: new Date(purchase.date).toISOString().split('T')[0],
         bill_no: purchase.bill_no,
+        party_name: purchase.party_name || "",
         vehicle_no: purchase.vehicle_no || "",
         driver_number: purchase.driver_number || "",
         items: purchase.items || []
       });
     } else {
       setCurrentPurchaseId(null);
-      setFormData({ date: new Date().toISOString().split('T')[0], bill_no: "", vehicle_no: "", driver_number: "", items: [] });
+      setFormData({ date: new Date().toISOString().split('T')[0], bill_no: "", party_name: "", vehicle_no: "", driver_number: "", items: [] });
     }
     setIsModalOpen(true);
   };
@@ -174,30 +194,40 @@ export default function Purchases() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this purchase record? The inventory will be reversed.")) {
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/purchase/delete/${id}`, {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-        });
-        const data = await response.json();
-        if (data.success) {
-          toast.success("Purchase record deleted!");
-          fetchPurchases();
-          fetchProducts();
-        } else {
-          toast.error(data.message);
-        }
-      } catch (e) {
-        console.error("Error deleting purchase:", e);
-        toast.error("Failed to delete purchase");
+  const handleDelete = (id) => {
+    setPurchaseToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const executeDelete = async () => {
+    if (!purchaseToDelete) return;
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/purchase/delete/${purchaseToDelete}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+      });
+      const data = await response.json();
+      if (data.success) {
+        toast.success("Purchase record deleted!");
+        fetchPurchases();
+        fetchProducts();
+      } else {
+        toast.error(data.message);
       }
+    } catch (e) {
+      console.error("Error deleting purchase:", e);
+      toast.error("Failed to delete purchase");
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteModalOpen(false);
+      setPurchaseToDelete(null);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       const submissionData = { ...formData, items: currentPurchaseId ? formData.items : [] };
@@ -227,6 +257,8 @@ export default function Purchases() {
     } catch (error) {
       console.error("Error saving purchase:", error);
       toast.error("Failed to save purchase");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -312,47 +344,47 @@ export default function Purchases() {
       <head>
         <title>Purchase Order - ${purchase.bill_no}</title>
         <style>
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #1e293b; background: #f1f5f9; }
-          .invoice-box { max-width: 800px; margin: auto; padding: 40px; background: #fff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
-          .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #f97316; padding-bottom: 20px; margin-bottom: 30px; }
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 10px; color: #1e293b; background: #f1f5f9; }
+          .invoice-box { max-width: 800px; margin: auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+          .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #f97316; padding-bottom: 10px; margin-bottom: 15px; }
           .header-left h1 { margin: 0; color: #ea580c; font-size: 32px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;}
           .header-left p { margin: 5px 0 0; font-size: 14px; color: #64748b; font-weight: 500; font-style: italic; }
           .header-right { text-align: right; }
           .header-right h2 { margin: 0; color: #0f172a; font-size: 24px; text-transform: uppercase; font-weight: 700; }
           .header-right p { margin: 5px 0 0; font-size: 14px; color: #475569; }
-          .details-container { display: flex; justify-content: space-between; margin-bottom: 30px; gap: 20px; }
-          .details-box { background: #f8fafc; padding: 20px; border-radius: 8px; flex: 1; border: 1px solid #e2e8f0; }
-          .details-box p { margin: 8px 0; font-size: 14px; color: #475569; }
+          .details-container { display: flex; justify-content: space-between; margin-bottom: 15px; gap: 15px; }
+          .details-box { background: #f8fafc; padding: 10px 15px; border-radius: 8px; flex: 1; border: 1px solid #e2e8f0; }
+          .details-box p { margin: 4px 0; font-size: 12px; color: #475569; }
           .details-box strong { color: #0f172a; display: inline-block; width: 100px; }
-          .details-box h3 { margin-top: 0; margin-bottom: 15px; font-size: 16px; color: #0f172a; border-bottom: 1px solid #cbd5e1; padding-bottom: 8px; }
+          .details-box h3 { margin-top: 0; margin-bottom: 8px; font-size: 14px; color: #0f172a; border-bottom: 1px solid #cbd5e1; padding-bottom: 6px; }
           table.main-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-          .main-table th, .main-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-          .main-table th { background: #f1f5f9; color: #334155; font-weight: 600; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }
-          .main-table td { font-size: 14px; color: #1e293b; }
+          .main-table th, .main-table td { padding: 4px 8px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+          .main-table th { background: #f1f5f9; color: #334155; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+          .main-table td { font-size: 12px; color: #1e293b; }
           .main-table tr:hover { background-color: #f8fafc; }
-          .summary-container { display: flex; justify-content: flex-end; margin-top: 40px; page-break-inside: avoid; break-inside: avoid; }
+          .summary-container { display: flex; justify-content: flex-end; margin-top: 20px; page-break-inside: avoid; break-inside: avoid; }
           .summary-box { width: 350px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; page-break-inside: avoid; break-inside: avoid; }
-          .summary-header { background: #f1f5f9; padding: 12px 20px; font-weight: bold; color: #0f172a; border-bottom: 1px solid #e2e8f0; }
+          .summary-header { background: #f1f5f9; padding: 8px 15px; font-weight: bold; color: #0f172a; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
           .summary-table { width: 100%; border-collapse: collapse; }
-          .summary-table th, .summary-table td { padding: 10px 20px; font-size: 14px; }
+          .summary-table th, .summary-table td { padding: 6px 12px; font-size: 12px; }
           .summary-table th { text-align: left; color: #475569; font-weight: 500; }
           .summary-table td { text-align: right; font-weight: 600; color: #0f172a; }
           .summary-table tr { border-bottom: 1px solid #f1f5f9; }
           .summary-table tr:last-child { border-bottom: none; }
           .total-row { background: #fff7ed; }
-          .total-row th { color: #ea580c; font-weight: 700; font-size: 15px; }
-          .total-row td { color: #ea580c; font-weight: 800; font-size: 15px; }
-          .footer { margin-top: 60px; text-align: center; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+          .total-row th { color: #ea580c; font-weight: 700; font-size: 13px; }
+          .total-row td { color: #ea580c; font-weight: 800; font-size: 13px; }
+          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
           
           @media print {
-            @page { margin: 15mm; }
+            @page { margin: 5mm; }
             body { background: #fff; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .invoice-box { box-shadow: none; padding: 0; max-width: 100%; border: none; }
             .header, .details-container { page-break-inside: avoid; break-inside: avoid; }
             tr { page-break-inside: avoid; break-inside: avoid; page-break-after: auto; }
-            .summary-container { margin-top: 20px; display: block; text-align: right; page-break-inside: avoid; break-inside: avoid; }
+            .summary-container { margin-top: 15px; display: block; text-align: right; page-break-inside: avoid; break-inside: avoid; }
             .summary-box { display: inline-block; text-align: left; page-break-inside: avoid; break-inside: avoid; }
-            .footer { page-break-inside: avoid; break-inside: avoid; margin-top: 30px; }
+            .footer { page-break-inside: avoid; break-inside: avoid; margin-top: 15px; }
           }
         </style>
       </head>
@@ -380,6 +412,7 @@ export default function Purchases() {
             </div>
             <div class="details-box">
               <h3>Invoice Details</h3>
+              <p><strong>Supplier:</strong> ${purchase.party_name || "N/A"}</p>
               <p><strong>Bill No:</strong> ${purchase.bill_no}</p>
               <p><strong>Vehicle No:</strong> ${purchase.vehicle_no || "N/A"}</p>
               <p><strong>Driver Details:</strong> ${purchase.driver_number || "N/A"}</p>
@@ -478,8 +511,11 @@ export default function Purchases() {
                       <th className="py-3 px-4 font-semibold w-16 text-center whitespace-nowrap">ID</th>
                       <th className="py-3 px-4 font-semibold whitespace-nowrap">Bill No</th>
                       <th className="py-3 px-4 font-semibold whitespace-nowrap">Date</th>
+                      <th className="py-3 px-4 font-semibold whitespace-nowrap">Supplier</th>
                       <th className="py-3 px-4 font-semibold whitespace-nowrap">Vehicle No</th>
                       <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">Items</th>
+                      <th className="py-3 px-4 font-semibold whitespace-nowrap text-center">Created At</th>
+                      <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">Created By</th>
                       <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">Actions</th>
                       <th className="py-3 px-4 font-semibold text-center text-blue-600 whitespace-nowrap">Bill</th>
                     </tr>
@@ -491,8 +527,18 @@ export default function Purchases() {
                           <td className="py-3 px-4 text-center text-slate-600 font-medium whitespace-nowrap">{indexOfFirstItem + index + 1}</td>
                           <td className="py-3 px-4 text-slate-800 font-medium">{p.bill_no}</td>
                           <td className="py-3 px-4 text-slate-800">{new Date(p.date).toLocaleDateString()}</td>
+                          <td className="py-3 px-4 font-bold text-slate-800">{p.party_name || "-"}</td>
                           <td className="py-3 px-4 text-slate-600">{p.vehicle_no || "-"}</td>
                           <td className="py-3 px-4 text-orange-600 font-medium text-center">{p.items_count || (p.product_code ? 1 : 0)}</td>
+                          <td className="py-3 px-4 text-slate-500 text-xs text-center whitespace-nowrap">
+                            {p.created_at ? new Date(p.created_at).toLocaleString('en-GB', {
+                                day: '2-digit', month: '2-digit', year: 'numeric',
+                                hour: '2-digit', minute: '2-digit'
+                            }) : "-"}
+                          </td>
+                          <td className="py-3 px-4 text-slate-600 font-medium text-center whitespace-nowrap">
+                            {p.created_by || "-"}
+                          </td>
                           <td className="py-3 px-4 text-center">
                             <div className="flex justify-center gap-2">
                               <button onClick={() => toggleItemsExpansion(p)} className="flex items-center justify-center w-7 h-7 bg-orange-50 text-orange-600 hover:bg-orange-100 font-bold rounded-lg transition-colors shadow-sm">
@@ -520,7 +566,7 @@ export default function Purchases() {
 
                         {expandedRowId === p.id && (
                           <tr className="bg-slate-50 border-b border-slate-200">
-                            <td colSpan="7" className="p-0">
+                            <td colSpan="9" className="p-0">
                               <div className="px-8 py-6 bg-slate-50/80 border-t border-slate-200 shadow-inner">
                                 <div className="flex justify-between items-center mb-4">
                                   <h4 className="font-bold text-slate-800">Add Products (Bill: {p.bill_no})</h4>
@@ -634,9 +680,23 @@ export default function Purchases() {
                 </table>
               </div>
 
-              <div className="flex flex-col px-6 py-4 bg-white border-t border-slate-200">
+              <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-500">Rows per page:</span>
+                  <select 
+                    value={itemsPerPage} 
+                    onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                    className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  >
+                    <option value={10}>10</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={200}>200</option>
+                  </select>
+                </div>
+
                 {totalPages > 1 && (
-                  <div className="flex justify-between items-center w-full">
+                  <div className="flex items-center gap-4">
                     <button 
                       onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                       disabled={currentPage === 1}
@@ -696,6 +756,19 @@ export default function Purchases() {
                     />
                   </div>
                   <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Supplier / Party</label>
+                    <select
+                      value={formData.party_name || ""}
+                      onChange={(e) => setFormData({ ...formData, party_name: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                    >
+                      <option value="">-- Select Supplier --</option>
+                      {purchaseParties.map(p => (
+                        <option key={p.id} value={p.name}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Vehicle No</label>
                     <input
                       type="text"
@@ -727,12 +800,61 @@ export default function Purchases() {
                   </button>
                   <button
                     type="submit"
-                    className="bg-orange-500 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20"
+                    disabled={isSubmitting}
+                    className="bg-orange-500 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20 flex items-center disabled:opacity-70"
                   >
-                    {currentPurchaseId ? "Update Purchase" : "Save Purchase"}
+                    {isSubmitting && (
+                      <svg className="animate-spin h-4 w-4 mr-2 inline" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                      </svg>
+                    )}
+                    {isSubmitting ? "Saving..." : (currentPurchaseId ? "Update Purchase" : "Save Purchase")}
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {isDeleteModalOpen && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+            <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-xl border border-slate-200 text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-slate-800 mb-2">Delete Purchase</h3>
+              <p className="text-sm text-slate-500 mb-6">
+                Are you sure you want to delete this purchase record? The inventory will be reversed.
+              </p>
+              
+              <div className="flex justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  disabled={isDeleting}
+                  className="px-4 py-2 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition disabled:opacity-50 w-full"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={executeDelete}
+                  disabled={isDeleting}
+                  className="px-4 py-2 rounded-lg bg-red-500 text-white font-bold hover:bg-red-600 transition shadow-md shadow-red-500/20 disabled:opacity-70 flex items-center justify-center w-full"
+                >
+                  {isDeleting && (
+                    <svg className="animate-spin h-4 w-4 mr-2 inline" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                  )}
+                  {isDeleting ? "Deleting..." : "Yes, Delete"}
+                </button>
+              </div>
             </div>
           </div>
         )}
