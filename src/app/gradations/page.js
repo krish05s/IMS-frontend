@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
 import TruckLoader from "../components/TruckLoader";
 import { toast } from "react-toastify";
-
+import Topbar from "../components/Topbar";
 export default function Gradations() {
   useRoleCheck(["admin"]);
   const [gradations, setGradations] = useState([]);
@@ -129,6 +129,8 @@ export default function Gradations() {
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
       <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto scrollbar-hide">
+                <Topbar />
+        
         {loading ? (
           <TruckLoader />
         ) : (

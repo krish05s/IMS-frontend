@@ -5,6 +5,7 @@ import useRoleCheck from "../hooks/useRoleCheck";
 import Select from "react-select";
 import TruckLoader from "../components/TruckLoader";
 import { toast } from "react-toastify";
+import Topbar from "../components/Topbar";
 
 export default function Sales() {
   useRoleCheck(["admin", "sales"]);
@@ -475,6 +476,8 @@ export default function Sales() {
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
       <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto scrollbar-hide">
+                <Topbar />
+        
         {loading ? (
           <TruckLoader />
         ) : (

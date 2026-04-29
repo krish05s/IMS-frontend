@@ -4,6 +4,7 @@ import Sidebar from "../../components/Sidebar";
 import useRoleCheck from "../../hooks/useRoleCheck";
 import TruckLoader from "../../components/TruckLoader";
 import { toast } from "react-toastify";
+import Topbar from "../components/Topbar";
 
 export default function SetupParties() {
   useRoleCheck(["admin"]); // Only admin can access setup
@@ -141,6 +142,7 @@ export default function SetupParties() {
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
       <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto scrollbar-hide">
+                <Topbar />
         
         <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
           <div>

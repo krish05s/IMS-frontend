@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
 import TruckLoader from "../components/TruckLoader";
+import Topbar from "../components/Topbar";
 
 export default function Settings() {
   useRoleCheck(["admin"]);
@@ -103,6 +104,8 @@ export default function Settings() {
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
       <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto scrollbar-hide">
+                <Topbar />
+        
         {loading ? (
           <TruckLoader />
         ) : (
