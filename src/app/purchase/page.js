@@ -19,7 +19,11 @@ export default function Purchases() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Header Data (For Modal)
-  const [formData, setFormData] = useState({ date: "", bill_no: "", vehicle_no: "", driver_number: "", party_name: "" });
+  const [formData, setFormData] = useState({ date: "", bill_no: "", vehicle_no: "", driver_name: "", driver_number: "", transporter_name: "", lr_number: "", party_name: "" });
+
+  // View Details Logic
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewPurchase, setViewPurchase] = useState(null);
 
   // Expanded Row Items Logic
   const [expandedRowId, setExpandedRowId] = useState(null);
@@ -90,12 +94,15 @@ export default function Purchases() {
         bill_no: purchase.bill_no,
         party_name: purchase.party_name || "",
         vehicle_no: purchase.vehicle_no || "",
+        driver_name: purchase.driver_name || "",
         driver_number: purchase.driver_number || "",
+        transporter_name: purchase.transporter_name || "",
+        lr_number: purchase.lr_number || "",
         items: purchase.items || []
       });
     } else {
       setCurrentPurchaseId(null);
-      setFormData({ date: new Date().toISOString().split('T')[0], bill_no: "", party_name: "", vehicle_no: "", driver_number: "", items: [] });
+      setFormData({ date: new Date().toISOString().split('T')[0], bill_no: "", party_name: "", vehicle_no: "", driver_name: "", driver_number: "", transporter_name: "", lr_number: "", items: [] });
     }
     setIsModalOpen(true);
   };
@@ -167,7 +174,10 @@ export default function Purchases() {
         date: purchase.date,
         bill_no: purchase.bill_no,
         vehicle_no: purchase.vehicle_no,
+        driver_name: purchase.driver_name,
         driver_number: purchase.driver_number,
+        transporter_name: purchase.transporter_name,
+        lr_number: purchase.lr_number,
         items: validItems
       };
 
@@ -412,11 +422,14 @@ export default function Purchases() {
               <p><strong>Website:</strong> www.micara.in</p>
             </div>
             <div class="details-box">
-              <h3>Invoice Details</h3>
+              <h3>Order Details</h3>
               <p><strong>Supplier:</strong> ${purchase.party_name || "N/A"}</p>
               <p><strong>Bill No:</strong> ${purchase.bill_no}</p>
               <p><strong>Vehicle No:</strong> ${purchase.vehicle_no || "N/A"}</p>
-              <p><strong>Driver Details:</strong> ${purchase.driver_number || "N/A"}</p>
+              <p><strong>Driver Name:</strong> ${purchase.driver_name || "N/A"}</p>
+              <p><strong>Driver No:</strong> ${purchase.driver_number || "N/A"}</p>
+              <p><strong>Transporter:</strong> ${purchase.transporter_name || "N/A"}</p>
+              <p><strong>LR No:</strong> ${purchase.lr_number || "N/A"}</p>
             </div>
           </div>
           
@@ -547,6 +560,9 @@ export default function Purchases() {
                             <div className="flex justify-center gap-2">
                               <button onClick={() => toggleItemsExpansion(p)} className="flex items-center justify-center w-7 h-7 bg-orange-50 text-orange-600 hover:bg-orange-100 font-bold rounded-lg transition-colors shadow-sm">
                                 {expandedRowId === p.id ? "-" : "+"}
+                              </button>
+                              <button onClick={() => { setViewPurchase(p); setIsViewModalOpen(true); }} title="View Details" className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-500 rounded-lg transition-colors">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                               </button>
                               <button onClick={() => handleOpenModal(p)} title="Edit" className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
@@ -760,7 +776,7 @@ export default function Purchases() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Supplier / Party</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Purchase Party</label>
                     <select
                       value={formData.party_name || ""}
                       onChange={(e) => setFormData({ ...formData, party_name: e.target.value })}
@@ -783,13 +799,44 @@ export default function Purchases() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Driver Name / No.</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Driver Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.driver_name}
+                      onChange={(e) => setFormData({ ...formData, driver_name: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                      placeholder="e.g. John Doe"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Driver No</label>
                     <input
                       type="text"
                       value={formData.driver_number}
                       onChange={(e) => setFormData({ ...formData, driver_number: e.target.value })}
                       className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
-                      placeholder="e.g. John Doe / 12345"
+                      placeholder="e.g. 1234567890"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Transporter Name</label>
+                    <input
+                      type="text"
+                      value={formData.transporter_name}
+                      onChange={(e) => setFormData({ ...formData, transporter_name: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                      placeholder="e.g. ABC Logistics"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">LR Number</label>
+                    <input
+                      type="text"
+                      value={formData.lr_number}
+                      onChange={(e) => setFormData({ ...formData, lr_number: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                      placeholder="e.g. LR-98765"
                     />
                   </div>
                 </div>
@@ -858,6 +905,81 @@ export default function Purchases() {
                   )}
                   {isDeleting ? "Deleting..." : "Yes, Delete"}
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* View Details Modal */}
+        {isViewModalOpen && viewPurchase && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+            <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-slate-800">Purchase Order Details</h2>
+                <button onClick={() => { setIsViewModalOpen(false); setViewPurchase(null); }} className="text-slate-400 hover:text-slate-600 transition">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2 mb-3">General Information</h3>
+                  <div className="space-y-2 text-sm">
+                    <p><span className="text-slate-500 w-32 inline-block">Date:</span> <span className="font-medium text-slate-800">{new Date(viewPurchase.date).toLocaleDateString()}</span></p>
+                    <p><span className="text-slate-500 w-32 inline-block">Bill No:</span> <span className="font-medium text-slate-800">{viewPurchase.bill_no}</span></p>
+                    <p><span className="text-slate-500 w-32 inline-block">Supplier:</span> <span className="font-medium text-slate-800">{viewPurchase.party_name || "-"}</span></p>
+                    <p><span className="text-slate-500 w-32 inline-block">Created By:</span> <span className="font-medium text-slate-800">{viewPurchase.created_by || "-"}</span></p>
+                  </div>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2 mb-3">Logistics Information</h3>
+                  <div className="space-y-2 text-sm">
+                    <p><span className="text-slate-500 w-32 inline-block">Vehicle No:</span> <span className="font-medium text-slate-800">{viewPurchase.vehicle_no || "-"}</span></p>
+                    <p><span className="text-slate-500 w-32 inline-block">Driver Name:</span> <span className="font-medium text-slate-800">{viewPurchase.driver_name || "-"}</span></p>
+                    <p><span className="text-slate-500 w-32 inline-block">Driver No:</span> <span className="font-medium text-slate-800">{viewPurchase.driver_number || "-"}</span></p>
+                    <p><span className="text-slate-500 w-32 inline-block">Transporter Name:</span> <span className="font-medium text-slate-800">{viewPurchase.transporter_name || "-"}</span></p>
+                  </div>
+                </div>
+              </div>
+
+              <h3 className="text-md font-bold text-slate-800 mb-3">Products</h3>
+              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+                    <tr>
+                      <th className="py-2 px-4 font-semibold w-12 text-center">#</th>
+                      <th className="py-2 px-4 font-semibold">Product Code</th>
+                      <th className="py-2 px-4 font-semibold">Product Name</th>
+                      <th className="py-2 px-4 font-semibold">Gradation</th>
+                      <th className="py-2 px-4 font-semibold text-right">Quantity</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {viewPurchase.items && viewPurchase.items.length > 0 ? (
+                      viewPurchase.items.map((item, idx) => (
+                        <tr key={idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                          <td className="py-2 px-4 text-center text-slate-500">{idx + 1}</td>
+                          <td className="py-2 px-4 font-medium">{item.product_code}</td>
+                          <td className="py-2 px-4 text-slate-600">{item.product_name}</td>
+                          <td className="py-2 px-4 text-slate-600">{item.gradation || "-"}</td>
+                          <td className="py-2 px-4 text-right font-bold text-slate-800">{item.quantity}</td>
+                        </tr>
+                      ))
+                    ) : viewPurchase.product_code ? (
+                        <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                          <td className="py-2 px-4 text-center text-slate-500">1</td>
+                          <td className="py-2 px-4 font-medium">{viewPurchase.product_code}</td>
+                          <td className="py-2 px-4 text-slate-600">{viewPurchase.product_name || "-"}</td>
+                          <td className="py-2 px-4 text-slate-600">{viewPurchase.gradation || "-"}</td>
+                          <td className="py-2 px-4 text-right font-bold text-slate-800">{viewPurchase.quantity}</td>
+                        </tr>
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="py-4 text-center text-slate-500">No products found.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

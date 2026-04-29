@@ -4,7 +4,7 @@ import Sidebar from "../../components/Sidebar";
 import useRoleCheck from "../../hooks/useRoleCheck";
 import TruckLoader from "../../components/TruckLoader";
 import { toast } from "react-toastify";
-import Topbar from "../components/Topbar";
+import Topbar from "../../components/Topbar";
 
 export default function SetupParties() {
   useRoleCheck(["admin"]); // Only admin can access setup
