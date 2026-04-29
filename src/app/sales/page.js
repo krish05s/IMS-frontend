@@ -475,9 +475,10 @@ export default function Sales() {
   return (
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
-      <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto scrollbar-hide">
+      <div className="flex-1 md:ml-64  overflow-x-auto scrollbar-hide">
                 <Topbar />
-        
+                 <div className="p-4 md:p-8 topbar-offset mt-4">
+ 
         {loading ? (
           <TruckLoader />
         ) : (
@@ -880,6 +881,7 @@ export default function Sales() {
           </>
         )}
       </div>
+    </div>
     </div>
   );
 }

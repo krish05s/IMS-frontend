@@ -191,9 +191,10 @@ function Members() {
     <div className="flex min-h-screen bg-slate-100">
       <Sidebar />
 
-      <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto scrollbar-hide">
+      <div className="flex-1 md:ml-64  overflow-x-auto scrollbar-hide">
                 <Topbar />
-        
+                  <div className="p-4 md:p-8 topbar-offset mt-4">
+
         {loading ? (
           <TruckLoader />
         ) : (
@@ -577,6 +578,7 @@ function Members() {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }
