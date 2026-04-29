@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
 import TruckLoader from "../components/TruckLoader";
+import Topbar from "../components/Topbar";
 
 export default function Settings() {
   useRoleCheck(["admin"]);
@@ -10,6 +11,8 @@ export default function Settings() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVehicle, setCurrentVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [formData, setFormData] = useState({ vehicle_no: "", owner_name: "", status: 1 });
 
   const fetchVehicles = async () => {
@@ -92,10 +95,18 @@ export default function Settings() {
     }
   };
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentVehicles = vehicles.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(vehicles.length / itemsPerPage);
+
   return (
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
-      <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto">
+      <div className="flex-1 md:ml-64 overflow-x-auto scrollbar-hide">
+                <Topbar />
+                  <div className="p-4 md:p-8 topbar-offset mt-4">
+
         {loading ? (
           <TruckLoader />
         ) : (
@@ -116,28 +127,38 @@ export default function Settings() {
                 + Add Vehicle
               </button>
             </div>
-            <div className="p-0 overflow-y-auto max-h-[400px]">
-              <table className="w-full text-left text-sm whitespace-nowrap">
+            <div className="p-0 overflow-x-auto scrollbar-hide">
+              <table className="w-full text-left text-sm">
                 <thead className="bg-slate-100/50 text-slate-500 border-b border-slate-200 sticky top-0">
                   <tr>
-                    <th className="py-3 px-5 font-semibold">Vehicle No</th>
-                    <th className="py-3 px-5 font-semibold">Owner Name</th>
-                    <th className="py-3 px-5 font-semibold text-center">Status</th>
-                    <th className="py-3 px-5 font-semibold text-right">Actions</th>
+                    <th className="py-3 px-5 font-semibold whitespace-nowrap">Vehicle No</th>
+                    <th className="py-3 px-5 font-semibold whitespace-nowrap">Owner Name</th>
+                    <th className="py-3 px-5 font-semibold text-center whitespace-nowrap">Status</th>
+                    <th className="py-3 px-5 font-semibold text-right whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {vehicles.map((v) => (
+                  {currentVehicles.map((v) => (
                     <tr key={v.vehicle_no} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                      <td className="py-3 px-5 font-medium text-slate-800 uppercase">{v.vehicle_no}</td>
+                      <td className="py-3 px-5 font-medium text-slate-800 uppercase whitespace-nowrap">{v.vehicle_no}</td>
                       <td className="py-3 px-5 text-slate-600">{v.owner_name}</td>
                       <td className="py-3 px-5 text-center">
                         <button onClick={() => handleToggle(v)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${Number(v.status) === 1 ? 'bg-green-500' : 'bg-slate-300'}`}>
                           <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${Number(v.status) === 1 ? 'translate-x-6' : 'translate-x-1'}`} />
                         </button>
                       </td>
-                      <td className="py-3 px-5 text-right">
-                        <button onClick={() => handleOpenModal(v)} className="text-blue-500 hover:text-blue-700 font-medium">Edit</button>
+                      <td className="py-3 px-5 text-right whitespace-nowrap">
+                        <div className="flex justify-end">
+                          <button
+                            onClick={() => handleOpenModal(v)}
+                            title="Edit"
+                            className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -146,6 +167,52 @@ export default function Settings() {
                   )}
                 </tbody>
               </table>
+            </div>
+            
+            <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-500">Rows per page:</span>
+                <select 
+                  value={itemsPerPage} 
+                  onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                  className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                >
+                  <option value={10}>10</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                  <option value={200}>200</option>
+                </select>
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                  >
+                    &lt;
+                  </button>
+                  <div className="flex items-center gap-2">
+                    {[...Array(totalPages)].map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentPage(i + 1)}
+                        className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-emerald-500 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                  </div>
+                  <button 
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                  >
+                    &gt;
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -202,6 +269,7 @@ export default function Settings() {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }
