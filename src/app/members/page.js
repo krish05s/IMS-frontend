@@ -4,6 +4,7 @@ import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
 import TruckLoader from "../components/TruckLoader";
 import { toast } from "react-toastify";
+import Topbar from "../components/Topbar";
 
 function Members() {
   useRoleCheck(["admin"]);
@@ -190,7 +191,10 @@ function Members() {
     <div className="flex min-h-screen bg-slate-100">
       <Sidebar />
 
-      <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto scrollbar-hide">
+      <div className="flex-1 md:ml-64  overflow-x-auto scrollbar-hide">
+                <Topbar />
+                  <div className="p-4 md:p-8 topbar-offset mt-4">
+
         {loading ? (
           <TruckLoader />
         ) : (
@@ -204,7 +208,7 @@ function Members() {
               <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
                 <button
                   onClick={() => { setAddModal(true); setShowAddPassword(false); }}
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-emerald-200 whitespace-nowrap"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl transition-all shadow-md  whitespace-nowrap"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -238,7 +242,7 @@ function Members() {
                         <td className="px-5 py-4 text-slate-400 font-mono text-xs whitespace-nowrap">{indexOfFirstItem + idx + 1}</td>
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 font-bold text-sm flex items-center justify-center uppercase">
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 text-[emerald-600] font-bold text-sm flex items-center justify-center uppercase">
                               {user.name?.charAt(0)}
                             </div>
                             <span className="font-medium text-slate-800">{user.name}</span>
@@ -520,7 +524,7 @@ function Members() {
                   Cancel
                 </button>
                 <button type="submit" disabled={editLoading}
-                  className="px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-60 flex items-center gap-2 shadow-md shadow-emerald-200">
+                  className="px-5 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-60 flex items-center gap-2">
                   {editLoading && (
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -560,7 +564,7 @@ function Members() {
                   Cancel
                 </button>
                 <button onClick={handleDelete} disabled={deleteLoading}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-rose-500 to-red-500 hover:from-rose-600 hover:to-red-600 text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-60 flex items-center justify-center gap-2 shadow-md shadow-rose-200">
+                  className="flex-1 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-60 flex items-center justify-center gap-2 ">
                   {deleteLoading && (
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -574,6 +578,7 @@ function Members() {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

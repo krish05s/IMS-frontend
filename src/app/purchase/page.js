@@ -5,6 +5,7 @@ import useRoleCheck from "../hooks/useRoleCheck";
 import Select from "react-select";
 import TruckLoader from "../components/TruckLoader";
 import { toast } from "react-toastify";
+import Topbar from "../components/Topbar";
 
 export default function Purchases() {
   useRoleCheck(["admin", "purchase"]);
@@ -486,7 +487,10 @@ export default function Purchases() {
   return (
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
-      <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto scrollbar-hide">
+      <div className="flex-1 md:ml-64 overflow-x-auto scrollbar-hide">
+                <Topbar />
+                  <div className="p-4 md:p-8 topbar-offset mt-4">
+
         {loading ? (
           <TruckLoader />
         ) : (
@@ -499,7 +503,7 @@ export default function Purchases() {
               <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
                 <button
                   onClick={() => handleOpenModal()}
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-orange-200 whitespace-nowrap"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl transition-all whitespace-nowrap"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -511,9 +515,9 @@ export default function Purchases() {
 
             {/* Filter Bar */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
-              <input type="text" placeholder="Filter by Bill No..." value={filters.bill_no} onChange={(e) => setFilters({ ...filters, bill_no: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
-              <input type="text" placeholder="Filter by Vehicle No..." value={filters.vehicle_no} onChange={(e) => setFilters({ ...filters, vehicle_no: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
-              <input type="text" placeholder="Filter by Driver No..." value={filters.driver_number} onChange={(e) => setFilters({ ...filters, driver_number: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
+              <input type="text" placeholder="Filter by Bill No..." value={filters.bill_no} onChange={(e) => setFilters({ ...filters, bill_no: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none  transition-colors" />
+              <input type="text" placeholder="Filter by Vehicle No..." value={filters.vehicle_no} onChange={(e) => setFilters({ ...filters, vehicle_no: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none  transition-colors" />
+              <input type="text" placeholder="Filter by Driver No..." value={filters.driver_number} onChange={(e) => setFilters({ ...filters, driver_number: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none  transition-colors" />
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-w-full overflow-hidden flex flex-col">
@@ -725,7 +729,7 @@ export default function Purchases() {
                         <button
                           key={i}
                           onClick={() => setCurrentPage(i + 1)}
-                          className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-emerald-500 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-[#212121] text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
                         >
                           {i + 1}
                         </button>
@@ -848,7 +852,7 @@ export default function Purchases() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-orange-500 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20 flex items-center disabled:opacity-70"
+                    className="bg-[#212121] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70"
                   >
                     {isSubmitting && (
                       <svg className="animate-spin h-4 w-4 mr-2 inline" viewBox="0 0 24 24" fill="none">
@@ -891,7 +895,7 @@ export default function Purchases() {
                   type="button"
                   onClick={executeDelete}
                   disabled={isDeleting}
-                  className="px-4 py-2 rounded-lg bg-red-500 text-white font-bold hover:bg-red-600 transition shadow-md shadow-red-500/20 disabled:opacity-70 flex items-center justify-center w-full"
+                  className="px-4 py-2 rounded-lg bg-[#212121] text-white font-bold  transition  disabled:opacity-70 flex items-center justify-center w-full"
                 >
                   {isDeleting && (
                     <svg className="animate-spin h-4 w-4 mr-2 inline" viewBox="0 0 24 24" fill="none">
@@ -983,6 +987,7 @@ export default function Purchases() {
           </>
         )}
       </div>
+    </div>
     </div>
   );
 }

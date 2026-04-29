@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
 import TruckLoader from "../components/TruckLoader";
 import { toast } from "react-toastify";
-
+import Topbar from "../components/Topbar";
 export default function Gradations() {
   useRoleCheck(["admin"]);
   const [gradations, setGradations] = useState([]);
@@ -128,7 +128,10 @@ export default function Gradations() {
   return (
     <div className="min-h-screen bg-slate-50 flex">
       <Sidebar />
-      <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-auto scrollbar-hide">
+      <div className="flex-1 md:ml-64  overflow-x-auto scrollbar-hide">
+                <Topbar />
+                  <div className="p-4 md:p-8 topbar-offset mt-4">
+
         {loading ? (
           <TruckLoader />
         ) : (
@@ -141,7 +144,7 @@ export default function Gradations() {
               <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
                 <button
                   onClick={() => handleOpenModal()}
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-orange-200 whitespace-nowrap"
+                  className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-orange-200 whitespace-nowrap"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -245,7 +248,7 @@ export default function Gradations() {
                     <button
                       key={i}
                       onClick={() => setCurrentPage(i + 1)}
-                      className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-emerald-500 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                      className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-[#212121] text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
                     >
                       {i + 1}
                     </button>
@@ -305,7 +308,7 @@ export default function Gradations() {
                   </button>
                   <button
                     type="submit"
-                    className="bg-orange-500 text-white px-5 py-2 rounded-lg font-medium hover:bg-orange-600 transition shadow-md shadow-orange-500/20"
+                    className="bg-[#212121] text-white px-5 py-2 rounded-lg font-medium hover:bg-orange-600 transition shadow-md shadow-orange-500/20"
                   >
                     Save
                   </button>
@@ -315,6 +318,7 @@ export default function Gradations() {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }

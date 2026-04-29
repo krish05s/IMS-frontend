@@ -8,6 +8,7 @@ import {
 } from "recharts";
 import Link from "next/link";
 import TruckLoader from "../components/TruckLoader";
+import Topbar from "../components/Topbar";
 
 export default function Dashboard() {
   const COLORS = ['#3b82f6', '#10b981', '#f97316', '#8b5cf6', '#ef4444'];
@@ -182,8 +183,12 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-pink-50 via-slate-50 to-green-50 font-sans">
       <Sidebar />
-      <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 overflow-x-hidden">
-        {(loading || !role) ? (
+
+      {/* <Topbar /> */}
+      <div className="flex-1 md:ml-64   overflow-x-hidden">
+        <Topbar />
+          <div className="p-4 md:p-8 topbar-offset mt-4">
+               {(loading || !role) ? (
           <TruckLoader />
         ) : (
           <>
@@ -423,6 +428,7 @@ export default function Dashboard() {
 
           </>
         )}
+      </div>
       </div>
       
       <style jsx global>{`

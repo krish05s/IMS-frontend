@@ -99,11 +99,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-pink-100 via-white to-green-100 p-3 sm:p-5 font-sans">
-      <div className="flex w-full max-w-3xl min-h-[520px] rounded-2xl overflow-hidden shadow-2xl bg-white">
+    <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-br from-pink-100 via-white to-green-100 p-3 sm:p-5 font-sans">
+      <div className="flex w-full max-w-3xl min-h-130 rounded-2xl overflow-hidden shadow-2xl bg-white">
 
         {/* LEFT: Carousel - Hidden on Mobile */}
-        <div className="relative hidden md:block w-[45%] min-h-[520px] overflow-hidden flex-shrink-0">
+        <div className="relative hidden md:block w-[45%] min-h-130 overflow-hidden shrink-0">
           {carouselImages.map((img, i) => (
             <div
               key={i}
@@ -116,7 +116,7 @@ export default function LoginPage() {
                 className="w-full h-full object-cover"
                 loading={i === 0 ? "eager" : "lazy"}
               />
-              <div className="absolute bottom-0 left-0 right-0 h-2/5 bg-gradient-to-t from-black/50 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 h-2/5 bg-linear-to-t from-black/50 to-transparent" />
             </div>
           ))}
           <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2 z-10">
@@ -227,7 +227,7 @@ export default function LoginPage() {
 
       {/* Toast */}
       <div
-        className={`fixed top-5 right-5 bg-white px-6 py-4 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 z-50 flex items-center gap-5 overflow-hidden min-w-[280px] transition-all duration-500 ease-out ${showTruckToast
+        className={`fixed top-5 right-5 bg-white px-6 py-4 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 z-50 flex items-center gap-5 overflow-hidden min-w-70 transition-all duration-500 ease-out ${showTruckToast
           ? "translate-x-0 opacity-100"
           : "translate-x-[120%] opacity-0"
           }`}
