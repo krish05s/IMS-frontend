@@ -1034,288 +1034,61 @@ export default function Sales() {
                   </table>
                 </div>
 
-                {totalPages > 1 && (
-                  <div className="flex items-center gap-4">
-                    <button 
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
-                    >
-                      &lt;
-                    </button>
-                    <div className="flex items-center gap-2">
-                      {[...Array(totalPages)].map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setCurrentPage(i + 1)}
-                          className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-emerald-500 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
-                        >
-                          {i + 1}
-                        </button>
-                      ))}
-                    </div>
-                    <button 
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
-                    >
-                      &gt;
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-            <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl overflow-y-auto max-h-[90vh]">
-              <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555] rounded-t-2xl -mx-8 -mt-8 mb-6">
-  <div className="flex items-center gap-2">
-    
-    <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
-      <svg
-  className="w-4 h-4 text-white"
-  fill="none"
-  stroke="currentColor"
-  viewBox="0 0 24 24"
->
-  <path
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    strokeWidth={2}
-    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-  />
-</svg>
-    </div>
-
-    <h2 className="text-base font-semibold text-white">
-      {currentSalesId ? "Edit Sales Invoice" : "Create Sales Invoice"}
-    </h2>
-  </div>
-
-  <button
-    onClick={handleCloseModal}
-    className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-colors"
-  >
-    ✕
-  </button>
-</div>
-              <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-
-                {/* Header Information */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
-                   <input
-  type="date"
-  required
-  value={formData.date}
-  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
-/>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Bill No</label>
-                    <input
-  type="text"
-  required
-  value={formData.bill_no}
-  onChange={(e) => setFormData({ ...formData, bill_no: e.target.value })}
-  placeholder="e.g. S-2039"
-  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
-/>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Sales Party</label>
+                <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-slate-500">
+                      Rows per page:
+                    </span>
                     <select
-  required
-  value={formData.customer_name}
-  onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
->
-  <option value="">-- Select Customer --</option>
-  {salesParties.map(p => (
-    <option key={p.id} value={p.name}>{p.name}</option>
-  ))}
-</select>
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    >
+                      <option value={10}>10</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                      <option value={200}>200</option>
+                    </select>
                   </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Vehicle No</label>
-                    <input
-  type="text"
-  value={formData.vehicle_no}
-  onChange={(e) => setFormData({ ...formData, vehicle_no: e.target.value })}
-  placeholder="e.g. GJ05 1234"
-  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white uppercase focus:outline-none"
-/>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Driver Name</label>
-                    <input
-  type="text"
-  required
-  value={formData.driver_name}
-  onChange={(e) => setFormData({ ...formData, driver_name: e.target.value })}
-  placeholder="e.g. John Doe"
-  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
-/>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Driver Number</label>
-                    <input
-  type="text"
-  value={formData.driver_number}
-  onChange={(e) => setFormData({ ...formData, driver_number: e.target.value })}
-  placeholder="e.g. 1234567890"
-  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
-/>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Transporter Name</label>
-                    <input
-  type="text"
-  value={formData.transporter_name}
-  onChange={(e) => setFormData({ ...formData, transporter_name: e.target.value })}
-  placeholder="e.g. ABC Logistics"
-  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
-/>
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">LR Number</label>
-                   <input
-  type="text"
-  value={formData.lr_number}
-  onChange={(e) => setFormData({ ...formData, lr_number: e.target.value })}
-  placeholder="e.g. LR-98765"
-  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
-/>
-                  </div>
-                </div>
 
-                {/* Items Section */}
-                <div className="flex justify-end gap-3 mt-8 border-t border-slate-100 pt-6">
-                  <button
-                    type="button"
-                    onClick={handleCloseModal}
-                    className="px-5 py-2.5 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-[#212121] hover:bg-[#444444] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70"
-                  >
-                    {isSubmitting && (
-                      <svg className="animate-spin h-4 w-4 mr-2 inline" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                      </svg>
-                    )}
-                    {isSubmitting ? "Saving..." : (currentSalesId ? "Update Dispatch" : "Save Dispatch")}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {isDeleteModalOpen && (
-  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-    
-    <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden">
-
-      {/* HEADER (same as Edit Member) */}
-      <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555]">
-        
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
-            <svg
-              className="w-4 h-4 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 7h12M9 7v10m6-10v10M10 4h4a1 1 0 011 1v2H9V5a1 1 0 011-1zM5 7h14l-1 13a2 2 0 01-2 2H8a2 2 0 01-2-2L5 7z"
-              />
-            </svg>
-          </div>
-
-          <h2 className="text-white font-semibold text-base">
-            Delete Sale
-          </h2>
-        </div>
-
-        <button
-          onClick={() => setIsDeleteModalOpen(false)}
-          className="w-7 h-7 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition"
-        >
-          ✕
-        </button>
-      </div>
-
-      {/* BODY */}
-      <div className="p-6 text-center">
-        <p className="text-sm text-slate-600 mb-6">
-          Are you sure you want to delete this sale? Inventory will be reverted.
-        </p>
-
-        <div className="flex gap-3">
-          <button
-            onClick={() => setIsDeleteModalOpen(false)}
-            disabled={isDeleting}
-            className="w-full px-4 py-2.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition"
-          >
-            Cancel
-          </button>
-
-          <button
-            onClick={executeDelete}
-            disabled={isDeleting}
-            className="w-full px-4 py-2.5 rounded-lg bg-[#212121] text-white font-semibold hover:bg-[#444444] transition flex justify-center items-center"
-          >
-            {isDeleting ? "Deleting..." : "Yes, Delete"}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-
-        {/* View Details Modal */}
-        {isViewModalOpen && viewSale && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-            <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-slate-800">Sales Order Details</h2>
-                <button onClick={() => { setIsViewModalOpen(false); setViewSale(null); }} className="text-slate-400 hover:text-slate-600 transition">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2 mb-3">General Information</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><span className="text-slate-500 w-32 inline-block">Date:</span> <span className="font-medium text-slate-800">{new Date(viewSale.date).toLocaleDateString()}</span></p>
-                    <p><span className="text-slate-500 w-32 inline-block">Bill No:</span> <span className="font-medium text-slate-800">{viewSale.bill_no}</span></p>
-                    <p><span className="text-slate-500 w-32 inline-block">Customer:</span> <span className="font-medium text-slate-800">{viewSale.customer_name || "-"}</span></p>
-                    <p><span className="text-slate-500 w-32 inline-block">Created By:</span> <span className="font-medium text-slate-800">{viewSale.created_by || "-"}</span></p>
-                  </div>
-                </div>
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2 mb-3">Logistics Information</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><span className="text-slate-500 w-32 inline-block">Vehicle No:</span> <span className="font-medium text-slate-800">{viewSale.vehicle_no || "-"}</span></p>
-                    <p><span className="text-slate-500 w-32 inline-block">Driver Name:</span> <span className="font-medium text-slate-800">{viewSale.driver_name || "-"}</span></p>
-                    <p><span className="text-slate-500 w-32 inline-block">Driver No:</span> <span className="font-medium text-slate-800">{viewSale.driver_number || "-"}</span></p>
-                    <p><span className="text-slate-500 w-32 inline-block">Transporter Name:</span> <span className="font-medium text-slate-800">{viewSale.transporter_name || "-"}</span></p>
-                  </div>
+                  {totalPages > 1 && (
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(prev - 1, 1))
+                        }
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                      >
+                        &lt;
+                      </button>
+                      <div className="flex items-center gap-2">
+                        {[...Array(totalPages)].map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setCurrentPage(i + 1)}
+                            className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-emerald-500 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                          >
+                            {i + 1}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(prev + 1, totalPages),
+                          )
+                        }
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                      >
+                        &gt;
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
