@@ -101,6 +101,7 @@ const Icons = {
   ),
 };
 
+// Route to label + icon mapping
 const routeMap = {
   "/dashboard": { label: "Dashboard", icon: Icons.Dashboard },
   "/gradations": { label: "Gradations", icon: Icons.Gradations },
@@ -112,7 +113,7 @@ const routeMap = {
 
 // Route to label + icon mapping
 
-export default function Topbar() {
+export default function Topbar({actions}) {
   const pathname = usePathname();
   const current = routeMap[pathname] || {
     label: "Dashboard",
@@ -120,13 +121,20 @@ export default function Topbar() {
   };
 
   return (
-    <div className="fixed top-0 left-0 md:left-64 right-0 h-16 bg-white border-b border-[#f0f2f5] flex items-center px-6 z-50">      <div className="flex items-center gap-2.5 text-[#000000]">
-      <span className="text-[#000000]">{current.icon}</span>
-      <span className="text-lg font-semibold text-[#000000]">
-        {current.label}
-      </span>
-    </div>
-
+<div className="fixed top-0 left-0 md:left-64 right-0 h-16 bg-white border-b border-[#f0f2f5] flex items-center px-6 z-50">      <div className="flex items-center gap-2.5 text-[#000000]">
+        <span className="text-[#000000]">{current.icon}</span>
+        <span className="text-lg font-semibold text-[#000000]">
+          {current.label}
+        </span>
+      </div>
+      
+      {/* Right - Action Buttons */}
+      {actions && (
+        <div className="flex items-center gap-3 ml-auto ">
+          {actions}
+        </div>
+      )}
     </div>
   );
 }
+

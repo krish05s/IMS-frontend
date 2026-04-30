@@ -107,8 +107,9 @@ export default function LoginPage() {
           {carouselImages.map((img, i) => (
             <div
               key={i}
-              className={`absolute inset-0 transition-opacity duration-700 ${i === current ? "opacity-100" : "opacity-0"
-                }`}
+              className={`absolute inset-0 transition-opacity duration-700 ${
+                i === current ? "opacity-100" : "opacity-0"
+              }`}
             >
               <img
                 src={img.url}
@@ -124,8 +125,9 @@ export default function LoginPage() {
               <button
                 key={i}
                 onClick={() => setCurrent(i)}
-                className={`h-2.5 rounded-full border-none cursor-pointer transition-all duration-300 ${i === current ? "w-7 bg-white" : "w-2.5 bg-white/50"
-                  }`}
+                className={`h-2.5 rounded-full border-none cursor-pointer transition-all duration-300 ${
+                  i === current ? "w-7 bg-white" : "w-2.5 bg-white/50"
+                }`}
               />
             ))}
           </div>
@@ -157,8 +159,9 @@ export default function LoginPage() {
                 placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border transition-all duration-200 focus:border-orange-500 focus:bg-white ${errors.email ? "border-red-400" : "border-gray-200"
-                  }`}
+                className={`w-full px-4 py-3 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border transition-all duration-200 focus:border-orange-500 focus:bg-white ${
+                  errors.email ? "border-red-400" : "border-gray-200"
+                }`}
               />
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1 ml-1">{errors.email}</p>
@@ -176,8 +179,9 @@ export default function LoginPage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleSubmit(e);
                 }}
-                className={`w-full px-4 py-3 pr-11 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border transition-all duration-200 focus:border-orange-500 focus:bg-white ${errors.password ? "border-red-400" : "border-gray-200"
-                  }`}
+                className={`w-full px-4 py-3 pr-11 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border transition-all duration-200 focus:border-orange-500 focus:bg-white ${
+                  errors.password ? "border-red-400" : "border-gray-200"
+                }`}
               />
               <button
                 type="button"
@@ -205,10 +209,11 @@ export default function LoginPage() {
 
             {serverMessage && (
               <div
-                className={`mb-4 text-sm px-4 py-2.5 rounded-lg border ${serverMessage.includes("successful")
-                  ? "bg-green-50 text-green-700 border-green-200"
-                  : "bg-red-50 text-red-600 border-red-200"
-                  }`}
+                className={`mb-4 text-sm px-4 py-2.5 rounded-lg border ${
+                  serverMessage.includes("successful")
+                    ? "bg-green-50 text-green-700 border-green-200"
+                    : "bg-red-50 text-red-600 border-red-200"
+                }`}
               >
                 {serverMessage}
               </div>
