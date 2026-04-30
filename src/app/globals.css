@@ -96,3 +96,7 @@ body {
   -ms-overflow-style: none !important; /* IE and Edge */
   scrollbar-width: none !important; /* Firefox */
 }
+
+.topbar-offset {
+  padding-top: 64px;
+}

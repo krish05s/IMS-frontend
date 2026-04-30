@@ -16,7 +16,7 @@ export default function useRoleCheck(allowedRoles) {
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
       const userRole = payload.role?.toLowerCase();
-      
+
       if (!allowedRoles.includes(userRole)) {
         router.push("/dashboard");
       } else {
