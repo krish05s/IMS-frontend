@@ -4,9 +4,13 @@ import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
 import Select from "react-select";
 import TruckLoader from "../components/TruckLoader";
+<<<<<<< Updated upstream
 import { toast } from "react-toastify";
 import Topbar from "../components/Topbar";
 
+=======
+import Topbar from "../components/Topbar";
+>>>>>>> Stashed changes
 export default function Purchases() {
   useRoleCheck(["admin", "purchase"]);
   const [purchases, setPurchases] = useState([]);
@@ -485,13 +489,19 @@ export default function Purchases() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-[#f1f1f1] flex">
       <Sidebar />
+<<<<<<< Updated upstream
       <div className="flex-1 md:ml-64 overflow-x-auto scrollbar-hide">
                 <Topbar />
                   <div className="p-4 md:p-8 topbar-offset mt-4">
 
         {loading ? (
+=======
+      <div className="flex-1 md:ml-64 p-4 md:p-20 t-20 overflow-x-auto">
+        <Topbar />
+                {loading ? (
+>>>>>>> Stashed changes
           <TruckLoader />
         ) : (
           <>

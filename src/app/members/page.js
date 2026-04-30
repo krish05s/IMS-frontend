@@ -3,9 +3,13 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
 import TruckLoader from "../components/TruckLoader";
+<<<<<<< Updated upstream
 import { toast } from "react-toastify";
 import Topbar from "../components/Topbar";
 
+=======
+import Topbar from "../components/Topbar";
+>>>>>>> Stashed changes
 function Members() {
   useRoleCheck(["admin"]);
   const [users, setUsers] = useState([]);
@@ -188,14 +192,20 @@ function Members() {
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
   return (
-    <div className="flex min-h-screen bg-slate-100">
+    <div className="flex min-h-screen bg-[#f1f1f1]">
       <Sidebar />
 
+<<<<<<< Updated upstream
       <div className="flex-1 md:ml-64  overflow-x-auto scrollbar-hide">
                 <Topbar />
                   <div className="p-4 md:p-8 topbar-offset mt-4">
 
         {loading ? (
+=======
+      <div className="flex-1 md:ml-64 p-4 md:p-20 t-20 overflow-x-auto">
+        <Topbar />
+                {loading ? (
+>>>>>>> Stashed changes
           <TruckLoader />
         ) : (
           <>

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
+import Topbar from "../components/Topbar";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, AreaChart, Area, BarChart, Bar
@@ -181,14 +182,20 @@ export default function Dashboard() {
   }, [rawSalesData, rawPurchaseData, timeFilter, loading]);
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-pink-50 via-slate-50 to-green-50 font-sans">
+    <div className="min-h-screen flex bg-[#f1f1f1] font-sans">
       <Sidebar />
+<<<<<<< Updated upstream
 
       {/* <Topbar /> */}
       <div className="flex-1 md:ml-64   overflow-x-hidden">
         <Topbar />
           <div className="p-4 md:p-8 topbar-offset mt-4">
                {(loading || !role) ? (
+=======
+      <div className="flex-1 md:ml-64 p-4 md:p-20 t-20 overflow-x-auto">
+        <Topbar />
+                {(loading || !role) ? (
+>>>>>>> Stashed changes
           <TruckLoader />
         ) : (
           <>
@@ -429,6 +436,7 @@ export default function Dashboard() {
           </>
         )}
       </div>
+<<<<<<< Updated upstream
       </div>
       
       <style jsx global>{`
@@ -443,6 +451,8 @@ export default function Dashboard() {
           border-radius: 20px;
         }
       `}</style>
+=======
+>>>>>>> Stashed changes
     </div>
   );
 }

@@ -4,7 +4,10 @@ import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
 import TruckLoader from "../components/TruckLoader";
 import Topbar from "../components/Topbar";
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 export default function Settings() {
   useRoleCheck(["admin"]);
   const [vehicles, setVehicles] = useState([]);
@@ -101,12 +104,17 @@ export default function Settings() {
   const totalPages = Math.ceil(vehicles.length / itemsPerPage);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-[#f1f1f1] flex">
       <Sidebar />
+<<<<<<< Updated upstream
       <div className="flex-1 md:ml-64 overflow-x-auto scrollbar-hide">
                 <Topbar />
                   <div className="p-4 md:p-8 topbar-offset mt-4">
 
+=======
+      <div className="flex-1 md:ml-64 p-4 md:p-20 t-20 overflow-x-auto">
+        <Topbar />
+>>>>>>> Stashed changes
         {loading ? (
           <TruckLoader />
         ) : (

@@ -99,16 +99,24 @@ export default function LoginPage() {
   };
 
   return (
+<<<<<<< Updated upstream
     <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-br from-pink-100 via-white to-green-100 p-3 sm:p-5 font-sans">
       <div className="flex w-full max-w-3xl min-h-130 rounded-2xl overflow-hidden shadow-2xl bg-white">
 
         {/* LEFT: Carousel - Hidden on Mobile */}
         <div className="relative hidden md:block w-[45%] min-h-130 overflow-hidden shrink-0">
+=======
+    <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-br from-pink-100 via-white to-green-100 p-5 font-sans">
+      <div className="flex w-full max-w-3xl min-h-130 rounded-2xl overflow-hidden shadow-2xl bg-white">
+        {/* LEFT: Carousel */}
+        <div className="relative w-[45%] min-h-130 overflow-hidden shrink-0">
+>>>>>>> Stashed changes
           {carouselImages.map((img, i) => (
             <div
               key={i}
-              className={`absolute inset-0 transition-opacity duration-700 ${i === current ? "opacity-100" : "opacity-0"
-                }`}
+              className={`absolute inset-0 transition-opacity duration-700 ${
+                i === current ? "opacity-100" : "opacity-0"
+              }`}
             >
               <img
                 src={img.url}
@@ -124,8 +132,9 @@ export default function LoginPage() {
               <button
                 key={i}
                 onClick={() => setCurrent(i)}
-                className={`h-2.5 rounded-full border-none cursor-pointer transition-all duration-300 ${i === current ? "w-7 bg-white" : "w-2.5 bg-white/50"
-                  }`}
+                className={`h-2.5 rounded-full border-none cursor-pointer transition-all duration-300 ${
+                  i === current ? "w-7 bg-white" : "w-2.5 bg-white/50"
+                }`}
               />
             ))}
           </div>
@@ -157,8 +166,9 @@ export default function LoginPage() {
                 placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border transition-all duration-200 focus:border-orange-500 focus:bg-white ${errors.email ? "border-red-400" : "border-gray-200"
-                  }`}
+                className={`w-full px-4 py-3 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border transition-all duration-200 focus:border-orange-500 focus:bg-white ${
+                  errors.email ? "border-red-400" : "border-gray-200"
+                }`}
               />
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1 ml-1">{errors.email}</p>
@@ -176,8 +186,9 @@ export default function LoginPage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleSubmit(e);
                 }}
-                className={`w-full px-4 py-3 pr-11 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border transition-all duration-200 focus:border-orange-500 focus:bg-white ${errors.password ? "border-red-400" : "border-gray-200"
-                  }`}
+                className={`w-full px-4 py-3 pr-11 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border transition-all duration-200 focus:border-orange-500 focus:bg-white ${
+                  errors.password ? "border-red-400" : "border-gray-200"
+                }`}
               />
               <button
                 type="button"
@@ -205,10 +216,11 @@ export default function LoginPage() {
 
             {serverMessage && (
               <div
-                className={`mb-4 text-sm px-4 py-2.5 rounded-lg border ${serverMessage.includes("successful")
-                  ? "bg-green-50 text-green-700 border-green-200"
-                  : "bg-red-50 text-red-600 border-red-200"
-                  }`}
+                className={`mb-4 text-sm px-4 py-2.5 rounded-lg border ${
+                  serverMessage.includes("successful")
+                    ? "bg-green-50 text-green-700 border-green-200"
+                    : "bg-red-50 text-red-600 border-red-200"
+                }`}
               >
                 {serverMessage}
               </div>
@@ -219,21 +231,61 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full py-3.5 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 disabled:bg-orange-300 disabled:cursor-not-allowed text-white text-base font-bold rounded-xl transition-all duration-200 shadow-lg shadow-orange-200 tracking-wide"
             >
+<<<<<<< Updated upstream
               {loading ? "Signing In..." : "Sign In"}
+=======
+              {loading ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Signing In...
+                </>
+              ) : (
+                "Sign In"
+              )}
+>>>>>>> Stashed changes
             </button>
           </div>
         </div>
       </div>
 
+<<<<<<< Updated upstream
       {/* Toast */}
       <div
         className={`fixed top-5 right-5 bg-white px-6 py-4 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 z-50 flex items-center gap-5 overflow-hidden min-w-70 transition-all duration-500 ease-out ${showTruckToast
           ? "translate-x-0 opacity-100"
           : "translate-x-[120%] opacity-0"
           }`}
+=======
+      {/* Moving Truck Toast Notification */}
+      <div
+        className={`fixed top-5 right-5 bg-white px-6 py-4 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 z-50 flex items-center gap-5 overflow-hidden min-w-[300px] transition-all duration-500 ease-out ${showTruckToast ? "translate-x-0 opacity-100" : "translate-x-[120%] opacity-0"}`}
+>>>>>>> Stashed changes
       >
         <div className="relative w-16 h-10 overflow-hidden bg-slate-50 rounded-lg">
           <div className="absolute bottom-1 left-0 w-full h-1 bg-slate-200 rounded-full z-0"></div>
+<<<<<<< Updated upstream
+=======
+          {/* Truck */}
+>>>>>>> Stashed changes
           <div
             className="absolute left-0 flex items-center h-full z-10"
             style={{ animation: "drive 2s linear infinite" }}
@@ -250,7 +302,11 @@ export default function LoginPage() {
           <h3 className="font-bold text-slate-800 text-sm">
             Login Successful!
           </h3>
+<<<<<<< Updated upstream
           <p className="text-xs text-slate-500"></p>
+=======
+          <p className="text-xs text-slate-500">Routing to dashboard...</p>
+>>>>>>> Stashed changes
         </div>
       </div>
 
