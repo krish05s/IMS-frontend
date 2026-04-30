@@ -14,12 +14,26 @@ export default function Sales() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentSalesId, setCurrentSalesId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ bill_no: "", customer_name: "", vehicle_no: "", driver_number: "" });
+  const [filters, setFilters] = useState({
+    bill_no: "",
+    customer_name: "",
+    vehicle_no: "",
+    driver_number: "",
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Header Data (For Modal)
-  const [formData, setFormData] = useState({ date: "", bill_no: "", customer_name: "", vehicle_no: "", driver_name: "", driver_number: "", transporter_name: "", lr_number: "" });
+  const [formData, setFormData] = useState({
+    date: "",
+    bill_no: "",
+    customer_name: "",
+    vehicle_no: "",
+    driver_name: "",
+    driver_number: "",
+    transporter_name: "",
+    lr_number: "",
+  });
 
   // View Details Logic
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
@@ -40,9 +54,12 @@ export default function Sales() {
 
   const fetchSales = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sales/read`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/sales/read`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        },
+      );
       const data = await response.json();
       if (data.success) {
         setSales(data.data);
@@ -54,9 +71,12 @@ export default function Sales() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/product/read`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/product/read`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        },
+      );
       const data = await response.json();
       if (data.success) {
         setProducts(data.data);
@@ -68,12 +88,17 @@ export default function Sales() {
 
   const fetchSalesParties = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/party/read?type=sales`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/party/read?type=sales`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        },
+      );
       const data = await res.json();
       if (data.success) setSalesParties(data.data);
-    } catch (e) { console.error("Error fetching sales parties:", e); }
+    } catch (e) {
+      console.error("Error fetching sales parties:", e);
+    }
   };
 
   useEffect(() => {
@@ -81,16 +106,16 @@ export default function Sales() {
   }, [filters]);
 
   useEffect(() => {
-    Promise.all([fetchSales(), fetchProducts(), fetchSalesParties()]).then(() => setLoading(false));
+    Promise.all([fetchSales(), fetchProducts(), fetchSalesParties()]).then(() =>
+      setLoading(false),
+    );
   }, []);
-
-
 
   const handleOpenModal = (sale = null) => {
     if (sale) {
       setCurrentSalesId(sale.id);
       setFormData({
-        date: new Date(sale.date).toISOString().split('T')[0],
+        date: new Date(sale.date).toISOString().split("T")[0],
         bill_no: sale.bill_no,
         customer_name: sale.customer_name,
         vehicle_no: sale.vehicle_no || "",
@@ -98,11 +123,21 @@ export default function Sales() {
         driver_number: sale.driver_number || "",
         transporter_name: sale.transporter_name || "",
         lr_number: sale.lr_number || "",
-        items: sale.items || []
+        items: sale.items || [],
       });
     } else {
       setCurrentSalesId(null);
-      setFormData({ date: new Date().toISOString().split('T')[0], bill_no: "", customer_name: "", vehicle_no: "", driver_name: "", driver_number: "", transporter_name: "", lr_number: "", items: [] });
+      setFormData({
+        date: new Date().toISOString().split("T")[0],
+        bill_no: "",
+        customer_name: "",
+        vehicle_no: "",
+        driver_name: "",
+        driver_number: "",
+        transporter_name: "",
+        lr_number: "",
+        items: [],
+      });
     }
     setIsModalOpen(true);
   };
@@ -119,31 +154,55 @@ export default function Sales() {
       setExpandedItems([]);
     } else {
       setExpandedRowId(sale.id);
-      const itemsLoaded = sale.items && sale.items.length > 0
-        ? sale.items.map(i => {
-          const prod = products.find(p => p.product_code === i.product_code);
-          return { ...i, unit: prod?.unit || "Kg", isEditing: false };
-        })
-        : sale.product_code
-          ? [{
-            product_code: sale.product_code,
-            product_name: sale.product_name,
-            gradation: "",
-            quantity: sale.quantity,
-            unit: products.find(p => p.product_code === sale.product_code)?.unit || "Kg",
-            isEditing: false
-          }]
-          : [];
+      const itemsLoaded =
+        sale.items && sale.items.length > 0
+          ? sale.items.map((i) => {
+              const prod = products.find(
+                (p) => p.product_code === i.product_code,
+              );
+              return { ...i, unit: prod?.unit || "Kg", isEditing: false };
+            })
+          : sale.product_code
+            ? [
+                {
+                  product_code: sale.product_code,
+                  product_name: sale.product_name,
+                  gradation: "",
+                  quantity: sale.quantity,
+                  unit:
+                    products.find((p) => p.product_code === sale.product_code)
+                      ?.unit || "Kg",
+                  isEditing: false,
+                },
+              ]
+            : [];
 
       // Always ensure there is one default product entry box visible at the end
-      itemsLoaded.push({ product_code: "", product_name: "", gradation: "", quantity: "", unit: "Kg", isEditing: true });
+      itemsLoaded.push({
+        product_code: "",
+        product_name: "",
+        gradation: "",
+        quantity: "",
+        unit: "Kg",
+        isEditing: true,
+      });
 
       setExpandedItems(itemsLoaded);
     }
   };
 
   const addExpandedItemRow = () => {
-    setExpandedItems([...expandedItems, { product_code: "", product_name: "", gradation: "", quantity: "", unit: "Kg", isEditing: true }]);
+    setExpandedItems([
+      ...expandedItems,
+      {
+        product_code: "",
+        product_name: "",
+        gradation: "",
+        quantity: "",
+        unit: "Kg",
+        isEditing: true,
+      },
+    ]);
   };
 
   const removeExpandedItemRow = (index) => {
@@ -156,7 +215,7 @@ export default function Sales() {
     newItems[index][field] = value;
 
     if (field === "product_code") {
-      const selectedProd = products.find(p => p.product_code === value);
+      const selectedProd = products.find((p) => p.product_code === value);
       if (selectedProd) {
         newItems[index].product_name = selectedProd.product_name;
         newItems[index].gradation = selectedProd.gradation;
@@ -166,7 +225,9 @@ export default function Sales() {
   };
 
   const handleSaveExpandedItems = async (sale) => {
-    const validItems = expandedItems.filter(i => i.product_code && i.quantity > 0);
+    const validItems = expandedItems.filter(
+      (i) => i.product_code && i.quantity > 0,
+    );
 
     try {
       const submissionData = {
@@ -178,17 +239,20 @@ export default function Sales() {
         driver_number: sale.driver_number,
         transporter_name: sale.transporter_name,
         lr_number: sale.lr_number,
-        items: validItems
+        items: validItems,
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sales/update/${sale.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/sales/update/${sale.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(submissionData),
         },
-        body: JSON.stringify(submissionData),
-      });
+      );
       const data = await response.json();
       if (data.success) {
         toast.success("Products saved successfully!");
@@ -214,10 +278,13 @@ export default function Sales() {
     if (!saleToDelete) return;
     setIsDeleting(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sales/delete/${saleToDelete}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/sales/delete/${saleToDelete}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        },
+      );
       const data = await response.json();
       if (data.success) {
         toast.success("Sales record deleted!");
@@ -242,7 +309,10 @@ export default function Sales() {
 
     // Validate Items
     try {
-      const submissionData = { ...formData, items: currentSalesId ? formData.items : [] };
+      const submissionData = {
+        ...formData,
+        items: currentSalesId ? formData.items : [],
+      };
       const url = currentSalesId
         ? `${process.env.NEXT_PUBLIC_API_URL}/api/sales/update/${currentSalesId}`
         : `${process.env.NEXT_PUBLIC_API_URL}/api/sales/create`;
@@ -258,7 +328,11 @@ export default function Sales() {
       });
       const data = await response.json();
       if (data.success) {
-        toast.success(currentSalesId ? "Sale updated successfully!" : "Sale created successfully!");
+        toast.success(
+          currentSalesId
+            ? "Sale updated successfully!"
+            : "Sale created successfully!",
+        );
         fetchSales();
         fetchProducts(); // refresh products stock count
         handleCloseModal();
@@ -273,11 +347,18 @@ export default function Sales() {
     }
   };
 
-  const filteredSales = sales.filter(s => 
-    s.bill_no?.toLowerCase().includes(filters.bill_no.toLowerCase()) &&
-    (s.customer_name || "").toLowerCase().includes(filters.customer_name.toLowerCase()) &&
-    (s.vehicle_no || "").toLowerCase().includes(filters.vehicle_no.toLowerCase()) &&
-    (s.driver_number || "").toLowerCase().includes(filters.driver_number.toLowerCase())
+  const filteredSales = sales.filter(
+    (s) =>
+      s.bill_no?.toLowerCase().includes(filters.bill_no.toLowerCase()) &&
+      (s.customer_name || "")
+        .toLowerCase()
+        .includes(filters.customer_name.toLowerCase()) &&
+      (s.vehicle_no || "")
+        .toLowerCase()
+        .includes(filters.vehicle_no.toLowerCase()) &&
+      (s.driver_number || "")
+        .toLowerCase()
+        .includes(filters.driver_number.toLowerCase()),
   );
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -290,20 +371,26 @@ export default function Sales() {
     let totalPieces = 0;
     const gradationTotals = {};
 
-    const itemsHtml = sale.items && sale.items.length > 0 ? sale.items.map((item, idx) => {
-      const prod = products.find(p => p.product_code === item.product_code);
-      const unit = prod?.unit || "Kg";
-      const qty = Number(item.quantity) || 0;
-      
-      if (unit.toLowerCase() === 'kg') totalKg += qty;
-      else totalPieces += qty;
+    const itemsHtml =
+      sale.items && sale.items.length > 0
+        ? sale.items
+            .map((item, idx) => {
+              const prod = products.find(
+                (p) => p.product_code === item.product_code,
+              );
+              const unit = prod?.unit || "Kg";
+              const qty = Number(item.quantity) || 0;
 
-      const grad = item.gradation || "N/A";
-      if (!gradationTotals[grad]) gradationTotals[grad] = { kg: 0, pieces: 0 };
-      if (unit.toLowerCase() === 'kg') gradationTotals[grad].kg += qty;
-      else gradationTotals[grad].pieces += qty;
+              if (unit.toLowerCase() === "kg") totalKg += qty;
+              else totalPieces += qty;
 
-      return `
+              const grad = item.gradation || "N/A";
+              if (!gradationTotals[grad])
+                gradationTotals[grad] = { kg: 0, pieces: 0 };
+              if (unit.toLowerCase() === "kg") gradationTotals[grad].kg += qty;
+              else gradationTotals[grad].pieces += qty;
+
+              return `
         <tr>
           <td>${idx + 1}</td>
           <td>${item.product_code}</td>
@@ -312,20 +399,25 @@ export default function Sales() {
           <td>${qty} ${unit}</td>
         </tr>
       `;
-    }).join('') : (() => {
-      const prod = products.find(p => p.product_code === sale.product_code);
-      const unit = prod?.unit || "Kg";
-      const qty = Number(sale.quantity) || 0;
-      const grad = prod?.gradation || "N/A";
-      
-      if (unit.toLowerCase() === 'kg') totalKg += qty;
-      else totalPieces += qty;
+            })
+            .join("")
+        : (() => {
+            const prod = products.find(
+              (p) => p.product_code === sale.product_code,
+            );
+            const unit = prod?.unit || "Kg";
+            const qty = Number(sale.quantity) || 0;
+            const grad = prod?.gradation || "N/A";
 
-      if (!gradationTotals[grad]) gradationTotals[grad] = { kg: 0, pieces: 0 };
-      if (unit.toLowerCase() === 'kg') gradationTotals[grad].kg += qty;
-      else gradationTotals[grad].pieces += qty;
+            if (unit.toLowerCase() === "kg") totalKg += qty;
+            else totalPieces += qty;
 
-      return `
+            if (!gradationTotals[grad])
+              gradationTotals[grad] = { kg: 0, pieces: 0 };
+            if (unit.toLowerCase() === "kg") gradationTotals[grad].kg += qty;
+            else gradationTotals[grad].pieces += qty;
+
+            return `
         <tr>
           <td>1</td>
           <td>${sale.product_code}</td>
@@ -334,23 +426,25 @@ export default function Sales() {
           <td>${qty} ${unit}</td>
         </tr>
       `;
-    })();
+          })();
 
-    const gradationSummaryHtml = Object.keys(gradationTotals).map(grad => {
-      const t = gradationTotals[grad];
-      let display = [];
-      if (t.kg > 0) display.push(`${t.kg} Kg`);
-      if (t.pieces > 0) display.push(`${t.pieces} Pieces`);
-      if (display.length === 0) display.push(`0`);
-      return `
+    const gradationSummaryHtml = Object.keys(gradationTotals)
+      .map((grad) => {
+        const t = gradationTotals[grad];
+        let display = [];
+        if (t.kg > 0) display.push(`${t.kg} Kg`);
+        if (t.pieces > 0) display.push(`${t.pieces} Pieces`);
+        if (display.length === 0) display.push(`0`);
+        return `
         <tr>
           <th>${grad}</th>
           <td>${display.join(" & ")}</td>
         </tr>
       `;
-    }).join('');
+      })
+      .join("");
 
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(`
       <html>
       <head>
@@ -409,7 +503,7 @@ export default function Sales() {
             </div>
             <div class="header-right">
               <h2>Sales Order</h2>
-              <p><strong>Date:</strong> ${new Date(sale.date).toLocaleDateString('en-GB')}</p>
+              <p><strong>Date:</strong> ${new Date(sale.date).toLocaleDateString("en-GB")}</p>
             </div>
           </div>
           
@@ -486,20 +580,42 @@ export default function Sales() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-[#f1f1f1] flex">
       <Sidebar />
       <div className="flex-1 md:ml-64  overflow-x-auto scrollbar-hide">
-                <Topbar />
-                 <div className="p-4 md:p-8 topbar-offset mt-4">
- 
-        {loading ? (
-          <TruckLoader />
-        ) : (
-          <>
-            <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+        {/* <Topbar /> */}
+        <Topbar
+          actions={
+            <button
+              onClick={() => handleOpenModal()}
+              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Add Sale
+            </button>
+          }
+        />
+        <div className="p-4 md:p-8 topbar-offset mt-4">
+          {loading ? (
+            <TruckLoader />
+          ) : (
+            <>
+              {/* <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
               <div>
                 <h1 className="text-2xl font-bold text-slate-800">Sales</h1>
-                {/* <p className="text-sm text-slate-500 mt-1">Manage outbound dispatch and customer bills</p> */}
+                {/* <p className="text-sm text-slate-500 mt-1">Manage outbound dispatch and customer bills</p> 
               </div>
               <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
                 <button
@@ -512,498 +628,986 @@ export default function Sales() {
                   Add Sales
                 </button>
               </div>
-            </div>
+            </div> */}
 
-            {/* Filter Bar */}
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
-              <input type="text" placeholder="Filter by Bill No..." value={filters.bill_no} onChange={(e) => setFilters({ ...filters, bill_no: e.target.value })} className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
-              <input type="text" placeholder="Filter by Customer..." value={filters.customer_name} onChange={(e) => setFilters({ ...filters, customer_name: e.target.value })} className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
-              <input type="text" placeholder="Filter by Vehicle No..." value={filters.vehicle_no} onChange={(e) => setFilters({ ...filters, vehicle_no: e.target.value })} className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
-              <input type="text" placeholder="Filter by Driver No..." value={filters.driver_number} onChange={(e) => setFilters({ ...filters, driver_number: e.target.value })} className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
-            </div>
+              {/* Filter Bar */}
+              <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
+                <input
+                  type="text"
+                  placeholder="Filter by Bill No..."
+                  value={filters.bill_no}
+                  onChange={(e) =>
+                    setFilters({ ...filters, bill_no: e.target.value })
+                  }
+                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                />
+                <input
+                  type="text"
+                  placeholder="Filter by Customer..."
+                  value={filters.customer_name}
+                  onChange={(e) =>
+                    setFilters({ ...filters, customer_name: e.target.value })
+                  }
+                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                />
+                <input
+                  type="text"
+                  placeholder="Filter by Vehicle No..."
+                  value={filters.vehicle_no}
+                  onChange={(e) =>
+                    setFilters({ ...filters, vehicle_no: e.target.value })
+                  }
+                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                />
+                <input
+                  type="text"
+                  placeholder="Filter by Driver No..."
+                  value={filters.driver_number}
+                  onChange={(e) =>
+                    setFilters({ ...filters, driver_number: e.target.value })
+                  }
+                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                />
+              </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-w-full overflow-hidden flex flex-col">
-              <div className="overflow-x-auto scrollbar-hide">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-100 text-slate-600 border-b border-slate-200 sticky top-0 z-10">
-                    <tr>
-                      <th className="py-3 px-4 font-semibold w-16 text-center whitespace-nowrap">ID</th>
-                      <th className="py-3 px-4 font-semibold whitespace-nowrap">Bill No</th>
-                      <th className="py-3 px-4 font-semibold whitespace-nowrap">Date</th>
-                      <th className="py-3 px-4 font-semibold whitespace-nowrap">Customer Name</th>
-                      <th className="py-3 px-4 font-semibold whitespace-nowrap">Vehicle No</th>
-                      <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">Items</th>
-                      <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">Created At</th>
-                      <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">Created By</th>
-                      <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">Actions</th>
-                      <th className="py-3 px-4 font-semibold text-center text-blue-600 whitespace-nowrap">Bill</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentSales.map((s, index) => (
-                      <React.Fragment key={s.id}>
-                        <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition">
-                          <td className="py-3 px-4 text-center text-slate-600 font-medium whitespace-nowrap">{indexOfFirstItem + index + 1}</td>
-                          <td className="py-3 px-4 text-slate-800 font-medium">{s.bill_no}</td>
-                          <td className="py-3 px-4 text-slate-800">{new Date(s.date).toLocaleDateString()}</td>
-                          <td className="py-3 px-4 text-slate-800 font-bold">{s.customer_name}</td>
-                          <td className="py-3 px-4 text-slate-600">{s.vehicle_no || "-"}</td>
-                          <td className="py-3 px-4 text-orange-600 font-medium text-center">{s.items_count || (s.product_code ? 1 : 0)}</td>
-                          <td className="py-3 px-4 text-slate-500 text-xs text-center whitespace-nowrap">
-                            {s.created_at ? new Date(s.created_at).toLocaleString('en-GB', {
-                                day: '2-digit', month: '2-digit', year: 'numeric',
-                                hour: '2-digit', minute: '2-digit'
-                            }) : "-"}
-                          </td>
-                          <td className="py-3 px-4 text-slate-600 font-medium text-center whitespace-nowrap">
-                            {s.created_by || "-"}
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            <div className="flex justify-center gap-2">
-                              <button onClick={() => toggleItemsExpansion(s)} className="flex items-center justify-center w-7 h-7 bg-orange-50 text-orange-600 hover:bg-orange-100 font-bold rounded-lg transition-colors shadow-sm">
-                                {expandedRowId === s.id ? "-" : "+"}
-                              </button>
-                              <button onClick={() => { setViewSale(s); setIsViewModalOpen(true); }} title="View Details" className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-500 rounded-lg transition-colors">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                              </button>
-                              <button onClick={() => handleOpenModal(s)} title="Edit" className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                              </button>
-                              <button onClick={() => handleDelete(s.id)} title="Delete" className="p-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg transition-colors">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                              </button>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            <button
-                              onClick={() => printInvoice(s)}
-                              className="flex items-center justify-center mx-auto gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 font-semibold rounded-lg transition-colors text-xs"
-                              title="Generate Bill"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                              Bill
-                            </button>
-                          </td>
-                        </tr>
-
-                        {expandedRowId === s.id && (
-                          <tr className="bg-slate-50 border-b border-slate-200">
-                            <td colSpan="9" className="p-0">
-                              <div className="px-8 py-6 bg-slate-50/80 border-t border-slate-200 shadow-inner">
-                                <div className="flex justify-between items-center mb-4">
-                                  <h4 className="font-bold text-slate-800">Dispatched Products (Bill: {s.bill_no})</h4>
-                                </div>
-
-                                <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
-                                  <div className="flex flex-col gap-4 max-h-[350px] overflow-y-auto pr-4 custom-scrollbar">
-                                    {expandedItems.map((item, idx) => (
-                                      <div key={idx} className="flex items-end gap-3 py-3 border-b border-slate-100 last:border-0">
-                                        {!item.isEditing ? (
-                                          <div className="flex-1 flex justify-between items-center text-slate-700">
-                                            <div>
-                                              <p className="font-semibold">{item.product_name || item.product_code}</p>
-                                              <p className="text-xs text-slate-500">Gradation: {item.gradation || "N/A"}</p>
-                                            </div>
-                                            <div className="flex gap-4 items-center">
-                                              <div className="text-center px-4 py-2 bg-orange-50 rounded text-orange-800 font-bold border border-orange-100">
-                                                Qty: {item.quantity} {item.unit || "Kg"}
-                                              </div>
-                                              <button type="button" onClick={() => handleExpandedItemChange(idx, "isEditing", true)} className="text-blue-500 hover:text-blue-700 text-sm font-semibold flex gap-1 items-center px-2 py-1 transition">
-                                                <i>✏️</i> Edit
-                                              </button>
-                                              <button type="button" onClick={() => removeExpandedItemRow(idx)} className="text-red-500 hover:text-red-700 px-2 py-1 transition font-bold">
-                                                Drop
-                                              </button>
-                                            </div>
-                                          </div>
-                                        ) : (
-                                          <>
-                                            <div className="flex-1">
-                                              <label className="block text-xs font-bold text-slate-600 mb-1">Select Product</label>
-                                              <Select
-                                                options={products.map(prod => ({
-                                                  value: prod.product_code,
-                                                  label: `${prod.product_name} (${prod.gradation}) - [Stock: ${prod.quantity}]`
-                                                }))}
-                                                value={item.product_code ? {
-                                                  value: item.product_code,
-                                                  label: `${item.product_name || item.product_code} (${item.gradation || ''})`
-                                                } : null}
-                                                onChange={(selectedOption) => {
-                                                  handleExpandedItemChange(idx, "product_code", selectedOption ? selectedOption.value : "");
-                                                  const prod = products.find(p => p.product_code === (selectedOption ? selectedOption.value : ""));
-                                                  if (prod) handleExpandedItemChange(idx, "unit", prod.unit || "Kg");
-                                                }}
-                                                placeholder="Search Product..."
-                                                menuPosition="fixed"
-                                                styles={{
-                                                  control: (base) => ({
-                                                    ...base,
-                                                    padding: '2px',
-                                                    borderRadius: '0.5rem',
-                                                    borderColor: '#cbd5e1',
-                                                    boxShadow: 'none',
-                                                    '&:hover': { borderColor: '#f97316' }
-                                                  }),
-                                                  menuPortal: base => ({ ...base, zIndex: 9999 })
-                                                }}
-                                                menuPortalTarget={typeof document !== "undefined" ? document.body : null}
-                                                isClearable
-                                              />
-                                            </div>
-                                            <div className="w-1/4">
-                                              <label className="block text-xs font-bold text-slate-600 mb-1">
-                                                Quantity {item.unit ? `(${item.unit})` : ""}
-                                                {item.product_code && (
-                                                  <span className="text-blue-500 font-normal ml-1">
-                                                    (Avail: {products.find(p => p.product_code === item.product_code)?.quantity || 0})
-                                                  </span>
-                                                )}
-                                              </label>
-                                              <input
-                                                type="number"
-                                                min="1"
-                                                required
-                                                value={item.quantity}
-                                                onChange={(e) => handleExpandedItemChange(idx, "quantity", parseInt(e.target.value) || "")}
-                                                onKeyDown={(e) => {
-                                                  if (e.key === "Enter") {
-                                                    e.preventDefault();
-                                                    if (item.product_code && item.quantity > 0) {
-                                                      handleExpandedItemChange(idx, "isEditing", false);
-                                                      addExpandedItemRow();
-                                                    }
-                                                  }
-                                                }}
-                                                className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
-                                                placeholder="Enter Qty (Press Enter)"
-                                              />
-                                            </div>
-                                            <div className="flex items-end pb-1">
-                                              <button type="button" onClick={() => removeExpandedItemRow(idx)} className="px-4 py-2.5 border border-red-300 text-red-500 hover:bg-red-50 hover:border-red-400 rounded-lg transition font-bold bg-white shadow-sm h-[46px]">
-                                                X
-                                              </button>
-                                            </div>
-                                          </>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-
-                                  <div className="flex justify-end items-center mt-6 pt-5 border-t border-slate-100">
-                                    <button type="button" onClick={() => handleSaveExpandedItems(s)} className="bg-orange-500 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20">
-                                      Save Products
-                                    </button>
-                                  </div>
-
-                                </div>
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-w-full overflow-hidden flex flex-col">
+                <div className="overflow-x-auto scrollbar-hide">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-100 text-slate-600 border-b border-slate-200 sticky top-0 z-10">
+                      <tr>
+                        <th className="py-3 px-4 font-semibold w-16 text-center whitespace-nowrap">
+                          ID
+                        </th>
+                        <th className="py-3 px-4 font-semibold whitespace-nowrap">
+                          Bill No
+                        </th>
+                        <th className="py-3 px-4 font-semibold whitespace-nowrap">
+                          Date
+                        </th>
+                        <th className="py-3 px-4 font-semibold whitespace-nowrap">
+                          Customer Name
+                        </th>
+                        <th className="py-3 px-4 font-semibold whitespace-nowrap">
+                          Vehicle No
+                        </th>
+                        <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
+                          Items
+                        </th>
+                        <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
+                          Created At
+                        </th>
+                        <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
+                          Created By
+                        </th>
+                        <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
+                          Actions
+                        </th>
+                        <th className="py-3 px-4 font-semibold text-center text-blue-600 whitespace-nowrap">
+                          Bill
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentSales.map((s, index) => (
+                        <React.Fragment key={s.id}>
+                          <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition">
+                            <td className="py-3 px-4 text-center text-slate-600 font-medium whitespace-nowrap">
+                              {indexOfFirstItem + index + 1}
+                            </td>
+                            <td className="py-3 px-4 text-slate-800 font-medium">
+                              {s.bill_no}
+                            </td>
+                            <td className="py-3 px-4 text-slate-800">
+                              {new Date(s.date).toLocaleDateString()}
+                            </td>
+                            <td className="py-3 px-4 text-slate-800 font-bold">
+                              {s.customer_name}
+                            </td>
+                            <td className="py-3 px-4 text-slate-600">
+                              {s.vehicle_no || "-"}
+                            </td>
+                            <td className="py-3 px-4 text-orange-600 font-medium text-center">
+                              {s.items_count || (s.product_code ? 1 : 0)}
+                            </td>
+                            <td className="py-3 px-4 text-slate-500 text-xs text-center whitespace-nowrap">
+                              {s.created_at
+                                ? new Date(s.created_at).toLocaleString(
+                                    "en-GB",
+                                    {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    },
+                                  )
+                                : "-"}
+                            </td>
+                            <td className="py-3 px-4 text-slate-600 font-medium text-center whitespace-nowrap">
+                              {s.created_by || "-"}
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              <div className="flex justify-center gap-2">
+                                <button
+                                  onClick={() => toggleItemsExpansion(s)}
+                                  className="flex items-center justify-center w-7 h-7 bg-orange-50 text-orange-600 hover:bg-orange-100 font-bold rounded-lg transition-colors shadow-sm"
+                                >
+                                  {expandedRowId === s.id ? "-" : "+"}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setViewSale(s);
+                                    setIsViewModalOpen(true);
+                                  }}
+                                  title="View Details"
+                                  className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-500 rounded-lg transition-colors"
+                                >
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                    />
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                    />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={() => handleOpenModal(s)}
+                                  title="Edit"
+                                  className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
+                                >
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                    />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(s.id)}
+                                  title="Delete"
+                                  className="p-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg transition-colors"
+                                >
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                    />
+                                  </svg>
+                                </button>
                               </div>
                             </td>
+                            <td className="py-3 px-4 text-center">
+                              <button
+                                onClick={() => printInvoice(s)}
+                                className="flex items-center justify-center mx-auto gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 font-semibold rounded-lg transition-colors text-xs"
+                                title="Generate Bill"
+                              >
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                  />
+                                </svg>
+                                Bill
+                              </button>
+                            </td>
                           </tr>
-                        )}
-                      </React.Fragment>))}
-                    {filteredSales.length === 0 && (
-                      <tr>
-                        <td colSpan="8" className="py-8 text-center text-slate-500">
-                          No sales found.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
 
-              <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-500">Rows per page:</span>
-                  <select 
-                    value={itemsPerPage} 
-                    onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                    className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  >
-                    <option value={10}>10</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                    <option value={200}>200</option>
-                  </select>
+                          {expandedRowId === s.id && (
+                            <tr className="bg-slate-50 border-b border-slate-200">
+                              <td colSpan="9" className="p-0">
+                                <div className="px-8 py-6 bg-slate-50/80 border-t border-slate-200 shadow-inner">
+                                  <div className="flex justify-between items-center mb-4">
+                                    <h4 className="font-bold text-slate-800">
+                                      Dispatched Products (Bill: {s.bill_no})
+                                    </h4>
+                                  </div>
+
+                                  <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                                    <div className="flex flex-col gap-4 max-h-[350px] overflow-y-auto pr-4 custom-scrollbar">
+                                      {expandedItems.map((item, idx) => (
+                                        <div
+                                          key={idx}
+                                          className="flex items-end gap-3 py-3 border-b border-slate-100 last:border-0"
+                                        >
+                                          {!item.isEditing ? (
+                                            <div className="flex-1 flex justify-between items-center text-slate-700">
+                                              <div>
+                                                <p className="font-semibold">
+                                                  {item.product_name ||
+                                                    item.product_code}
+                                                </p>
+                                                <p className="text-xs text-slate-500">
+                                                  Gradation:{" "}
+                                                  {item.gradation || "N/A"}
+                                                </p>
+                                              </div>
+                                              <div className="flex gap-4 items-center">
+                                                <div className="text-center px-4 py-2 bg-orange-50 rounded text-orange-800 font-bold border border-orange-100">
+                                                  Qty: {item.quantity}{" "}
+                                                  {item.unit || "Kg"}
+                                                </div>
+                                                <button
+                                                  type="button"
+                                                  onClick={() =>
+                                                    handleExpandedItemChange(
+                                                      idx,
+                                                      "isEditing",
+                                                      true,
+                                                    )
+                                                  }
+                                                  className="text-blue-500 hover:text-blue-700 text-sm font-semibold flex gap-1 items-center px-2 py-1 transition"
+                                                >
+                                                  <i>✏️</i> Edit
+                                                </button>
+                                                <button
+                                                  type="button"
+                                                  onClick={() =>
+                                                    removeExpandedItemRow(idx)
+                                                  }
+                                                  className="text-red-500 hover:text-red-700 px-2 py-1 transition font-bold"
+                                                >
+                                                  Drop
+                                                </button>
+                                              </div>
+                                            </div>
+                                          ) : (
+                                            <>
+                                              <div className="flex-1">
+                                                <label className="block text-xs font-bold text-slate-600 mb-1">
+                                                  Select Product
+                                                </label>
+                                                <Select
+                                                  options={products.map(
+                                                    (prod) => ({
+                                                      value: prod.product_code,
+                                                      label: `${prod.product_name} (${prod.gradation}) - [Stock: ${prod.quantity}]`,
+                                                    }),
+                                                  )}
+                                                  value={
+                                                    item.product_code
+                                                      ? {
+                                                          value:
+                                                            item.product_code,
+                                                          label: `${item.product_name || item.product_code} (${item.gradation || ""})`,
+                                                        }
+                                                      : null
+                                                  }
+                                                  onChange={(
+                                                    selectedOption,
+                                                  ) => {
+                                                    handleExpandedItemChange(
+                                                      idx,
+                                                      "product_code",
+                                                      selectedOption
+                                                        ? selectedOption.value
+                                                        : "",
+                                                    );
+                                                    const prod = products.find(
+                                                      (p) =>
+                                                        p.product_code ===
+                                                        (selectedOption
+                                                          ? selectedOption.value
+                                                          : ""),
+                                                    );
+                                                    if (prod)
+                                                      handleExpandedItemChange(
+                                                        idx,
+                                                        "unit",
+                                                        prod.unit || "Kg",
+                                                      );
+                                                  }}
+                                                  placeholder="Search Product..."
+                                                  menuPosition="fixed"
+                                                  styles={{
+                                                    control: (base) => ({
+                                                      ...base,
+                                                      padding: "2px",
+                                                      borderRadius: "0.5rem",
+                                                      borderColor: "#cbd5e1",
+                                                      boxShadow: "none",
+                                                      "&:hover": {
+                                                        borderColor: "#f97316",
+                                                      },
+                                                    }),
+                                                    menuPortal: (base) => ({
+                                                      ...base,
+                                                      zIndex: 9999,
+                                                    }),
+                                                  }}
+                                                  menuPortalTarget={
+                                                    typeof document !==
+                                                    "undefined"
+                                                      ? document.body
+                                                      : null
+                                                  }
+                                                  isClearable
+                                                />
+                                              </div>
+                                              <div className="w-1/4">
+                                                <label className="block text-xs font-bold text-slate-600 mb-1">
+                                                  Quantity{" "}
+                                                  {item.unit
+                                                    ? `(${item.unit})`
+                                                    : ""}
+                                                  {item.product_code && (
+                                                    <span className="text-blue-500 font-normal ml-1">
+                                                      (Avail:{" "}
+                                                      {products.find(
+                                                        (p) =>
+                                                          p.product_code ===
+                                                          item.product_code,
+                                                      )?.quantity || 0}
+                                                      )
+                                                    </span>
+                                                  )}
+                                                </label>
+                                                <input
+                                                  type="number"
+                                                  min="1"
+                                                  required
+                                                  value={item.quantity}
+                                                  onChange={(e) =>
+                                                    handleExpandedItemChange(
+                                                      idx,
+                                                      "quantity",
+                                                      parseInt(
+                                                        e.target.value,
+                                                      ) || "",
+                                                    )
+                                                  }
+                                                  onKeyDown={(e) => {
+                                                    if (e.key === "Enter") {
+                                                      e.preventDefault();
+                                                      if (
+                                                        item.product_code &&
+                                                        item.quantity > 0
+                                                      ) {
+                                                        handleExpandedItemChange(
+                                                          idx,
+                                                          "isEditing",
+                                                          false,
+                                                        );
+                                                        addExpandedItemRow();
+                                                      }
+                                                    }
+                                                  }}
+                                                  className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                                                  placeholder="Enter Qty (Press Enter)"
+                                                />
+                                              </div>
+                                              <div className="flex items-end pb-1">
+                                                <button
+                                                  type="button"
+                                                  onClick={() =>
+                                                    removeExpandedItemRow(idx)
+                                                  }
+                                                  className="px-4 py-2.5 border border-red-300 text-red-500 hover:bg-red-50 hover:border-red-400 rounded-lg transition font-bold bg-white shadow-sm h-[46px]"
+                                                >
+                                                  X
+                                                </button>
+                                              </div>
+                                            </>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+
+                                    <div className="flex justify-end items-center mt-6 pt-5 border-t border-slate-100">
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleSaveExpandedItems(s)
+                                        }
+                                        className="bg-orange-500 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20"
+                                      >
+                                        Save Products
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      ))}
+                      {filteredSales.length === 0 && (
+                        <tr>
+                          <td
+                            colSpan="8"
+                            className="py-8 text-center text-slate-500"
+                          >
+                            No sales found.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
 
-                {totalPages > 1 && (
-                  <div className="flex items-center gap-4">
-                    <button 
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
-                    >
-                      &lt;
-                    </button>
-                    <div className="flex items-center gap-2">
-                      {[...Array(totalPages)].map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setCurrentPage(i + 1)}
-                          className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-emerald-500 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
-                        >
-                          {i + 1}
-                        </button>
-                      ))}
-                    </div>
-                    <button 
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
-                    >
-                      &gt;
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-            <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl border border-slate-200 overflow-y-auto max-h-[90vh]">
-              <h2 className="text-xl font-bold text-slate-800 mb-6">{currentSalesId ? "Edit Sales Invoice" : "Create Sales Invoice"}</h2>
-              <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-
-                {/* Header Information */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
-                    <input
-                      type="date"
-                      required
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Bill No</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.bill_no}
-                      onChange={(e) => setFormData({ ...formData, bill_no: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
-                      placeholder="e.g. S-2039"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Sales Party</label>
+                <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-slate-500">
+                      Rows per page:
+                    </span>
                     <select
-                      required
-                      value={formData.customer_name}
-                      onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                      }}
+                      className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                     >
-                      <option value="">-- Select Customer --</option>
-                      {salesParties.map(p => (
-                        <option key={p.id} value={p.name}>{p.name}</option>
-                      ))}
+                      <option value={10}>10</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                      <option value={200}>200</option>
                     </select>
                   </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Vehicle No</label>
-                    <input
-                      type="text"
-                      value={formData.vehicle_no}
-                      onChange={(e) => setFormData({ ...formData, vehicle_no: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 uppercase bg-white"
-                      placeholder="e.g. GJ05 1234"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Driver Name</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.driver_name}
-                      onChange={(e) => setFormData({ ...formData, driver_name: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
-                      placeholder="e.g. John Doe"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Driver Number</label>
-                    <input
-                      type="text"
-                      value={formData.driver_number}
-                      onChange={(e) => setFormData({ ...formData, driver_number: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
-                      placeholder="e.g. 1234567890"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Transporter Name</label>
-                    <input
-                      type="text"
-                      value={formData.transporter_name}
-                      onChange={(e) => setFormData({ ...formData, transporter_name: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
-                      placeholder="e.g. ABC Logistics"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 mb-1">LR Number</label>
-                    <input
-                      type="text"
-                      value={formData.lr_number}
-                      onChange={(e) => setFormData({ ...formData, lr_number: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
-                      placeholder="e.g. LR-98765"
-                    />
-                  </div>
-                </div>
 
-                {/* Items Section */}
-                <div className="flex justify-end gap-3 mt-8 border-t border-slate-100 pt-6">
-                  <button
-                    type="button"
-                    onClick={handleCloseModal}
-                    className="px-5 py-2.5 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-[#212121] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70"
-                  >
-                    {isSubmitting && (
-                      <svg className="animate-spin h-4 w-4 mr-2 inline" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                      </svg>
-                    )}
-                    {isSubmitting ? "Saving..." : (currentSalesId ? "Update Dispatch" : "Save Dispatch")}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {isDeleteModalOpen && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-            <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-xl border border-slate-200 text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-bold text-slate-800 mb-2">Delete Sale</h3>
-              <p className="text-sm text-slate-500 mb-6">
-                Are you sure you want to delete this sale? Inventory will be reverted.
-              </p>
-              
-              <div className="flex justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsDeleteModalOpen(false)}
-                  disabled={isDeleting}
-                  className="px-4 py-2 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition disabled:opacity-50 w-full"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={executeDelete}
-                  disabled={isDeleting}
-                  className="px-4 py-2 rounded-lg bg-[#212121] text-white font-bold  transition  disabled:opacity-70 flex items-center justify-center w-full"
-                >
-                  {isDeleting && (
-                    <svg className="animate-spin h-4 w-4 mr-2 inline" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
+                  {totalPages > 1 && (
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(prev - 1, 1))
+                        }
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                      >
+                        &lt;
+                      </button>
+                      <div className="flex items-center gap-2">
+                        {[...Array(totalPages)].map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setCurrentPage(i + 1)}
+                            className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-emerald-500 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
+                          >
+                            {i + 1}
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(prev + 1, totalPages),
+                          )
+                        }
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                      >
+                        &gt;
+                      </button>
+                    </div>
                   )}
-                  {isDeleting ? "Deleting..." : "Yes, Delete"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* View Details Modal */}
-        {isViewModalOpen && viewSale && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-            <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-slate-800">Sales Order Details</h2>
-                <button onClick={() => { setIsViewModalOpen(false); setViewSale(null); }} className="text-slate-400 hover:text-slate-600 transition">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2 mb-3">General Information</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><span className="text-slate-500 w-32 inline-block">Date:</span> <span className="font-medium text-slate-800">{new Date(viewSale.date).toLocaleDateString()}</span></p>
-                    <p><span className="text-slate-500 w-32 inline-block">Bill No:</span> <span className="font-medium text-slate-800">{viewSale.bill_no}</span></p>
-                    <p><span className="text-slate-500 w-32 inline-block">Customer:</span> <span className="font-medium text-slate-800">{viewSale.customer_name || "-"}</span></p>
-                    <p><span className="text-slate-500 w-32 inline-block">Created By:</span> <span className="font-medium text-slate-800">{viewSale.created_by || "-"}</span></p>
-                  </div>
-                </div>
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2 mb-3">Logistics Information</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><span className="text-slate-500 w-32 inline-block">Vehicle No:</span> <span className="font-medium text-slate-800">{viewSale.vehicle_no || "-"}</span></p>
-                    <p><span className="text-slate-500 w-32 inline-block">Driver Name:</span> <span className="font-medium text-slate-800">{viewSale.driver_name || "-"}</span></p>
-                    <p><span className="text-slate-500 w-32 inline-block">Driver No:</span> <span className="font-medium text-slate-800">{viewSale.driver_number || "-"}</span></p>
-                    <p><span className="text-slate-500 w-32 inline-block">Transporter Name:</span> <span className="font-medium text-slate-800">{viewSale.transporter_name || "-"}</span></p>
-                  </div>
                 </div>
               </div>
 
-              <h3 className="text-md font-bold text-slate-800 mb-3">Products</h3>
-              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
-                    <tr>
-                      <th className="py-2 px-4 font-semibold w-12 text-center">#</th>
-                      <th className="py-2 px-4 font-semibold">Product Code</th>
-                      <th className="py-2 px-4 font-semibold">Product Name</th>
-                      <th className="py-2 px-4 font-semibold">Gradation</th>
-                      <th className="py-2 px-4 font-semibold text-right">Quantity</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {viewSale.items && viewSale.items.length > 0 ? (
-                      viewSale.items.map((item, idx) => (
-                        <tr key={idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                          <td className="py-2 px-4 text-center text-slate-500">{idx + 1}</td>
-                          <td className="py-2 px-4 font-medium">{item.product_code}</td>
-                          <td className="py-2 px-4 text-slate-600">{item.product_name}</td>
-                          <td className="py-2 px-4 text-slate-600">{item.gradation || "-"}</td>
-                          <td className="py-2 px-4 text-right font-bold text-slate-800">{item.quantity}</td>
-                        </tr>
-                      ))
-                    ) : viewSale.product_code ? (
-                        <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                          <td className="py-2 px-4 text-center text-slate-500">1</td>
-                          <td className="py-2 px-4 font-medium">{viewSale.product_code}</td>
-                          <td className="py-2 px-4 text-slate-600">{viewSale.product_name || "-"}</td>
-                          <td className="py-2 px-4 text-slate-600">{viewSale.gradation || "-"}</td>
-                          <td className="py-2 px-4 text-right font-bold text-slate-800">{viewSale.quantity}</td>
-                        </tr>
-                    ) : (
-                      <tr>
-                        <td colSpan="5" className="py-4 text-center text-slate-500">No products found.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-          </>
-        )}
+              {isModalOpen && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+                  <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl border border-slate-200 overflow-y-auto max-h-[90vh]">
+                    <h2 className="text-xl font-bold text-slate-800 mb-6">
+                      {currentSalesId
+                        ? "Edit Sales Invoice"
+                        : "Create Sales Invoice"}
+                    </h2>
+                    <form
+                      onSubmit={handleSubmit}
+                      className="flex flex-col gap-6"
+                    >
+                      {/* Header Information */}
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Date
+                          </label>
+                          <input
+                            type="date"
+                            required
+                            value={formData.date}
+                            onChange={(e) =>
+                              setFormData({ ...formData, date: e.target.value })
+                            }
+                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Bill No
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={formData.bill_no}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                bill_no: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            placeholder="e.g. S-2039"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Sales Party
+                          </label>
+                          <select
+                            required
+                            value={formData.customer_name}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                customer_name: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                          >
+                            <option value="">-- Select Customer --</option>
+                            {salesParties.map((p) => (
+                              <option key={p.id} value={p.name}>
+                                {p.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Vehicle No
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.vehicle_no}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                vehicle_no: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 uppercase bg-white"
+                            placeholder="e.g. GJ05 1234"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Driver Name
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={formData.driver_name}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                driver_name: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            placeholder="e.g. John Doe"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Driver Number
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.driver_number}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                driver_number: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            placeholder="e.g. 1234567890"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Transporter Name
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.transporter_name}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                transporter_name: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            placeholder="e.g. ABC Logistics"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            LR Number
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.lr_number}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                lr_number: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            placeholder="e.g. LR-98765"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Items Section */}
+                      <div className="flex justify-end gap-3 mt-8 border-t border-slate-100 pt-6">
+                        <button
+                          type="button"
+                          onClick={handleCloseModal}
+                          className="px-5 py-2.5 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="bg-[#212121] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70"
+                        >
+                          {isSubmitting && (
+                            <svg
+                              className="animate-spin h-4 w-4 mr-2 inline"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v8z"
+                              />
+                            </svg>
+                          )}
+                          {isSubmitting
+                            ? "Saving..."
+                            : currentSalesId
+                              ? "Update Dispatch"
+                              : "Save Dispatch"}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
+
+              {/* Delete Confirmation Modal */}
+              {isDeleteModalOpen && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+                  <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-xl border border-slate-200 text-center">
+                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                      <svg
+                        className="h-6 w-6 text-red-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-800 mb-2">
+                      Delete Sale
+                    </h3>
+                    <p className="text-sm text-slate-500 mb-6">
+                      Are you sure you want to delete this sale? Inventory will
+                      be reverted.
+                    </p>
+
+                    <div className="flex justify-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setIsDeleteModalOpen(false)}
+                        disabled={isDeleting}
+                        className="px-4 py-2 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition disabled:opacity-50 w-full"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={executeDelete}
+                        disabled={isDeleting}
+                        className="px-4 py-2 rounded-lg bg-[#212121] text-white font-bold  transition  disabled:opacity-70 flex items-center justify-center w-full"
+                      >
+                        {isDeleting && (
+                          <svg
+                            className="animate-spin h-4 w-4 mr-2 inline"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v8z"
+                            />
+                          </svg>
+                        )}
+                        {isDeleting ? "Deleting..." : "Yes, Delete"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* View Details Modal */}
+              {isViewModalOpen && viewSale && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+                  <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-xl font-bold text-slate-800">
+                        Sales Order Details
+                      </h2>
+                      <button
+                        onClick={() => {
+                          setIsViewModalOpen(false);
+                          setViewSale(null);
+                        }}
+                        className="text-slate-400 hover:text-slate-600 transition"
+                      >
+                        <svg
+                          className="w-6 h-6"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2 mb-3">
+                          General Information
+                        </h3>
+                        <div className="space-y-2 text-sm">
+                          <p>
+                            <span className="text-slate-500 w-32 inline-block">
+                              Date:
+                            </span>{" "}
+                            <span className="font-medium text-slate-800">
+                              {new Date(viewSale.date).toLocaleDateString()}
+                            </span>
+                          </p>
+                          <p>
+                            <span className="text-slate-500 w-32 inline-block">
+                              Bill No:
+                            </span>{" "}
+                            <span className="font-medium text-slate-800">
+                              {viewSale.bill_no}
+                            </span>
+                          </p>
+                          <p>
+                            <span className="text-slate-500 w-32 inline-block">
+                              Customer:
+                            </span>{" "}
+                            <span className="font-medium text-slate-800">
+                              {viewSale.customer_name || "-"}
+                            </span>
+                          </p>
+                          <p>
+                            <span className="text-slate-500 w-32 inline-block">
+                              Created By:
+                            </span>{" "}
+                            <span className="font-medium text-slate-800">
+                              {viewSale.created_by || "-"}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2 mb-3">
+                          Logistics Information
+                        </h3>
+                        <div className="space-y-2 text-sm">
+                          <p>
+                            <span className="text-slate-500 w-32 inline-block">
+                              Vehicle No:
+                            </span>{" "}
+                            <span className="font-medium text-slate-800">
+                              {viewSale.vehicle_no || "-"}
+                            </span>
+                          </p>
+                          <p>
+                            <span className="text-slate-500 w-32 inline-block">
+                              Driver Name:
+                            </span>{" "}
+                            <span className="font-medium text-slate-800">
+                              {viewSale.driver_name || "-"}
+                            </span>
+                          </p>
+                          <p>
+                            <span className="text-slate-500 w-32 inline-block">
+                              Driver No:
+                            </span>{" "}
+                            <span className="font-medium text-slate-800">
+                              {viewSale.driver_number || "-"}
+                            </span>
+                          </p>
+                          <p>
+                            <span className="text-slate-500 w-32 inline-block">
+                              Transporter Name:
+                            </span>{" "}
+                            <span className="font-medium text-slate-800">
+                              {viewSale.transporter_name || "-"}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <h3 className="text-md font-bold text-slate-800 mb-3">
+                      Products
+                    </h3>
+                    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                      <table className="w-full text-left text-sm">
+                        <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+                          <tr>
+                            <th className="py-2 px-4 font-semibold w-12 text-center">
+                              #
+                            </th>
+                            <th className="py-2 px-4 font-semibold">
+                              Product Code
+                            </th>
+                            <th className="py-2 px-4 font-semibold">
+                              Product Name
+                            </th>
+                            <th className="py-2 px-4 font-semibold">
+                              Gradation
+                            </th>
+                            <th className="py-2 px-4 font-semibold text-right">
+                              Quantity
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {viewSale.items && viewSale.items.length > 0 ? (
+                            viewSale.items.map((item, idx) => (
+                              <tr
+                                key={idx}
+                                className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
+                              >
+                                <td className="py-2 px-4 text-center text-slate-500">
+                                  {idx + 1}
+                                </td>
+                                <td className="py-2 px-4 font-medium">
+                                  {item.product_code}
+                                </td>
+                                <td className="py-2 px-4 text-slate-600">
+                                  {item.product_name}
+                                </td>
+                                <td className="py-2 px-4 text-slate-600">
+                                  {item.gradation || "-"}
+                                </td>
+                                <td className="py-2 px-4 text-right font-bold text-slate-800">
+                                  {item.quantity}
+                                </td>
+                              </tr>
+                            ))
+                          ) : viewSale.product_code ? (
+                            <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                              <td className="py-2 px-4 text-center text-slate-500">
+                                1
+                              </td>
+                              <td className="py-2 px-4 font-medium">
+                                {viewSale.product_code}
+                              </td>
+                              <td className="py-2 px-4 text-slate-600">
+                                {viewSale.product_name || "-"}
+                              </td>
+                              <td className="py-2 px-4 text-slate-600">
+                                {viewSale.gradation || "-"}
+                              </td>
+                              <td className="py-2 px-4 text-right font-bold text-slate-800">
+                                {viewSale.quantity}
+                              </td>
+                            </tr>
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan="5"
+                                className="py-4 text-center text-slate-500"
+                              >
+                                No products found.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
     </div>
   );
 }

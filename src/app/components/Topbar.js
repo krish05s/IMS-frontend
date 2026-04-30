@@ -112,7 +112,7 @@ const routeMap = {
 
 // Route to label + icon mapping
 
-export default function Topbar() {
+export default function Topbar({actions}) {
   const pathname = usePathname();
   const current = routeMap[pathname] || {
     label: "Dashboard",
@@ -127,6 +127,12 @@ export default function Topbar() {
         </span>
       </div>
       
+      {/* Right - Action Buttons */}
+      {actions && (
+        <div className="flex items-center gap-3 ml-auto ">
+          {actions}
+        </div>
+      )}
     </div>
   );
 }
