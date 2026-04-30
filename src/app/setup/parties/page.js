@@ -6,7 +6,7 @@ import TruckLoader from "../../components/TruckLoader";
 import { toast } from "react-toastify";
 import Topbar from "../../components/Topbar";
 
-export default function SetupParties() {
+export default function Page() {
   useRoleCheck(["admin"]); // Only admin can access setup
 
   const [activeTab, setActiveTab] = useState("purchase"); // "purchase" or "sales"
@@ -139,7 +139,7 @@ export default function SetupParties() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-[#f1f1f1] flex">
       <Sidebar />
       <div className="flex-1 md:ml-64 overflow-x-auto scrollbar-hide">
                 <Topbar />
@@ -148,11 +148,10 @@ export default function SetupParties() {
         <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">Party Setup</h1>
-            {/* <p className="text-sm text-slate-500 mt-1">Manage purchase suppliers and sales customers</p> */}
           </div>
           <button
             onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-orange-200 whitespace-nowrap">
+            className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl transition-all whitespace-nowrap">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
@@ -166,7 +165,7 @@ export default function SetupParties() {
             onClick={() => setActiveTab("purchase")}
             className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${
               activeTab === "purchase"
-                ? "bg-orange-500 text-white shadow-md shadow-orange-500/20"
+                ? "bg-[#212121] text-white "
                 : "text-slate-600 hover:bg-slate-100"
             }`}
           >
@@ -176,7 +175,7 @@ export default function SetupParties() {
             onClick={() => setActiveTab("sales")}
             className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${
               activeTab === "sales"
-                ? "bg-orange-500 text-white shadow-md shadow-orange-500/20"
+                ? "bg-[#212121] text-white"
                 : "text-slate-600 hover:bg-slate-100"
             }`}
           >
@@ -286,7 +285,7 @@ export default function SetupParties() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-orange-500 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20 disabled:opacity-70 flex items-center"
+                    className="bg-[#212121] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center"
                   >
                     {isSubmitting && (
                       <svg className="animate-spin h-4 w-4 mr-2 inline" viewBox="0 0 24 24" fill="none">
@@ -329,7 +328,7 @@ export default function SetupParties() {
                   type="button"
                   onClick={executeDelete}
                   disabled={isDeleting}
-                  className="px-4 py-2 rounded-lg bg-red-500 text-white font-bold hover:bg-red-600 transition shadow-md shadow-red-500/20 disabled:opacity-70 flex items-center justify-center w-full"
+                  className="px-4 py-2 rounded-lg bg-[#212121] text-white font-bold  transition  disabled:opacity-70 flex items-center justify-center w-full"
                 >
                   {isDeleting && (
                     <svg className="animate-spin h-4 w-4 mr-2 inline" viewBox="0 0 24 24" fill="none">

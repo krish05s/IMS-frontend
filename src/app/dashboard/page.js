@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
-import Topbar from "../components/Topbar";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, AreaChart, Area, BarChart, Bar
@@ -184,23 +183,17 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex bg-[#f1f1f1] font-sans">
       <Sidebar />
-<<<<<<< Updated upstream
 
       {/* <Topbar /> */}
       <div className="flex-1 md:ml-64   overflow-x-hidden">
         <Topbar />
           <div className="p-4 md:p-8 topbar-offset mt-4">
                {(loading || !role) ? (
-=======
-      <div className="flex-1 md:ml-64 p-4 md:p-20 t-20 overflow-x-auto">
-        <Topbar />
-                {(loading || !role) ? (
->>>>>>> Stashed changes
           <TruckLoader />
         ) : (
           <>
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-white p-6  shadow-sm border border-slate-100">
               <div className="flex items-center gap-5">
                 <div>
                   <h1 className="text-2xl font-bold text-slate-800 capitalize">Welcome Back, {userName}!</h1>
@@ -213,49 +206,49 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
 
               {/* Product Card */}
-              <Link href="/products" className="group bg-gradient-to-br from-blue-50 to-white p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-200 border-l-4 border-l-blue-500 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[130px]">
+              <Link href="/products" className="group bg-gradient-to-br from-blue-100 to-white p-6 rounded-xl shadow-sm hover:shadow-md border border-slate-200 border-l-4 border-l-blue-500 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[130px]">
                 <div>
                   <h2 className="text-slate-500 font-bold mb-1 text-xs uppercase tracking-widest flex items-center gap-2">
                     <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                     Total Products
                   </h2>
-                  <p className="text-2xl font-black text-slate-800 mt-2">{stats.products}</p>
+                  <p className="text-2xl  font-semibold text-slate-800 mt-2">{stats.products}</p>
                 </div>
               </Link>
 
               {/* Stock Card */}
-              <Link href="/products" className="group bg-gradient-to-br from-emerald-50 to-white p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-200 border-l-4 border-l-emerald-500 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[130px]">
+              <Link href="/products" className="group bg-gradient-to-br from-emerald-100 to-white p-6 rounded-xl shadow-sm hover:shadow-md border border-slate-200 border-l-4 border-l-emerald-500 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[130px]">
                 <div>
                   <h2 className="text-slate-500 font-bold mb-1 text-xs uppercase tracking-widest flex items-center gap-2">
                     <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
                     Stock Available
                   </h2>
-                  <p className="text-2xl font-black text-slate-800 mt-2">{stats.totalQuantity}</p>
+                  <p className="text-2xl  font-semibold text-slate-800 mt-2">{stats.totalQuantity}</p>
                 </div>
               </Link>
 
               {/* Sales Card */}
               {(role === "admin" || role === "sales") && (
-                <Link href="/sales" className="group bg-gradient-to-br from-orange-50 to-white p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-200 border-l-4 border-l-orange-500 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[130px]">
+                <Link href="/sales" className="group bg-gradient-to-br from-orange-100 to-white p-6 rounded-xl shadow-sm hover:shadow-md border border-slate-200 border-l-4 border-l-orange-500 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[130px]">
                   <div>
                     <h2 className="text-slate-500 font-bold mb-1 text-xs uppercase tracking-widest flex items-center gap-2">
                       <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
                       Total Sales (Qty)
                     </h2>
-                    <p className="text-2xl font-black text-slate-800 mt-2">{stats.totalSalesQty}</p>
+                    <p className="text-2xl font-semibold text-slate-800 mt-2">{stats.totalSalesQty}</p>
                   </div>
                 </Link>
               )}
 
               {/* Purchase Card */}
               {(role === "admin" || role === "purchase") && (
-                <Link href="/purchase" className="group bg-gradient-to-br from-purple-50 to-white p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-200 border-l-4 border-l-purple-500 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[130px]">
+                <Link href="/purchase" className="group bg-gradient-to-br from-purple-100 to-white p-6 rounded-xl shadow-sm hover:shadow-md border border-slate-200 border-l-4 border-l-purple-500 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[130px]">
                   <div>
                     <h2 className="text-slate-500 font-bold mb-1 text-xs uppercase tracking-widest flex items-center gap-2">
                       <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                       Total Purchases (Qty)
                     </h2>
-                    <p className="text-2xl font-black text-slate-800 mt-2">{stats.totalPurchaseQty}</p>
+                    <p className="text-2xl font-semibold text-slate-800 mt-2">{stats.totalPurchaseQty}</p>
                   </div>
                 </Link>
               )}
@@ -264,7 +257,7 @@ export default function Dashboard() {
             {/* Dynamic Analytics Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               {(role === "admin" || role === "sales" || role === "purchase") && (
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-lg font-bold text-slate-800">Activity Overview</h2>
                     <div className="flex bg-slate-100 p-1 rounded-lg">
@@ -316,7 +309,7 @@ export default function Dashboard() {
               
               {/* Chart: Top Stocked Items (Admin Only) */}
               {role === "admin" && (
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                   <h2 className="text-lg font-bold text-slate-800 mb-6 flex justify-between items-center">
                     Top Stocked Items
                     <Link href="/products" className="text-sm font-semibold text-blue-500 hover:text-blue-600 transition-colors">View Inventory</Link>
@@ -349,7 +342,7 @@ export default function Dashboard() {
 
               {/* Chart: Top Selling Products (Admin & Sales) */}
               {(role === "admin" || role === "sales") && (
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                   <h2 className="text-lg font-bold text-slate-800 mb-6 flex justify-between items-center">
                     Trending Sales
                     <Link href="/sales" className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors">View Sales</Link>
@@ -375,7 +368,7 @@ export default function Dashboard() {
               
               {/* Alert List: Low Stock Watchlist (Admin & Purchase) */}
               {(role === "admin" || role === "purchase") && (
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                   <h2 className="text-lg font-bold text-slate-800 mb-6 flex justify-between items-center">
                     Low Stock Products
                     <span className="text-xs font-bold bg-red-100 text-red-600 px-2.5 py-1 rounded-md">{lowStockProducts.length} Alerts</span>
@@ -408,7 +401,7 @@ export default function Dashboard() {
 
               {/* Chart: Top Purchased Products (Admin & Purchase) */}
               {(role === "admin" || role === "purchase") && (
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                   <h2 className="text-lg font-bold text-slate-800 mb-6 flex justify-between items-center">
                     Recent Purchases
                     <Link href="/purchase" className="text-sm font-semibold text-purple-500 hover:text-purple-600 transition-colors">View Purchases</Link>
@@ -436,7 +429,6 @@ export default function Dashboard() {
           </>
         )}
       </div>
-<<<<<<< Updated upstream
       </div>
       
       <style jsx global>{`
@@ -451,8 +443,6 @@ export default function Dashboard() {
           border-radius: 20px;
         }
       `}</style>
-=======
->>>>>>> Stashed changes
     </div>
   );
 }

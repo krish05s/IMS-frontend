@@ -87,7 +87,6 @@ body {
     width: 100%;
   }
 }
-<<<<<<< Updated upstream
 
 /* Globally hide all scrollbars visually but retain functionality */
 *::-webkit-scrollbar {
@@ -100,18 +99,4 @@ body {
 
 .topbar-offset {
   padding-top: 64px;
-=======
-/* Custom Scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 20px;
->>>>>>> Stashed changes
 }

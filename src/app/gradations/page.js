@@ -236,11 +236,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
 import TruckLoader from "../components/TruckLoader";
-<<<<<<< Updated upstream
 import { toast } from "react-toastify";
-=======
-import { Pencil } from "lucide-react";
->>>>>>> Stashed changes
 import Topbar from "../components/Topbar";
 export default function Gradations() {
   useRoleCheck(["admin"]);
@@ -248,17 +244,10 @@ export default function Gradations() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentGradation, setCurrentGradation] = useState(null);
   const [loading, setLoading] = useState(true);
-<<<<<<< Updated upstream
   const [filters, setFilters] = useState({ gradation: "" });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [formData, setFormData] = useState({ gradationName: "", thickness: "" });
-=======
-  const [formData, setFormData] = useState({
-    gradationName: "",
-    thickness: "",
-  });
->>>>>>> Stashed changes
 
   useEffect(() => { setCurrentPage(1); }, [filters]);
 
@@ -367,7 +356,6 @@ export default function Gradations() {
     }
   };
 
-<<<<<<< Updated upstream
   const filteredGradations = gradations.filter(g => 
     g.gradation.toLowerCase().includes(filters.gradation.toLowerCase())
   );
@@ -376,24 +364,14 @@ export default function Gradations() {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentGradations = filteredGradations.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredGradations.length / itemsPerPage);
-=======
-  const totalCount = gradations.length;
-  const activeCount = gradations.filter((g) => g.status === 1).length;
-  const inactiveCount = gradations.filter((g) => g.status === 0).length;
->>>>>>> Stashed changes
 
   return (
     <div className="min-h-screen bg-[#f5f6f8] flex">
       <Sidebar />
-<<<<<<< Updated upstream
       <div className="flex-1 md:ml-64  overflow-x-auto scrollbar-hide">
                 <Topbar />
                   <div className="p-4 md:p-8 topbar-offset mt-4">
 
-=======
-      <div className="flex-1 md:ml-64 p-4 md:p-20 t-20 overflow-x-auto">
-        <Topbar />        
->>>>>>> Stashed changes
         {loading ? (
           <TruckLoader />
         ) : (
@@ -401,7 +379,6 @@ export default function Gradations() {
             {/* Header */}
             <div className="flex justify-between items-center bg-white px-7 py-5 rounded-xl border-b-[3px] border-[#f0f0f0] mb-5">
               <div>
-<<<<<<< Updated upstream
                 <h1 className="text-2xl font-bold text-slate-800">Gradations</h1>
                 {/* <p className="text-sm text-slate-500 mt-1">Manage and organize product gradations</p> */}
               </div>
@@ -530,137 +507,6 @@ export default function Gradations() {
           </div>
         </div>
         </>
-=======
-                <h1 className="text-lg font-medium text-[#1a1a2e] tracking-tight">
-                  Gradations
-                </h1>
-                <p className="text-xs text-[#9098a9] mt-1">
-                  Manage and organize product gradations
-                </p>
-              </div>
-              {/* <button
-                onClick={() => handleOpenModal()}
-                className="bg-[#1a1a2e] text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-[#2d2d4e] transition flex items-center gap-2"
-              >
-                <span className="text-base leading-none">+</span> Add Gradation
-              </button> */}
-              <button
-                onClick={() => handleOpenModal()}
-                className="bg-[#1a1a2e] text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-[#2d2d4e] transition flex items-center gap-2 whitespace-nowrap"
-              >
-                <span className="text-base leading-none">+</span> Add Gradation
-              </button>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-5">
-              <div className="bg-white rounded-xl px-5 py-4 border-l-[3px] border-[#e8e8e8]">
-                <p className="text-[10px] uppercase tracking-widest text-[#9098a9] font-medium">
-                  Total
-                </p>
-                <p className="text-3xl font-medium text-[#1a1a2e] mt-1">
-                  {totalCount}
-                </p>
-              </div>
-              <div className="bg-white rounded-xl px-5 py-4 border-l-[3px] border-green-400">
-                <p className="text-[10px] uppercase tracking-widest text-[#9098a9] font-medium">
-                  Active
-                </p>
-                <p className="text-3xl font-medium text-[#1a1a2e] mt-1">
-                  {activeCount}
-                </p>
-              </div>
-              <div className="bg-white rounded-xl px-5 py-4 border-l-[3px] border-orange-400">
-                <p className="text-[10px] uppercase tracking-widest text-[#9098a9] font-medium">
-                  Inactive
-                </p>
-                <p className="text-3xl font-medium text-[#1a1a2e] mt-1">
-                  {inactiveCount}
-                </p>
-              </div>
-            </div>
-
-            {/* Table */}
-            <div className="bg-white rounded-xl overflow-hidden">
-              {/* <div className="flex items-center justify-between px-6 py-4 border-b border-[#f0f2f5]">
-                <span className="text-xs text-[#9098a9] font-medium">
-                  {totalCount} gradations
-                </span>
-              </div> */}
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="bg-[#212121] text-white">
-                    <th className="py-3 px-6 text-[11px] uppercase tracking-wider text-[#9098a9] font-medium border-b border-[#f0f2f5]">
-                      #
-                    </th>
-                    <th className="py-3 px-6 text-[11px] uppercase tracking-wider text-[#9098a9] font-medium border-b border-[#f0f2f5]">
-                      Gradation Name
-                    </th>
-                    <th className="py-3 px-6 text-[11px] uppercase tracking-wider text-[#9098a9] font-medium border-b border-[#f0f2f5]">
-                      Status
-                    </th>
-                    <th className="py-3 px-6 text-[11px] uppercase tracking-wider text-[#9098a9] font-medium border-b border-[#f0f2f5] text-right">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {gradations.map((g, index) => (
-                    <tr
-                      key={g.id}
-                      className={`border-b border-[#f5f6f8] last:border-0 hover:bg-[#f0f4ff] transition-colors ${
-                        index % 2 === 0 ? "bg-[#fafbfc]" : "bg-white"
-                      }`}
-                    >
-                      <td className="py-3.5 px-6">
-                        <span className="bg-[#f0f2f5] text-[#6b7280] text-xs font-medium rounded-md px-2 py-1">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-6 text-[#1a1a2e] font-medium">
-                        {g.gradation}
-                      </td>
-
-                      <td className="py-3.5 px-6">
-                        <button
-                          onClick={() => handleToggleStatus(g.id, g.status)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            g.status === 1 ? "bg-green-500" : "bg-slate-300"
-                          }`}
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              g.status === 1 ? "translate-x-6" : "translate-x-1"
-                            }`}
-                          />
-                        </button>
-                      </td>
-                      <td className="py-3.5 px-6 text-right">
-                        <button
-                          onClick={() => handleOpenModal(g)}
-                          className="p-2 rounded-md bg-[#f0f2f5] text-[#1a1a2e] hover:bg-[#e2e5ea] transition"
-                          title="Edit"
-                        >
-                          <Pencil size={14} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {gradations.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan="4"
-                        className="py-12 text-center text-[#9098a9] text-sm"
-                      >
-                        No gradations found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </>
->>>>>>> Stashed changes
         )}
 
         {/* Modal */}
@@ -723,11 +569,7 @@ export default function Gradations() {
                   </button>
                   <button
                     type="submit"
-<<<<<<< Updated upstream
                     className="bg-[#212121] text-white px-5 py-2 rounded-lg font-medium hover:bg-orange-600 transition shadow-md shadow-orange-500/20"
-=======
-                    className="bg-[#1a1a2e] text-white text-sm font-medium px-5 py-2 rounded-lg hover:bg-[#2d2d4e] transition"
->>>>>>> Stashed changes
                   >
                     Save
                   </button>
