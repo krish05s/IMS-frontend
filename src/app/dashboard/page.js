@@ -261,33 +261,48 @@ export default function Dashboard() {
       {/* <Topbar /> */}
       <div className="flex-1 md:ml-64   overflow-x-hidden">
         <Topbar />
-        <div className="p-4 md:p-8 topbar-offset mt-4">
-          {loading || !role ? (
-            <TruckLoader />
-          ) : (
-            <>
-              {/* Header Section */}
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-white p-6  shadow-sm border border-slate-100">
-                <div className="flex items-center gap-5">
-                  <div>
-                    <h1 className="text-2xl font-bold text-slate-800 capitalize">
-                      Welcome Back, {userName}!
-                    </h1>
-                    <p className="text-sm text-slate-500 font-medium mt-1">
-                      Here is your {role === "admin" ? "entire system" : role}{" "}
-                      activity summary for today.
-                    </p>
-                  </div>
+          <div className="p-4 md:p-8 topbar-offset mt-4">
+               {(loading || !role) ? (
+          <TruckLoader />
+        ) : (
+          <>
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-white p-6  shadow-sm border border-slate-100">
+              <div className="flex items-center gap-5">
+                <div>
+                  <h1 className="text-2xl font-bold text-slate-800 capitalize">Welcome Back, {userName}!</h1>
+                  <p className="text-sm text-slate-500 font-medium mt-1">Here is your {role === 'admin' ? 'entire system' : role} activity summary for today.</p>
                 </div>
               </div>
 
-              {/* Dynamic Metric Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {/* Product Card */}
-                <Link
-                  href="/products"
-                  className="group bg-gradient-to-br from-blue-100 to-white p-6 rounded-xl shadow-sm hover:shadow-md border border-slate-200 border-l-4 border-l-blue-500 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[130px]"
-                >
+            {/* Dynamic Metric Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+
+              {/* Product Card */}
+              <Link href="/products" className="group bg-gradient-to-br from-blue-100 to-white p-6 rounded-xl shadow-sm hover:shadow-md border border-slate-200 border-l-4 border-l-blue-500 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[130px]">
+                <div>
+                  <h2 className="text-slate-500 font-bold mb-1 text-xs uppercase tracking-widest flex items-center gap-2">
+                    <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                    Total Products
+                  </h2>
+                  <p className="text-2xl  font-semibold text-slate-800 mt-2">{stats.products}</p>
+                </div>
+              </Link>
+
+              {/* Stock Card */}
+              <Link href="/products" className="group bg-gradient-to-br from-emerald-100 to-white p-6 rounded-xl shadow-sm hover:shadow-md border border-slate-200 border-l-4 border-l-emerald-500 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[130px]">
+                <div>
+                  <h2 className="text-slate-500 font-bold mb-1 text-xs uppercase tracking-widest flex items-center gap-2">
+                    <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                    Stock Available
+                  </h2>
+                  <p className="text-2xl  font-semibold text-slate-800 mt-2">{stats.totalQuantity}</p>
+                </div>
+              </Link>
+
+              {/* Sales Card */}
+              {(role === "admin" || role === "sales") && (
+                <Link href="/sales" className="group bg-gradient-to-br from-orange-100 to-white p-6 rounded-xl shadow-sm hover:shadow-md border border-slate-200 border-l-4 border-l-orange-500 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[130px]">
                   <div>
                     <h2 className="text-slate-500 font-bold mb-1 text-xs uppercase tracking-widest flex items-center gap-2">
                       <svg

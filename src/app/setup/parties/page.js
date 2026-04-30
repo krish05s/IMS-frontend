@@ -6,7 +6,7 @@ import TruckLoader from "../../components/TruckLoader";
 import { toast } from "react-toastify";
 import Topbar from "../../components/Topbar";
 
-export default function SetupParties() {
+export default function Page() {
   useRoleCheck(["admin"]); // Only admin can access setup
 
   const [activeTab, setActiveTab] = useState("purchase"); // "purchase" or "sales"

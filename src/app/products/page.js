@@ -80,11 +80,11 @@ export default function Products() {
     setFormData(
       product
         ? {
-            product_name: product.product_name,
-            gradation_id: product.gradation_id,
-            gradation: product.gradation,
-            unit: product.unit || "Kg",
-          }
+          product_name: product.product_name,
+          gradation_id: product.gradation_id,
+          gradation: product.gradation,
+          unit: product.unit || "Kg",
+        }
         : { product_name: "", gradation_id: "", gradation: "", unit: "Pieces" },
     );
     setIsModalOpen(true);
@@ -183,26 +183,14 @@ export default function Products() {
   return (
     <div className="min-h-screen bg-[#f1f1f1] flex">
       <Sidebar />
-      <div className="flex-1 md:ml-64  overflow-x-auto scrollbar-hide">
+      <div className="flex-1 md:ml-64 p-4 md:p-20 t-20 overflow-x-auto">
         {/* <Topbar /> */}
         <Topbar
           actions={
-            <button
-              onClick={() => handleOpenModal()}
-              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
+            <button onClick={() => setAddModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               Add Product
             </button>

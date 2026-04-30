@@ -1,6 +1,6 @@
 "use client";
 import { usePathname } from "next/navigation";
-
+// import {Topbar} from "/Topbar.js";
 // --- Same Icons as Sidebar ---
 const Icons = {
   Dashboard: (
@@ -101,8 +101,9 @@ const Icons = {
   ),
 };
 
+// Route to label + icon mapping
 const routeMap = {
-    "/dashboard": { label: "Dashboard", icon: Icons.Dashboard },
+  "/dashboard": { label: "Dashboard", icon: Icons.Dashboard },
   "/gradations": { label: "Gradations", icon: Icons.Gradations },
   "/products": { label: "Products", icon: Icons.Products },
   "/purchase": { label: "Purchase", icon: Icons.Purchase },
@@ -136,3 +137,4 @@ export default function Topbar({actions}) {
     </div>
   );
 }
+

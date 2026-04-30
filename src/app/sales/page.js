@@ -583,91 +583,47 @@ export default function Sales() {
     <div className="min-h-screen bg-[#f1f1f1] flex">
       <Sidebar />
       <div className="flex-1 md:ml-64  overflow-x-auto scrollbar-hide">
-        {/* <Topbar /> */}
         <Topbar
           actions={
-            <button
-              onClick={() => handleOpenModal()}
-              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
+            <button onClick={() => setAddModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               Add Sale
             </button>
           }
         />
         <div className="p-4 md:p-8 topbar-offset mt-4">
+
           {loading ? (
             <TruckLoader />
           ) : (
             <>
-              {/* <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-800">Sales</h1>
-                {/* <p className="text-sm text-slate-500 mt-1">Manage outbound dispatch and customer bills</p> 
+              <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+                <div>
+                  <h1 className="text-2xl font-bold text-slate-800">Sales</h1>
+                  {/* <p className="text-sm text-slate-500 mt-1">Manage outbound dispatch and customer bills</p> */}
+                </div>
+                <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
+                  <button
+                    onClick={() => handleOpenModal()}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl transition-all  whitespace-nowrap"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Sales
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
-                <button
-                  onClick={() => handleOpenModal()}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl transition-all  whitespace-nowrap"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Add Sales
-                </button>
-              </div>
-            </div> */}
 
               {/* Filter Bar */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
-                <input
-                  type="text"
-                  placeholder="Filter by Bill No..."
-                  value={filters.bill_no}
-                  onChange={(e) =>
-                    setFilters({ ...filters, bill_no: e.target.value })
-                  }
-                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
-                />
-                <input
-                  type="text"
-                  placeholder="Filter by Customer..."
-                  value={filters.customer_name}
-                  onChange={(e) =>
-                    setFilters({ ...filters, customer_name: e.target.value })
-                  }
-                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
-                />
-                <input
-                  type="text"
-                  placeholder="Filter by Vehicle No..."
-                  value={filters.vehicle_no}
-                  onChange={(e) =>
-                    setFilters({ ...filters, vehicle_no: e.target.value })
-                  }
-                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
-                />
-                <input
-                  type="text"
-                  placeholder="Filter by Driver No..."
-                  value={filters.driver_number}
-                  onChange={(e) =>
-                    setFilters({ ...filters, driver_number: e.target.value })
-                  }
-                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
-                />
+                <input type="text" placeholder="Filter by Bill No..." value={filters.bill_no} onChange={(e) => setFilters({ ...filters, bill_no: e.target.value })} className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
+                <input type="text" placeholder="Filter by Customer..." value={filters.customer_name} onChange={(e) => setFilters({ ...filters, customer_name: e.target.value })} className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
+                <input type="text" placeholder="Filter by Vehicle No..." value={filters.vehicle_no} onChange={(e) => setFilters({ ...filters, vehicle_no: e.target.value })} className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
+                <input type="text" placeholder="Filter by Driver No..." value={filters.driver_number} onChange={(e) => setFilters({ ...filters, driver_number: e.target.value })} className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
               </div>
 
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-w-full overflow-hidden flex flex-col">
