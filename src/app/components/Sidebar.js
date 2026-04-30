@@ -128,12 +128,10 @@ export default function Sidebar() {
           {role === "admin" && (
             <NavItem href="/members" currentPath={pathname} onClick={() => setIsOpen(false)} icon={Icons.Members} label="Members" />
           )}
-
           {/* Setup - Visible to admin only */}
           {role === "admin" && (
             <NavItem href="/setup/parties" currentPath={pathname} onClick={() => setIsOpen(false)} icon={Icons.Setup} label="Setup" />
           )}
-
         </nav>
 
         {/* User Details & Logout */}
