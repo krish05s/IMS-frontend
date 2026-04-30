@@ -419,9 +419,37 @@ export default function Products() {
             {isModalOpen && (
               <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100]">
                 <div className="bg-white p-8 rounded-2xl w-full max-w-md shadow-xl border border-slate-200">
-                  <h2 className="text-xl font-bold text-slate-800 mb-6">
-                    {currentProduct ? "Edit Product" : "Add Product"}
-                  </h2>
+                 <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555] rounded-t-2xl -mx-8 -mt-8 mb-6">
+  <div className="flex items-center gap-2">
+    
+    <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+      <svg
+        className="w-4 h-4 text-white"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+        />
+      </svg>
+    </div>
+
+    <h2 className="text-base font-semibold text-white">
+      {currentProduct ? "Edit Product" : "Add Product"}
+    </h2>
+  </div>
+
+  <button
+    onClick={handleCloseModal}
+    className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-colors"
+  >
+    ✕
+  </button>
+</div>
                   <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">

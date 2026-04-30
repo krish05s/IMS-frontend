@@ -1,5 +1,6 @@
 "use client";
 import { usePathname } from "next/navigation";
+// import {Topbar} from "/Topbar.js";
 // --- Same Icons as Sidebar ---
 const Icons = {
   Dashboard: (
@@ -101,7 +102,7 @@ const Icons = {
 };
 
 const routeMap = {
-    "/dashboard": { label: "Dashboard", icon: Icons.Dashboard },
+  "/dashboard": { label: "Dashboard", icon: Icons.Dashboard },
   "/gradations": { label: "Gradations", icon: Icons.Gradations },
   "/products": { label: "Products", icon: Icons.Products },
   "/purchase": { label: "Purchase", icon: Icons.Purchase },
@@ -119,13 +120,13 @@ export default function Topbar() {
   };
 
   return (
-<div className="fixed top-0 left-0 md:left-64 right-0 h-16 bg-white border-b border-[#f0f2f5] flex items-center px-6 z-50">      <div className="flex items-center gap-2.5 text-[#000000]">
-        <span className="text-[#000000]">{current.icon}</span>
-        <span className="text-lg font-semibold text-[#000000]">
-          {current.label}
-        </span>
-      </div>
-      
+    <div className="fixed top-0 left-0 md:left-64 right-0 h-16 bg-white border-b border-[#f0f2f5] flex items-center px-6 z-50">      <div className="flex items-center gap-2.5 text-[#000000]">
+      <span className="text-[#000000]">{current.icon}</span>
+      <span className="text-lg font-semibold text-[#000000]">
+        {current.label}
+      </span>
+    </div>
+
     </div>
   );
 }

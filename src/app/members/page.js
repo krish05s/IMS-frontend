@@ -417,7 +417,7 @@ function Members() {
                 </div>
               </div>
 
-              <p className="text-xs text-slate-400 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
+              <p className="text-xs text-slate-400 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2" >
                 💡 <span className="text-rose-400 font-semibold">*</span> marked fields are required. New user will be Active by default.
               </p>
 
@@ -446,7 +446,7 @@ function Members() {
       {editModal && editUser && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
-            <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-t-2xl">
+            <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555] rounded-t-2xl">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-sm uppercase">
                   {editUser.name?.charAt(0)}
@@ -514,7 +514,7 @@ function Members() {
                 </div>
               </div>
 
-              <p className="text-xs text-slate-400 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
+              <p className="text-xs text-gray-200 bg-[#555555] border border-[#444444] rounded-xl px-3 py-2">
                 💡 Change <span className="font-semibold text-slate-500">Status</span> from the toggle button in the table.
               </p>
 
@@ -524,7 +524,7 @@ function Members() {
                   Cancel
                 </button>
                 <button type="submit" disabled={editLoading}
-                  className="px-5 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-60 flex items-center gap-2">
+                  className="px-5 py-2 bg-[#212121] hover:bg-[#444444] text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-60 flex items-center gap-2">
                   {editLoading && (
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -578,8 +578,13 @@ function Members() {
           </div>
         </div>
       )}
+ 
+
+
     </div>
     </div>
+
+
   );
 }
 export default Members;

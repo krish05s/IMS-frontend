@@ -733,8 +733,36 @@ export default function Purchases() {
 
         {isModalOpen && (
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-            <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-bold text-slate-800 mb-6">{currentPurchaseId ? "Edit Purchase Order" : "Record Purchase Order"}</h2>
+            <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555] rounded-t-2xl -mx-8 -mt-8 mb-6">
+  <div className="flex items-center gap-2">
+    <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+  <svg
+    className="w-4 h-4 text-white"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+    />
+  </svg>
+</div>
+    <h2 className="text-base font-semibold text-white">
+      {currentPurchaseId ? "Edit Purchase" : "Add Purchase"}
+    </h2>
+  </div>
+
+  <button
+    onClick={handleCloseModal}
+    className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-colors"
+  >
+    ✕
+  </button>
+</div>
               <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
@@ -805,7 +833,7 @@ export default function Purchases() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-[#212121] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70"
+                    className="bg-[#212121] hover:bg-[#444444] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70"
                   >
                     {isSubmitting && (
                       <svg className="animate-spin h-4 w-4 mr-2 inline" viewBox="0 0 24 24" fill="none">
