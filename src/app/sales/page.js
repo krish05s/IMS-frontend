@@ -585,7 +585,7 @@ export default function Sales() {
       <div className="flex-1 md:ml-64  overflow-x-auto scrollbar-hide">
         <Topbar
           actions={
-            <button onClick={() => setAddModal(true)}
+            <button onClick={() => handleOpenModal()}
               className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -600,10 +600,10 @@ export default function Sales() {
             <TruckLoader />
           ) : (
             <>
-              <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
+              {/* <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
                 <div>
                   <h1 className="text-2xl font-bold text-slate-800">Sales</h1>
-                  {/* <p className="text-sm text-slate-500 mt-1">Manage outbound dispatch and customer bills</p> */}
+                  {/* <p className="text-sm text-slate-500 mt-1">Manage outbound dispatch and customer bills</p> 
                 </div>
                 <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
                   <button
@@ -616,7 +616,7 @@ export default function Sales() {
                     Add Sales
                   </button>
                 </div>
-              </div>
+              </div> */}
 
               {/* Filter Bar */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
