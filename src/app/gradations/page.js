@@ -268,55 +268,98 @@ export default function Gradations() {
         </>
         )}
 
-        {/* Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100]">
-            <div className="bg-white p-8 rounded-2xl w-full max-w-md shadow-xl border border-slate-200">
-              <h2 className="text-xl font-bold text-slate-800 mb-6">
-                {currentGradation ? "Edit Gradation" : "Add Gradation"}
-              </h2>
-              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Gradation Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.gradationName}
-                    onChange={(e) => setFormData({ ...formData, gradationName: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition text-slate-800 bg-slate-50"
-                    placeholder="e.g. SF"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Thickness</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.thickness}
-                    onChange={(e) => setFormData({ ...formData, thickness: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition text-slate-800 bg-slate-50"
-                    placeholder="e.g. 1mm"
-                  />
-                </div>
-                <div className="flex justify-end gap-3 mt-2">
-                  <button
-                    type="button"
-                    onClick={handleCloseModal}
-                    className="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 font-medium transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#212121] text-white px-5 py-2 rounded-lg font-medium hover:bg-orange-600 transition shadow-md shadow-orange-500/20"
-                  >
-                    Save
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+       {isModalOpen && (
+  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+    
+    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+
+      {/* HEADER */}
+      <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555]">
+        
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+  <svg
+    className="w-4 h-4 text-white"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+    />
+  </svg>
+</div>
+
+          <h2 className="text-base font-semibold text-white">
+            {currentGradation ? "Edit Gradation" : "Add Gradation"}
+          </h2>
+        </div>
+
+        <button
+          onClick={handleCloseModal}
+          className="w-7 h-7 rounded-full flex items-center justify-center text-white transition"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* FORM */}
+      <form onSubmit={handleSubmit} className="p-6 space-y-4">
+
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">
+            Gradation Name
+          </label>
+          <input
+            type="text"
+            required
+            value={formData.gradationName}
+            onChange={(e) =>
+              setFormData({ ...formData, gradationName: e.target.value })
+            }
+            className="w-full px-4 py-2.5 rounded-xl border border-[#D2A185] bg-white focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">
+            Thickness
+          </label>
+          <input
+            type="text"
+            required
+            value={formData.thickness}
+            onChange={(e) =>
+              setFormData({ ...formData, thickness: e.target.value })
+            }
+            className="w-full px-4 py-2.5 rounded-xl border border-[#D2A185] bg-white focus:outline-none"
+          />
+        </div>
+
+        <div className="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            onClick={handleCloseModal}
+            className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            className="px-5 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl hover:bg-[#444]"
+          >
+            Save
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+)}
       </div>
     </div>
     </div>

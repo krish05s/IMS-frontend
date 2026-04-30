@@ -785,12 +785,12 @@ export default function Purchases() {
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
                     <input
-                      type="date"
-                      required
-                      value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
-                    />
+  type="date"
+  required
+  value={formData.date}
+  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
+/>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Bill No</label>
@@ -799,7 +799,7 @@ export default function Purchases() {
                       required
                       value={formData.bill_no}
                       onChange={(e) => setFormData({ ...formData, bill_no: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                      className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
                       placeholder="e.g. INV-2039"
                     />
                   </div>
@@ -808,7 +808,7 @@ export default function Purchases() {
                     <select
                       value={formData.party_name || ""}
                       onChange={(e) => setFormData({ ...formData, party_name: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                      className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
                     >
                       <option value="">-- Select Supplier --</option>
                       {purchaseParties.map(p => (
@@ -822,7 +822,7 @@ export default function Purchases() {
                       type="text"
                       value={formData.vehicle_no}
                       onChange={(e) => setFormData({ ...formData, vehicle_no: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 uppercase bg-white"
+                      className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none uppercase bg-white"
                       placeholder="e.g. GJ05 1234"
                     />
                   </div>
@@ -833,7 +833,7 @@ export default function Purchases() {
                       required
                       value={formData.driver_name}
                       onChange={(e) => setFormData({ ...formData, driver_name: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                     className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
                       placeholder="e.g. John Doe"
                     />
                   </div>
@@ -843,7 +843,7 @@ export default function Purchases() {
                       type="text"
                       value={formData.driver_number}
                       onChange={(e) => setFormData({ ...formData, driver_number: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                     className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
                       placeholder="e.g. 1234567890"
                     />
                   </div>
@@ -853,7 +853,7 @@ export default function Purchases() {
                       type="text"
                       value={formData.transporter_name}
                       onChange={(e) => setFormData({ ...formData, transporter_name: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                     className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
                       placeholder="e.g. ABC Logistics"
                     />
                   </div>
@@ -863,7 +863,7 @@ export default function Purchases() {
                       type="text"
                       value={formData.lr_number}
                       onChange={(e) => setFormData({ ...formData, lr_number: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                      className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
                       placeholder="e.g. LR-98765"
                     />
                   </div>
@@ -898,45 +898,55 @@ export default function Purchases() {
 
         {/* Delete Confirmation Modal */}
         {isDeleteModalOpen && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-            <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-xl border border-slate-200 text-center">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-bold text-slate-800 mb-2">Delete Purchase</h3>
-              <p className="text-sm text-slate-500 mb-6">
-                Are you sure you want to delete this purchase record? The inventory will be reversed.
-              </p>
-              
-              <div className="flex justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsDeleteModalOpen(false)}
-                  disabled={isDeleting}
-                  className="px-4 py-2 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition disabled:opacity-50 w-full"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={executeDelete}
-                  disabled={isDeleting}
-                  className="px-4 py-2 rounded-lg bg-[#212121] text-white font-bold  transition  disabled:opacity-70 flex items-center justify-center w-full"
-                >
-                  {isDeleting && (
-                    <svg className="animate-spin h-4 w-4 mr-2 inline" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
-                  )}
-                  {isDeleting ? "Deleting..." : "Yes, Delete"}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+    
+    <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden">
+
+      {/* HEADER */}
+      <div className="flex justify-between items-center px-5 py-4 bg-gradient-to-r from-[#212121] to-[#555555]">
+        <div className="flex items-center gap-2 text-white font-semibold">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
+          </svg>
+          Delete Purchase
+        </div>
+
+        <button
+          onClick={() => setIsDeleteModalOpen(false)}
+          className="text-white text-lg"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* BODY */}
+      <div className="p-6 text-center">
+        <p className="text-slate-600 text-sm mb-6">
+          Are you sure you want to delete this purchase? Inventory will be reverted.
+        </p>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => setIsDeleteModalOpen(false)}
+            className="w-full py-2 rounded-lg bg-gray-100 text-gray-700 font-semibold"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={executeDelete}
+            disabled={isDeleting}
+            className="w-full py-2 rounded-lg bg-[#212121] text-white font-semibold"
+          >
+            {isDeleting ? "Deleting..." : "Yes, Delete"}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+)}
 
         {/* View Details Modal */}
         {isViewModalOpen && viewPurchase && (

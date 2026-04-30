@@ -12,6 +12,9 @@ export default function Products() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState(false);
+const [deleteProduct, setDeleteProduct] = useState(null);
+const [deleteLoading, setDeleteLoading] = useState(false);
   const [filters, setFilters] = useState({
     product_code: "",
     product_name: "",
@@ -136,31 +139,35 @@ export default function Products() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this product?")) return;
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/product/delete/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+  const handleDelete = async () => {
+  setDeleteLoading(true);
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/product/delete/${deleteProduct.id}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-      );
-      const data = await response.json();
-      if (data.success) {
-        toast.success("Product deleted successfully!");
-        fetchProducts();
-      } else {
-        toast.error(data.message);
       }
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      toast.error("Failed to delete product");
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+      toast.success("Product deleted successfully!");
+      setDeleteModal(false);
+      fetchProducts();
+    } else {
+      toast.error(data.message);
     }
-  };
+  } catch (error) {
+    toast.error("Failed to delete product");
+  } finally {
+    setDeleteLoading(false);
+  }
+};
 
   const filteredProducts = products.filter(
     (p) =>
@@ -221,6 +228,74 @@ export default function Products() {
                 )}
               </div>
             </div>
+
+            {/*delete model */}
+
+            {deleteModal && deleteProduct && (
+  <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555]">
+        <div className="flex items-center gap-2">
+          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+          <h2 className="text-base font-semibold text-white">
+            Delete Product
+          </h2>
+        </div>
+
+        <button
+          onClick={() => setDeleteModal(false)}
+          className="text-white text-lg hover:opacity-70"
+        >
+          ✕
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="p-6 text-center">
+        <p className="text-sm text-slate-600 mb-6">
+          Are you sure you want to delete{" "}
+          <span className="font-semibold text-slate-800">
+            {deleteProduct.product_name}
+          </span>
+          ?
+          <br />
+          <span className="text-slate-400 text-xs">
+            This action cannot be undone.
+          </span>
+        </p>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => setDeleteModal(false)}
+            className="flex-1 px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={handleDelete}
+            disabled={deleteLoading}
+            className="flex-1 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2"
+          >
+            {deleteLoading && (
+              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25"/>
+                <path d="M4 12a8 8 0 018-8v8z" fill="currentColor" className="opacity-75"/>
+              </svg>
+            )}
+            {deleteLoading ? "Deleting..." : "Yes, Delete"}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
             {/* Filter Bar */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
@@ -324,7 +399,10 @@ export default function Products() {
                                 </svg>
                               </button>
                               <button
-                                onClick={() => handleDelete(p.id)}
+                               onClick={() => {
+  setDeleteProduct(p);
+  setDeleteModal(true);
+}}
                                 title="Delete"
                                 className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-lg transition-colors"
                               >
@@ -418,7 +496,7 @@ export default function Products() {
             {/* Modal */}
             {isModalOpen && (
               <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100]">
-                <div className="bg-white p-8 rounded-2xl w-full max-w-md shadow-xl border border-slate-200">
+                <div className="bg-white p-8 rounded-2xl w-full max-w-md shadow-2xl">
                  <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555] rounded-t-2xl -mx-8 -mt-8 mb-6">
   <div className="flex items-center gap-2">
     
@@ -465,8 +543,7 @@ export default function Products() {
                             product_name: e.target.value,
                           })
                         }
-                        className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition text-slate-800 bg-slate-50"
-                        placeholder="e.g. Synthetic Resin"
+                        className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none text-slate-800 bg-white"
                       />
                     </div>
                     <div>
@@ -486,7 +563,7 @@ export default function Products() {
                             gradation: selected ? selected.gradation : "",
                           });
                         }}
-                        className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition text-slate-800 bg-slate-50"
+                        className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none text-slate-800 bg-white"
                       >
                         <option value="" disabled>
                           Select Gradation
@@ -508,7 +585,7 @@ export default function Products() {
                         onChange={(e) =>
                           setFormData({ ...formData, unit: e.target.value })
                         }
-                        className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition text-slate-800 bg-slate-50"
+                        className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none text-slate-800 bg-white"
                       >
                         <option value="Pieces">Pieces</option>
                         <option value="Kg">Kg</option>
@@ -522,12 +599,12 @@ export default function Products() {
                       >
                         Cancel
                       </button>
-                      <button
-                        type="submit"
-                        className="bg-[#212121] text-white px-5 py-2 rounded-lg font-medium  transition shadow-md "
-                      >
-                        Save
-                      </button>
+                       <button
+            type="submit"
+            className="px-5 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl hover:bg-[#444]"
+          >
+            Save
+          </button>
                     </div>
                   </form>
                 </div>
