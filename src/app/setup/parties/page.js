@@ -176,7 +176,7 @@ export default function Page() {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              Add {activeTab === "purchase" ? "Supplier" : "Customer"}
+    Add {activeTab === "purchase" ? "Purchase" : "sales"}
             </button>
           }
         />

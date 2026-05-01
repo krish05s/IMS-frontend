@@ -124,7 +124,7 @@ const routeMap = {
   "/purchase": { label: "Purchase", icon: Icons.Purchase },
   "/sales": { label: "Sales", icon: Icons.Sales },
   "/members": { label: "Members", icon: Icons.Members },
-  "Setup": { label: "Setup", icon: Icons.Setup },
+"/setup/parties": { label: "Setup", icon: Icons.Setup },
 };
 
 // Route to label + icon mapping
