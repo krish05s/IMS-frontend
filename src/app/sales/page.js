@@ -585,17 +585,28 @@ export default function Sales() {
       <div className="flex-1 md:ml-64  overflow-x-auto scrollbar-hide">
         <Topbar
           actions={
-            <button onClick={() => handleOpenModal()}
-              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            <button
+              onClick={() => handleOpenModal()}
+              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
               Add Sale
             </button>
           }
         />
         <div className="p-4 md:p-8 topbar-offset mt-4">
-
           {loading ? (
             <TruckLoader />
           ) : (
@@ -620,10 +631,42 @@ export default function Sales() {
 
               {/* Filter Bar */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
-                <input type="text" placeholder="Filter by Bill No..." value={filters.bill_no} onChange={(e) => setFilters({ ...filters, bill_no: e.target.value })} className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
-                <input type="text" placeholder="Filter by Customer..." value={filters.customer_name} onChange={(e) => setFilters({ ...filters, customer_name: e.target.value })} className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
-                <input type="text" placeholder="Filter by Vehicle No..." value={filters.vehicle_no} onChange={(e) => setFilters({ ...filters, vehicle_no: e.target.value })} className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
-                <input type="text" placeholder="Filter by Driver No..." value={filters.driver_number} onChange={(e) => setFilters({ ...filters, driver_number: e.target.value })} className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors" />
+                <input
+                  type="text"
+                  placeholder="Filter by Bill No..."
+                  value={filters.bill_no}
+                  onChange={(e) =>
+                    setFilters({ ...filters, bill_no: e.target.value })
+                  }
+                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                />
+                <input
+                  type="text"
+                  placeholder="Filter by Customer..."
+                  value={filters.customer_name}
+                  onChange={(e) =>
+                    setFilters({ ...filters, customer_name: e.target.value })
+                  }
+                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                />
+                <input
+                  type="text"
+                  placeholder="Filter by Vehicle No..."
+                  value={filters.vehicle_no}
+                  onChange={(e) =>
+                    setFilters({ ...filters, vehicle_no: e.target.value })
+                  }
+                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                />
+                <input
+                  type="text"
+                  placeholder="Filter by Driver No..."
+                  value={filters.driver_number}
+                  onChange={(e) =>
+                    setFilters({ ...filters, driver_number: e.target.value })
+                  }
+                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                />
               </div>
 
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-w-full overflow-hidden flex flex-col">
@@ -1091,160 +1134,129 @@ export default function Sales() {
                   )}
                 </div>
               </div>
-
-              {isModalOpen && (
+{/* Edit Modal */}
+               {isModalOpen && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-                  <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl border border-slate-200 overflow-y-auto max-h-[90vh]">
-                    <h2 className="text-xl font-bold text-slate-800 mb-6">
-                      {currentSalesId
-                        ? "Edit Sales Invoice"
-                        : "Create Sales Invoice"}
-                    </h2>
-                    <form
-                      onSubmit={handleSubmit}
-                      className="flex flex-col gap-6"
-                    >
+                  <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl overflow-y-auto max-h-[90vh]">
+                    <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555] rounded-t-2xl -mx-8 -mt-8 mb-6">
+                      <div className="flex items-center gap-2">
+
+                        <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+                          <svg
+                            className="w-4 h-4 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </div>
+
+                        <h2 className="text-base font-semibold text-white">
+                          {currentSalesId ? "Edit Sales Invoice" : "Create Sales Invoice"}
+                        </h2>
+                      </div>
+
+                      <button
+                        onClick={handleCloseModal}
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-colors"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+
                       {/* Header Information */}
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Date
-                          </label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
                           <input
                             type="date"
                             required
                             value={formData.date}
-                            onChange={(e) =>
-                              setFormData({ ...formData, date: e.target.value })
-                            }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Bill No
-                          </label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Bill No</label>
                           <input
                             type="text"
                             required
                             value={formData.bill_no}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                bill_no: e.target.value,
-                              })
-                            }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            onChange={(e) => setFormData({ ...formData, bill_no: e.target.value })}
                             placeholder="e.g. S-2039"
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Sales Party
-                          </label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Sales Party</label>
                           <select
                             required
                             value={formData.customer_name}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                customer_name: e.target.value,
-                              })
-                            }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           >
                             <option value="">-- Select Customer --</option>
-                            {salesParties.map((p) => (
-                              <option key={p.id} value={p.name}>
-                                {p.name}
-                              </option>
+                            {salesParties.map(p => (
+                              <option key={p.id} value={p.name}>{p.name}</option>
                             ))}
                           </select>
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Vehicle No
-                          </label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Vehicle No</label>
                           <input
                             type="text"
                             value={formData.vehicle_no}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                vehicle_no: e.target.value,
-                              })
-                            }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 uppercase bg-white"
+                            onChange={(e) => setFormData({ ...formData, vehicle_no: e.target.value })}
                             placeholder="e.g. GJ05 1234"
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white uppercase focus:outline-none"
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Driver Name
-                          </label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Driver Name</label>
                           <input
                             type="text"
                             required
                             value={formData.driver_name}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                driver_name: e.target.value,
-                              })
-                            }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            onChange={(e) => setFormData({ ...formData, driver_name: e.target.value })}
                             placeholder="e.g. John Doe"
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Driver Number
-                          </label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Driver Number</label>
                           <input
                             type="text"
                             value={formData.driver_number}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                driver_number: e.target.value,
-                              })
-                            }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            onChange={(e) => setFormData({ ...formData, driver_number: e.target.value })}
                             placeholder="e.g. 1234567890"
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Transporter Name
-                          </label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">Transporter Name</label>
                           <input
                             type="text"
                             value={formData.transporter_name}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                transporter_name: e.target.value,
-                              })
-                            }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            onChange={(e) => setFormData({ ...formData, transporter_name: e.target.value })}
                             placeholder="e.g. ABC Logistics"
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            LR Number
-                          </label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">LR Number</label>
                           <input
                             type="text"
                             value={formData.lr_number}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                lr_number: e.target.value,
-                              })
-                            }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            onChange={(e) => setFormData({ ...formData, lr_number: e.target.value })}
                             placeholder="e.g. LR-98765"
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           />
                         </div>
                       </div>
@@ -1261,34 +1273,15 @@ export default function Sales() {
                         <button
                           type="submit"
                           disabled={isSubmitting}
-                          className="bg-[#212121] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70"
+                          className="bg-[#212121] hover:bg-[#444444] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70"
                         >
                           {isSubmitting && (
-                            <svg
-                              className="animate-spin h-4 w-4 mr-2 inline"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8v8z"
-                              />
+                            <svg className="animate-spin h-4 w-4 mr-2 inline" viewBox="0 0 24 24" fill="none">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                             </svg>
                           )}
-                          {isSubmitting
-                            ? "Saving..."
-                            : currentSalesId
-                              ? "Update Dispatch"
-                              : "Save Dispatch"}
+                          {isSubmitting ? "Saving..." : (currentSalesId ? "Update Dispatch" : "Save Dispatch")}
                         </button>
                       </div>
                     </form>
@@ -1297,70 +1290,67 @@ export default function Sales() {
               )}
 
               {/* Delete Confirmation Modal */}
-              {isDeleteModalOpen && (
+             {isDeleteModalOpen && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-                  <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-xl border border-slate-200 text-center">
-                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                      <svg
-                        className="h-6 w-6 text-red-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-800 mb-2">
-                      Delete Sale
-                    </h3>
-                    <p className="text-sm text-slate-500 mb-6">
-                      Are you sure you want to delete this sale? Inventory will
-                      be reverted.
-                    </p>
 
-                    <div className="flex justify-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setIsDeleteModalOpen(false)}
-                        disabled={isDeleting}
-                        className="px-4 py-2 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition disabled:opacity-50 w-full"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        onClick={executeDelete}
-                        disabled={isDeleting}
-                        className="px-4 py-2 rounded-lg bg-[#212121] text-white font-bold  transition  disabled:opacity-70 flex items-center justify-center w-full"
-                      >
-                        {isDeleting && (
+                  <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden">
+
+                    {/* HEADER (same as Edit Member) */}
+                    <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555]">
+
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
                           <svg
-                            className="animate-spin h-4 w-4 mr-2 inline"
-                            viewBox="0 0 24 24"
+                            className="w-4 h-4 text-white"
                             fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
                           >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            />
                             <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8v8z"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 7h12M9 7v10m6-10v10M10 4h4a1 1 0 011 1v2H9V5a1 1 0 011-1zM5 7h14l-1 13a2 2 0 01-2 2H8a2 2 0 01-2-2L5 7z"
                             />
                           </svg>
-                        )}
-                        {isDeleting ? "Deleting..." : "Yes, Delete"}
+                        </div>
+
+                        <h2 className="text-white font-semibold text-base">
+                          Delete Sale
+                        </h2>
+                      </div>
+
+                      <button
+                        onClick={() => setIsDeleteModalOpen(false)}
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition"
+                      >
+                        ✕
                       </button>
+                    </div>
+
+                    {/* BODY */}
+                    <div className="p-6 text-center">
+                      <p className="text-sm text-slate-600 mb-6">
+                        Are you sure you want to delete this sale? Inventory will be reverted.
+                      </p>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => setIsDeleteModalOpen(false)}
+                          disabled={isDeleting}
+                          className="w-full px-4 py-2.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition"
+                        >
+                          Cancel
+                        </button>
+
+                        <button
+                          onClick={executeDelete}
+                          disabled={isDeleting}
+                          className="w-full px-4 py-2.5 rounded-lg bg-[#212121] text-white font-semibold hover:bg-[#444444] transition flex justify-center items-center"
+                        >
+                          {isDeleting ? "Deleting..." : "Yes, Delete"}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
