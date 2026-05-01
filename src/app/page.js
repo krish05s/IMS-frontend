@@ -29,6 +29,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [serverMessage, setServerMessage] = useState("");
 
+  // Forgot Password State
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotStep, setForgotStep] = useState(1); // 1: Email, 2: OTP, 3: Reset
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotOtp, setForgotOtp] = useState("");
+  const [forgotPassword, setForgotPassword] = useState("");
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotMessage, setForgotMessage] = useState("");
+  const [forgotError, setForgotError] = useState("");
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % carouselImages.length);
@@ -98,6 +109,94 @@ export default function LoginPage() {
     }
   };
 
+  // Forgot Password Handlers
+  const handleForgotSubmitEmail = async () => {
+    if (!forgotEmail) return setForgotError("Email is required");
+    setForgotLoading(true);
+    setForgotError("");
+    setForgotMessage("");
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setForgotMessage(data.message);
+        setTimeout(() => {
+          setForgotStep(2);
+          setForgotMessage("");
+        }, 1500);
+      } else {
+        setForgotError(data.message);
+      }
+    } catch (e) {
+      setForgotError("Something went wrong");
+    }
+    setForgotLoading(false);
+  };
+
+  const handleForgotSubmitOtp = async () => {
+    if (!forgotOtp) return setForgotError("OTP is required");
+    setForgotLoading(true);
+    setForgotError("");
+    setForgotMessage("");
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail, otp: forgotOtp })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setForgotMessage(data.message);
+        setTimeout(() => {
+          setForgotStep(3);
+          setForgotMessage("");
+        }, 1500);
+      } else {
+        setForgotError(data.message);
+      }
+    } catch (e) {
+      setForgotError("Something went wrong");
+    }
+    setForgotLoading(false);
+  };
+
+  const handleForgotSubmitReset = async () => {
+    if (!forgotPassword || !forgotConfirmPassword) return setForgotError("Both fields are required");
+    if (forgotPassword !== forgotConfirmPassword) return setForgotError("Passwords do not match");
+    setForgotLoading(true);
+    setForgotError("");
+    setForgotMessage("");
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail, otp: forgotOtp, newPassword: forgotPassword })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setForgotMessage(data.message);
+        setTimeout(() => {
+          setShowForgotModal(false);
+          setForgotStep(1);
+          setForgotEmail("");
+          setForgotOtp("");
+          setForgotPassword("");
+          setForgotConfirmPassword("");
+          setForgotMessage("");
+        }, 2000);
+      } else {
+        setForgotError(data.message);
+      }
+    } catch (e) {
+      setForgotError("Something went wrong");
+    }
+    setForgotLoading(false);
+  };
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-br from-pink-100 via-white to-green-100 p-3 sm:p-5 font-sans">
       <div className="flex w-full max-w-3xl min-h-130 rounded-2xl overflow-hidden shadow-2xl bg-white">
@@ -107,9 +206,8 @@ export default function LoginPage() {
           {carouselImages.map((img, i) => (
             <div
               key={i}
-              className={`absolute inset-0 transition-opacity duration-700 ${
-                i === current ? "opacity-100" : "opacity-0"
-              }`}
+              className={`absolute inset-0 transition-opacity duration-700 ${i === current ? "opacity-100" : "opacity-0"
+                }`}
             >
               <img
                 src={img.url}
@@ -125,9 +223,8 @@ export default function LoginPage() {
               <button
                 key={i}
                 onClick={() => setCurrent(i)}
-                className={`h-2.5 rounded-full border-none cursor-pointer transition-all duration-300 ${
-                  i === current ? "w-7 bg-white" : "w-2.5 bg-white/50"
-                }`}
+                className={`h-2.5 rounded-full border-none cursor-pointer transition-all duration-300 ${i === current ? "w-7 bg-white" : "w-2.5 bg-white/50"
+                  }`}
               />
             ))}
           </div>
@@ -159,9 +256,8 @@ export default function LoginPage() {
                 placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border transition-all duration-200 focus:border-orange-500 focus:bg-white ${
-                  errors.email ? "border-red-400" : "border-gray-200"
-                }`}
+                className={`w-full px-4 py-3 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border transition-all duration-200 focus:border-orange-500 focus:bg-white ${errors.email ? "border-red-400" : "border-gray-200"
+                  }`}
               />
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1 ml-1">{errors.email}</p>
@@ -179,9 +275,8 @@ export default function LoginPage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleSubmit(e);
                 }}
-                className={`w-full px-4 py-3 pr-11 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border transition-all duration-200 focus:border-orange-500 focus:bg-white ${
-                  errors.password ? "border-red-400" : "border-gray-200"
-                }`}
+                className={`w-full px-4 py-3 pr-11 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border transition-all duration-200 focus:border-orange-500 focus:bg-white ${errors.password ? "border-red-400" : "border-gray-200"
+                  }`}
               />
               <button
                 type="button"
@@ -202,18 +297,26 @@ export default function LoginPage() {
             </div>
 
             <div className="text-right mb-5">
-              <span className="text-sm text-gray-400 cursor-pointer hover:text-orange-500 transition-colors">
+              <span 
+                className="text-sm text-gray-400 cursor-pointer hover:text-orange-500 transition-colors"
+                onClick={() => {
+                  setShowForgotModal(true);
+                  setForgotStep(1);
+                  setForgotError("");
+                  setForgotMessage("");
+                  setForgotEmail("");
+                }}
+              >
                 Forgot Password
               </span>
             </div>
 
             {serverMessage && (
               <div
-                className={`mb-4 text-sm px-4 py-2.5 rounded-lg border ${
-                  serverMessage.includes("successful")
-                    ? "bg-green-50 text-green-700 border-green-200"
-                    : "bg-red-50 text-red-600 border-red-200"
-                }`}
+                className={`mb-4 text-sm px-4 py-2.5 rounded-lg border ${serverMessage.includes("successful")
+                  ? "bg-green-50 text-green-700 border-green-200"
+                  : "bg-red-50 text-red-600 border-red-200"
+                  }`}
               >
                 {serverMessage}
               </div>
@@ -222,7 +325,7 @@ export default function LoginPage() {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full py-3.5 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 disabled:bg-orange-300 disabled:cursor-not-allowed text-white text-base font-bold rounded-xl transition-all duration-200 shadow-lg shadow-orange-200 tracking-wide"
+              className="w-full py-3.5 flex items-center justify-center gap-2 bg-[#212121] disabled:bg-[#555555] disabled:cursor-not-allowed text-white text-base font-bold rounded-xl transition-all duration-200  tracking-wide"
             >
               {loading ? "Signing In..." : "Sign In"}
             </button>
@@ -258,6 +361,111 @@ export default function LoginPage() {
           <p className="text-xs text-slate-500"></p>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-slate-50">
+              <h3 className="text-lg font-bold text-slate-800">
+                {forgotStep === 1 && "Forgot Password"}
+                {forgotStep === 2 && "Enter OTP"}
+                {forgotStep === 3 && "Reset Password"}
+              </h3>
+              <button 
+                onClick={() => setShowForgotModal(false)}
+                className="text-gray-400 hover:text-gray-700 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-6">
+              {forgotMessage && (
+                <div className="mb-4 text-sm px-4 py-2.5 rounded-lg bg-green-50 text-green-700 border border-green-200">
+                  {forgotMessage}
+                </div>
+              )}
+              {forgotError && (
+                <div className="mb-4 text-sm px-4 py-2.5 rounded-lg bg-red-50 text-red-600 border border-red-200">
+                  {forgotError}
+                </div>
+              )}
+
+              {/* Step 1: Email */}
+              {forgotStep === 1 && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-4">Enter your registered email address to receive a password reset OTP.</p>
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border border-gray-200 focus:border-orange-500 focus:bg-white mb-4"
+                  />
+                  <button
+                    onClick={handleForgotSubmitEmail}
+                    disabled={forgotLoading}
+                    className="w-full py-3 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold rounded-xl transition-all disabled:opacity-70 shadow-md shadow-orange-200"
+                  >
+                    {forgotLoading ? "Sending..." : "Send OTP"}
+                  </button>
+                </div>
+              )}
+
+              {/* Step 2: OTP */}
+              {forgotStep === 2 && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-4">We've sent a 6-digit OTP to <strong>{forgotEmail}</strong>.</p>
+                  <input
+                    type="text"
+                    placeholder="Enter OTP"
+                    value={forgotOtp}
+                    onChange={(e) => setForgotOtp(e.target.value)}
+                    maxLength={6}
+                    className="w-full px-4 py-3 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border border-gray-200 focus:border-orange-500 focus:bg-white mb-4 tracking-widest text-center text-lg font-mono"
+                  />
+                  <button
+                    onClick={handleForgotSubmitOtp}
+                    disabled={forgotLoading}
+                    className="w-full py-3 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold rounded-xl transition-all disabled:opacity-70 shadow-md shadow-orange-200"
+                  >
+                    {forgotLoading ? "Verifying..." : "Verify OTP"}
+                  </button>
+                </div>
+              )}
+
+              {/* Step 3: Reset */}
+              {forgotStep === 3 && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-4">Enter your new password below.</p>
+                  <input
+                    type="password"
+                    placeholder="New Password"
+                    value={forgotPassword}
+                    onChange={(e) => setForgotPassword(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border border-gray-200 focus:border-orange-500 focus:bg-white mb-3"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Confirm New Password"
+                    value={forgotConfirmPassword}
+                    onChange={(e) => setForgotConfirmPassword(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border border-gray-200 focus:border-orange-500 focus:bg-white mb-4"
+                  />
+                  <button
+                    onClick={handleForgotSubmitReset}
+                    disabled={forgotLoading}
+                    className="w-full py-3 bg-[#212121] text-white font-bold rounded-xl transition-all disabled:opacity-70 "
+                  >
+                    {forgotLoading ? "Resetting..." : "Reset Password"}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <style
         dangerouslySetInnerHTML={{

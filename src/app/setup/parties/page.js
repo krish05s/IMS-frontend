@@ -13,6 +13,9 @@ export default function Page() {
   const [parties, setParties] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -123,6 +126,10 @@ export default function Page() {
     setIsDeleteModalOpen(true);
   };
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
+
   const executeDelete = async () => {
     if (!partyToDelete) return;
     setIsDeleting(true);
@@ -152,6 +159,36 @@ export default function Page() {
     }
   };
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+  const currentParties = parties.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(parties.length / itemsPerPage);
+
+  const getSlidingPages = () => {
+    const visibleCount = 5;
+
+    // ✅ If total pages less than visible count
+    if (totalPages <= visibleCount) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    let start = currentPage - Math.floor(visibleCount / 2);
+    let end = currentPage + Math.floor(visibleCount / 2);
+
+    if (start < 1) {
+      start = 1;
+      end = visibleCount;
+    }
+
+    if (end > totalPages) {
+      end = totalPages;
+      start = totalPages - visibleCount + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
+
   return (
     <div className="min-h-screen bg-[#f1f1f1] flex">
       <Sidebar />
@@ -176,7 +213,7 @@ export default function Page() {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-    Add {activeTab === "purchase" ? "Purchase" : "sales"}
+              Add {activeTab === "purchase" ? "Purchase" : "sales"}
             </button>
           }
         />
@@ -251,19 +288,19 @@ export default function Page() {
                         key={p.id}
                         className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition"
                       >
-                        <td className="py-3 px-4 text-center text-slate-600 font-medium whitespace-nowrap">
+                        <td className="py-1.5 px-4 text-center text-slate-600 font-medium whitespace-nowrap">
                           {index + 1}
                         </td>
-                        <td className="py-3 px-4 text-slate-800 font-bold">
+                        <td className="py-1.5 px-4 text-slate-800 font-bold">
                           {p.name}
                         </td>
-                        <td className="py-3 px-4 text-slate-600">
+                        <td className="py-1.5 px-4 text-slate-600">
                           {p.phone || "-"}
                         </td>
-                        <td className="py-3 px-4 text-slate-600 truncate max-w-[200px]">
+                        <td className="py-1.5 px-4 text-slate-600 truncate max-w-[200px]">
                           {p.address || "-"}
                         </td>
-                        <td className="py-3 px-4 text-center">
+                        <td className="py-1.5 px-4 text-center">
                           <div className="flex justify-center gap-2">
                             <button
                               onClick={() => handleOpenModal(p)}
@@ -322,17 +359,104 @@ export default function Page() {
                   </tbody>
                 </table>
               </div>
+
+              <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-500">Rows per page:</span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      setItemsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={100}>100</option>
+                    <option value={200}>200</option>
+                  </select>
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                    {/* Prev */}
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                    >
+                      &lt;
+                    </button>
+
+                    {/* Sliding Pages */}
+                    {getSlidingPages().map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                          currentPage === page
+                            ? "bg-[#212121] text-white"
+                            : "border border-slate-200 text-slate-600"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+
+                    {/* Next */}
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                    >
+                      &gt;
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {/* Add/Edit Modal */}
           {isModalOpen && (
             <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-              <div className="bg-white p-8 rounded-2xl w-full max-w-lg shadow-xl border border-slate-200">
-                <h2 className="text-xl font-bold text-slate-800 mb-6">
-                  {currentPartyId ? "Edit" : "Add"}{" "}
-                  {activeTab === "purchase" ? "Supplier" : "Customer"}
-                </h2>
+              <div className="bg-white p-8 rounded-2xl w-full max-w-lg shadow-xl">
+                <div className="flex items-center justify-between bg-gradient-to-r from-[#2c2c2c] to-[#4b4b4b] text-white px-6 py-4 rounded-t-2xl -m-8 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white/20 p-2 rounded-full">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        />
+                      </svg>
+                    </div>
+
+                    <h2 className="text-lg font-semibold">
+                      {currentPartyId ? "Edit" : "Add"}{" "}
+                      {activeTab === "purchase" ? "Supplier" : "Customer"}
+                    </h2>
+                  </div>
+
+                  <button
+                    onClick={handleCloseModal}
+                    className="text-white hover:text-gray-200"
+                  >
+                    ✕
+                  </button>
+                </div>
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -341,12 +465,12 @@ export default function Page() {
                     <input
                       type="text"
                       required
+                      autoFocus
                       value={formData.name}
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
-                      placeholder="e.g. Acme Corp"
+                      className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] focus:outline-none focus:ring-0 focus:border-[#C19A6B] bg-white"
                     />
                   </div>
 
@@ -360,7 +484,7 @@ export default function Page() {
                       onChange={(e) =>
                         setFormData({ ...formData, phone: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                      className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] focus:outline-none focus:ring-0 focus:border-[#C19A6B] bg-white"
                       placeholder="e.g. +1 234 567 8900"
                     />
                   </div>
@@ -375,7 +499,7 @@ export default function Page() {
                       onChange={(e) =>
                         setFormData({ ...formData, address: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white resize-none"
+                      className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] focus:outline-none focus:ring-0 focus:border-[#C19A6B] bg-white"
                       placeholder="Enter complete address"
                     />
                   </div>
@@ -392,7 +516,7 @@ export default function Page() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="bg-[#212121] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center"
+                      className="bg-orange-500 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20 disabled:opacity-70 flex items-center"
                     >
                       {isSubmitting && (
                         <svg
@@ -426,73 +550,94 @@ export default function Page() {
               </div>
             </div>
           )}
-
           {/* Delete Confirmation Modal */}
+
           {isDeleteModalOpen && (
             <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-              <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-xl border border-slate-200 text-center">
-                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                  <svg
-                    className="h-6 w-6 text-red-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-bold text-slate-800 mb-2">
-                  Delete {activeTab === "purchase" ? "Supplier" : "Customer"}
-                </h3>
-                <p className="text-sm text-slate-500 mb-6">
-                  Are you sure you want to delete{" "}
-                  <strong>{partyToDelete?.name}</strong>? This action cannot be
-                  undone.
-                </p>
-
-                <div className="flex justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setIsDeleteModalOpen(false)}
-                    disabled={isDeleting}
-                    className="px-4 py-2 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition disabled:opacity-50 w-full"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={executeDelete}
-                    disabled={isDeleting}
-                    className="px-4 py-2 rounded-lg bg-[#212121] text-white font-bold  transition  disabled:opacity-70 flex items-center justify-center w-full"
-                  >
-                    {isDeleting && (
+              <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden">
+                {/* HEADER (same as Edit modal style) */}
+                <div className="flex items-center justify-between bg-gradient-to-r from-[#2c2c2c] to-[#4b4b4b] text-white px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white/20 p-2 rounded-full">
+                      {/* DELETE ICON */}
                       <svg
-                        className="animate-spin h-4 w-4 mr-2 inline"
-                        viewBox="0 0 24 24"
+                        className="w-5 h-5"
                         fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                       >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
                         <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8v8z"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 7h12M9 7v10m6-10v10M10 4h4a1 1 0 011 1v2H9V5a1 1 0 011-1zm-3 3h12l-1 13a2 2 0 01-2 2H8a2 2 0 01-2-2L5 7z"
                         />
                       </svg>
-                    )}
-                    {isDeleting ? "Deleting..." : "Yes, Delete"}
+                    </div>
+
+                    <h2 className="text-lg font-semibold">
+                      Delete{" "}
+                      {activeTab === "purchase" ? "Supplier" : "Customer"}
+                    </h2>
+                  </div>
+
+                  {/* CLOSE BUTTON */}
+                  <button
+                    onClick={() => setIsDeleteModalOpen(false)}
+                    className="text-white hover:text-gray-200 text-xl"
+                  >
+                    ✕
                   </button>
+                </div>
+
+                {/* BODY */}
+                <div className="p-6 text-center">
+                  <p className="text-slate-600 text-sm mb-6">
+                    Are you sure you want to delete{" "}
+                    <span className="font-semibold text-slate-800">
+                      {partyToDelete?.name}
+                    </span>
+                    ? This action cannot be undone.
+                  </p>
+
+                  {/* ACTION BUTTONS */}
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => setIsDeleteModalOpen(false)}
+                      disabled={isDeleting}
+                      className="px-5 py-2.5 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      onClick={executeDelete}
+                      disabled={isDeleting}
+                      className="px-6 py-2.5 rounded-lg bg-black text-white font-bold hover:bg-gray-800 transition shadow-md shadow-black/20 flex items-center"
+                    >
+                      {isDeleting && (
+                        <svg
+                          className="animate-spin h-4 w-4 mr-2"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z"
+                          />
+                        </svg>
+                      )}
+                      {isDeleting ? "Deleting..." : "Yes, Delete"}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

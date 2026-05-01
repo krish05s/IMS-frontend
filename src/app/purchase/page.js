@@ -359,14 +359,37 @@ export default function Purchases() {
         .toLowerCase()
         .includes(filters.driver_number.toLowerCase()),
   );
-
-  const indexOfLastItem = currentPage * itemsPerPage;
+const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentPurchases = filteredPurchases.slice(
     indexOfFirstItem,
     indexOfLastItem,
   );
   const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
+
+  const getSlidingPages = () => {
+    const visibleCount = 5;
+
+    // ✅ If total pages less than visible count
+    if (totalPages <= visibleCount) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    let start = currentPage - Math.floor(visibleCount / 2);
+    let end = currentPage + Math.floor(visibleCount / 2);
+
+    if (start < 1) {
+      start = 1;
+      end = visibleCount;
+    }
+
+    if (end > totalPages) {
+      end = totalPages;
+      start = totalPages - visibleCount + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
 
   const printInvoice = (purchase) => {
     let totalKg = 0;
@@ -587,10 +610,22 @@ export default function Purchases() {
       <div className="flex-1 md:ml-64 overflow-x-auto scrollbar-hide">
         <Topbar
           actions={
-            <button onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
               </svg>
               Add Purchase
             </button>
@@ -609,9 +644,33 @@ export default function Purchases() {
 
               {/* Filter Bar */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
-                <input type="text" placeholder="Filter by Bill No..." value={filters.bill_no} onChange={(e) => setFilters({ ...filters, bill_no: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none  transition-colors" />
-                <input type="text" placeholder="Filter by Vehicle No..." value={filters.vehicle_no} onChange={(e) => setFilters({ ...filters, vehicle_no: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none  transition-colors" />
-                <input type="text" placeholder="Filter by Driver No..." value={filters.driver_number} onChange={(e) => setFilters({ ...filters, driver_number: e.target.value })} className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none  transition-colors" />
+                <input
+                  type="text"
+                  placeholder="Filter by Bill No..."
+                  value={filters.bill_no}
+                  onChange={(e) =>
+                    setFilters({ ...filters, bill_no: e.target.value })
+                  }
+                  className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none  transition-colors"
+                />
+                <input
+                  type="text"
+                  placeholder="Filter by Vehicle No..."
+                  value={filters.vehicle_no}
+                  onChange={(e) =>
+                    setFilters({ ...filters, vehicle_no: e.target.value })
+                  }
+                  className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none  transition-colors"
+                />
+                <input
+                  type="text"
+                  placeholder="Filter by Driver No..."
+                  value={filters.driver_number}
+                  onChange={(e) =>
+                    setFilters({ ...filters, driver_number: e.target.value })
+                  }
+                  className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none  transition-colors"
+                />
               </div>
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-w-full overflow-hidden flex flex-col">
                 <div className="overflow-x-auto scrollbar-hide">
@@ -654,25 +713,25 @@ export default function Purchases() {
                       {currentPurchases.map((p, index) => (
                         <React.Fragment key={p.id}>
                           <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition">
-                            <td className="py-3 px-4 text-center text-slate-600 font-medium whitespace-nowrap">
+                            <td className="py-1.5 px-4 text-center text-slate-600 font-medium whitespace-nowrap">
                               {indexOfFirstItem + index + 1}
                             </td>
-                            <td className="py-3 px-4 text-slate-800 font-medium">
+                            <td className="py-1.5 px-4 text-slate-800 font-medium">
                               {p.bill_no}
                             </td>
-                            <td className="py-3 px-4 text-slate-800">
+                            <td className="py-1.5 px-4 text-slate-800">
                               {new Date(p.date).toLocaleDateString()}
                             </td>
-                            <td className="py-3 px-4 font-bold text-slate-800">
+                            <td className="py-1.5 px-4 font-bold text-slate-800">
                               {p.party_name || "-"}
                             </td>
-                            <td className="py-3 px-4 text-slate-600">
+                            <td className="py-1.5  px-4 text-slate-600">
                               {p.vehicle_no || "-"}
                             </td>
-                            <td className="py-3 px-4 text-orange-600 font-medium text-center">
+                            <td className="py-1.5  px-4 text-orange-600 font-medium text-center">
                               {p.items_count || (p.product_code ? 1 : 0)}
                             </td>
-                            <td className="py-3 px-4 text-slate-500 text-xs text-center whitespace-nowrap">
+                            <td className="py-1.5 px-4 text-slate-500 text-xs text-center whitespace-nowrap">
                               {p.created_at
                                 ? new Date(p.created_at).toLocaleString(
                                     "en-GB",
@@ -686,10 +745,10 @@ export default function Purchases() {
                                   )
                                 : "-"}
                             </td>
-                            <td className="py-3 px-4 text-slate-600 font-medium text-center whitespace-nowrap">
+                            <td className="py-1.5 px-4 text-slate-600 font-medium text-center whitespace-nowrap">
                               {p.created_by || "-"}
                             </td>
-                            <td className="py-3 px-4 text-center">
+                            <td className="py-1.5 px-4 text-center">
                               <div className="flex justify-center gap-2">
                                 <button
                                   onClick={() => toggleItemsExpansion(p)}
@@ -765,7 +824,7 @@ export default function Purchases() {
                                 </button>
                               </div>
                             </td>
-                            <td className="py-3 px-4 text-center">
+                            <td className="py-1.5 px-4 text-center">
                               <button
                                 onClick={() => printInvoice(p)}
                                 className="flex items-center justify-center mx-auto gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 font-semibold rounded-lg transition-colors text-xs"
@@ -804,7 +863,7 @@ export default function Purchases() {
                                       {expandedItems.map((item, idx) => (
                                         <div
                                           key={idx}
-                                          className="flex items-end gap-3 py-3 border-b border-slate-100 last:border-0"
+                                          className="flex items-end gap-3 py-1.5 border-b border-slate-100 last:border-0"
                                         >
                                           {!item.isEditing ? (
                                             <div className="flex-1 flex justify-between items-center text-slate-700">
@@ -1009,14 +1068,16 @@ export default function Purchases() {
                       className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                     >
                       <option value={10}>10</option>
-                      <option value={50}>50</option>
+                      <option value={20}>20</option>
                       <option value={100}>100</option>
                       <option value={200}>200</option>
                     </select>
                   </div>
 
                   {totalPages > 1 && (
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+
+                      {/* Prev */}
                       <button
                         onClick={() =>
                           setCurrentPage((prev) => Math.max(prev - 1, 1))
@@ -1026,21 +1087,26 @@ export default function Purchases() {
                       >
                         &lt;
                       </button>
-                      <div className="flex items-center gap-2">
-                        {[...Array(totalPages)].map((_, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setCurrentPage(i + 1)}
-                            className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-[#212121] text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
-                          >
-                            {i + 1}
-                          </button>
-                        ))}
-                      </div>
+
+                      {/* Sliding Pages */}
+                      {getSlidingPages().map((page) => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
+                              ? "bg-[#212121] text-white"
+                              : "border border-slate-200 text-slate-600"
+                            }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+
+                      {/* Next */}
                       <button
                         onClick={() =>
                           setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages),
+                            Math.min(prev + 1, totalPages)
                           )
                         }
                         disabled={currentPage === totalPages}
@@ -1048,19 +1114,44 @@ export default function Purchases() {
                       >
                         &gt;
                       </button>
+
                     </div>
                   )}
                 </div>
               </div>
-
+              {/* edit */}
               {isModalOpen && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-                  <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-                    <h2 className="text-xl font-bold text-slate-800 mb-6">
-                      {currentPurchaseId
-                        ? "Edit Purchase Order"
-                        : "Record Purchase Order"}
-                    </h2>
+                  <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl max-h-[90vh] overflow-y-auto">
+                    <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555] rounded-t-2xl -mx-8 -mt-8 mb-6">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+                          <svg
+                            className="w-4 h-4 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </div>
+                        <h2 className="text-base font-semibold text-white">
+                          {currentPurchaseId ? "Edit Purchase" : "Add Purchase"}
+                        </h2>
+                      </div>
+
+                      <button
+                        onClick={handleCloseModal}
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-colors"
+                      >
+                        ✕
+                      </button>
+                    </div>
                     <form
                       onSubmit={handleSubmit}
                       className="flex flex-col gap-6"
@@ -1077,7 +1168,7 @@ export default function Purchases() {
                             onChange={(e) =>
                               setFormData({ ...formData, date: e.target.value })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           />
                         </div>
                         <div>
@@ -1094,7 +1185,7 @@ export default function Purchases() {
                                 bill_no: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
                             placeholder="e.g. INV-2039"
                           />
                         </div>
@@ -1110,7 +1201,7 @@ export default function Purchases() {
                                 party_name: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
                           >
                             <option value="">-- Select Supplier --</option>
                             {purchaseParties.map((p) => (
@@ -1133,7 +1224,7 @@ export default function Purchases() {
                                 vehicle_no: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 uppercase bg-white"
+                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none uppercase bg-white"
                             placeholder="e.g. GJ05 1234"
                           />
                         </div>
@@ -1151,7 +1242,7 @@ export default function Purchases() {
                                 driver_name: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
                             placeholder="e.g. John Doe"
                           />
                         </div>
@@ -1168,7 +1259,7 @@ export default function Purchases() {
                                 driver_number: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
                             placeholder="e.g. 1234567890"
                           />
                         </div>
@@ -1185,7 +1276,7 @@ export default function Purchases() {
                                 transporter_name: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
                             placeholder="e.g. ABC Logistics"
                           />
                         </div>
@@ -1202,7 +1293,7 @@ export default function Purchases() {
                                 lr_number: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
                             placeholder="e.g. LR-98765"
                           />
                         </div>
@@ -1219,7 +1310,7 @@ export default function Purchases() {
                         <button
                           type="submit"
                           disabled={isSubmitting}
-                          className="bg-[#212121] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70"
+                          className="bg-[#212121] hover:bg-[#444444] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70"
                         >
                           {isSubmitting && (
                             <svg
@@ -1255,70 +1346,60 @@ export default function Purchases() {
               )}
 
               {/* Delete Confirmation Modal */}
+
               {isDeleteModalOpen && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-                  <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-xl border border-slate-200 text-center">
-                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                      <svg
-                        className="h-6 w-6 text-red-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                        />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-800 mb-2">
-                      Delete Purchase
-                    </h3>
-                    <p className="text-sm text-slate-500 mb-6">
-                      Are you sure you want to delete this purchase record? The
-                      inventory will be reversed.
-                    </p>
+                  <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden">
+                    {/* HEADER */}
+                    <div className="flex justify-between items-center px-5 py-4 bg-gradient-to-r from-[#212121] to-[#555555]">
+                      <div className="flex items-center gap-2 text-white font-semibold">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
+                          />
+                        </svg>
+                        Delete Purchase
+                      </div>
 
-                    <div className="flex justify-center gap-3">
                       <button
-                        type="button"
                         onClick={() => setIsDeleteModalOpen(false)}
-                        disabled={isDeleting}
-                        className="px-4 py-2 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition disabled:opacity-50 w-full"
+                        className="text-white text-lg"
                       >
-                        Cancel
+                        ✕
                       </button>
-                      <button
-                        type="button"
-                        onClick={executeDelete}
-                        disabled={isDeleting}
-                        className="px-4 py-2 rounded-lg bg-[#212121] text-white font-bold  transition  disabled:opacity-70 flex items-center justify-center w-full"
-                      >
-                        {isDeleting && (
-                          <svg
-                            className="animate-spin h-4 w-4 mr-2 inline"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            />
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8v8z"
-                            />
-                          </svg>
-                        )}
-                        {isDeleting ? "Deleting..." : "Yes, Delete"}
-                      </button>
+                    </div>
+
+                    {/* BODY */}
+                    <div className="p-6 text-center">
+                      <p className="text-slate-600 text-sm mb-6">
+                        Are you sure you want to delete this purchase? Inventory
+                        will be reverted.
+                      </p>
+
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => setIsDeleteModalOpen(false)}
+                          className="w-full py-2 rounded-lg bg-gray-100 text-gray-700 font-semibold"
+                        >
+                          Cancel
+                        </button>
+
+                        <button
+                          onClick={executeDelete}
+                          disabled={isDeleting}
+                          className="w-full py-2 rounded-lg bg-[#212121] text-white font-semibold"
+                        >
+                          {isDeleting ? "Deleting..." : "Yes, Delete"}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

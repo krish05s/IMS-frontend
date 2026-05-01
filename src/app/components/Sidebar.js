@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+
 // --- SVG Icons ---
 const Icons = {
   Dashboard: (
@@ -101,19 +102,25 @@ const Icons = {
     </svg>
   ),
   Setup: (
-     <svg xmlns="http://www.w3.org/2000/svg" 
-    fill="none" 
-    viewBox="0 0 24 24" 
-    strokeWidth={1.5} 
-    stroke="currentColor" 
-    className="w-5 h-5"
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="w-5 h-5"
     >
-      <path 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" 
-      /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+      />
+    </svg>
   ),
 };
 
@@ -163,6 +170,14 @@ export default function Sidebar() {
     }
   }, []);
 
+  // ✅ FIX: Listen for hamburger toggle event from Topbar
+  useEffect(() => {
+    const toggleSidebar = () => setIsOpen((prev) => !prev);
+    window.addEventListener("toggleSidebarToggle", toggleSidebar);
+    return () =>
+      window.removeEventListener("toggleSidebarToggle", toggleSidebar);
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("isLoggedIn");
@@ -171,28 +186,7 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile Hamburger Trigger */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-40 p-2 bg-white rounded-lg shadow-md border border-slate-200 text-slate-700 hover:bg-slate-50 transition"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={2.5}
-          stroke="currentColor"
-          className="w-6 h-6"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-          />
-        </svg>
-      </button>
-
-      {/* Background Overlay (Mobile Only) */}
+      {/* ✅ FIX: Overlay - Mobile Only - click karo to sidebar band thay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-slate-900/50 z-40 md:hidden backdrop-blur-sm transition-opacity"
@@ -200,10 +194,15 @@ export default function Sidebar() {
         />
       )}
 
-      {/* Sidebar Panel */}
+      {/* ✅ FIX: Sidebar Panel - isOpen state thi translate control thay chhe */}
       <div
-        className={`fixed top-0 left-0 h-full w-64 bg-slate-50 text-slate-700 border-r border-slate-200 p-5 z-50 shadow-sm transition-transform duration-300 md:translate-x-0 flex flex-col ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed top-0 left-0 h-full w-64 bg-slate-50 text-slate-700 border-r border-slate-200 p-5 z-50 shadow-sm flex flex-col
+          transition-transform duration-300
+          md:translate-x-0
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        `}
       >
+        {/* Header - Logo + Close Button */}
         <div className="flex justify-between items-center mb-8 md:mb-6">
           <div className="flex justify-center items-center w-full">
             <img
@@ -213,6 +212,7 @@ export default function Sidebar() {
             />
           </div>
 
+          {/* Close button - Mobile only */}
           <button
             onClick={() => setIsOpen(false)}
             className="md:hidden p-2 text-slate-500 hover:text-red-500 bg-slate-200 rounded-md"
@@ -234,9 +234,9 @@ export default function Sidebar() {
           </button>
         </div>
 
-        {/* --- STATIC MENU FOR BETTER PERFORMANCE --- */}
+        {/* Navigation */}
         <nav className="flex flex-col gap-3 flex-1 overflow-y-auto pr-2 pb-4">
-          {/* Dashboard - Visible to admin, sales, purchase, user */}
+          {/* Dashboard - admin, sales, purchase, user */}
           {(role === "admin" ||
             role === "sales" ||
             role === "purchase" ||
@@ -250,7 +250,7 @@ export default function Sidebar() {
             />
           )}
 
-          {/* Gradations - Visible to admin only */}
+          {/* Gradations - admin only */}
           {role === "admin" && (
             <NavItem
               href="/gradations"
@@ -261,7 +261,7 @@ export default function Sidebar() {
             />
           )}
 
-          {/* Products - Visible to admin, sales, purchase */}
+          {/* Products - admin, sales, purchase */}
           {(role === "admin" || role === "sales" || role === "purchase") && (
             <NavItem
               href="/products"
@@ -272,7 +272,7 @@ export default function Sidebar() {
             />
           )}
 
-          {/* Purchase - Visible to admin, purchase */}
+          {/* Purchase - admin, purchase */}
           {(role === "admin" || role === "purchase") && (
             <NavItem
               href="/purchase"
@@ -283,7 +283,7 @@ export default function Sidebar() {
             />
           )}
 
-          {/* Sales - Visible to admin, sales */}
+          {/* Sales - admin, sales */}
           {(role === "admin" || role === "sales") && (
             <NavItem
               href="/sales"
@@ -294,7 +294,7 @@ export default function Sidebar() {
             />
           )}
 
-          {/* Members - Visible to admin only */}
+          {/* Members - admin only */}
           {role === "admin" && (
             <NavItem
               href="/members"
@@ -304,9 +304,16 @@ export default function Sidebar() {
               label="Members"
             />
           )}
-          {/* Setup - Visible to admin only */}
+
+          {/* Setup - admin only */}
           {role === "admin" && (
-            <NavItem href="/setup/parties" currentPath={pathname} onClick={() => setIsOpen(false)} icon={Icons.Setup} label="Setup" />
+            <NavItem
+              href="/setup/parties"
+              currentPath={pathname}
+              onClick={() => setIsOpen(false)}
+              icon={Icons.Setup}
+              label="Setup"
+            />
           )}
         </nav>
 
