@@ -139,13 +139,41 @@ export default function Gradations() {
     g.gradation.toLowerCase().includes(filters.gradation.toLowerCase()),
   );
 
-  const indexOfLastItem = currentPage * itemsPerPage;
+const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
   const currentGradations = filteredGradations.slice(
-    indexOfFirstItem,
-    indexOfLastItem,
-  );
-  const totalPages = Math.ceil(filteredGradations.length / itemsPerPage);
+  indexOfFirstItem,
+  indexOfLastItem
+);
+
+const totalPages = Math.ceil(
+  filteredGradations.length / itemsPerPage
+);
+
+  const getSlidingPages = () => {
+    const visibleCount = 5;
+
+    // ✅ If total pages less than visible count
+    if (totalPages <= visibleCount) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    let start = currentPage - Math.floor(visibleCount / 2);
+    let end = currentPage + Math.floor(visibleCount / 2);
+
+    if (start < 1) {
+      start = 1;
+      end = visibleCount;
+    }
+
+    if (end > totalPages) {
+      end = totalPages;
+      start = totalPages - visibleCount + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
 
   return (
     <div className="min-h-screen bg-[#f1f1f1] flex">
@@ -250,13 +278,13 @@ export default function Gradations() {
                           key={g.id}
                           className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition"
                         >
-                          <td className="py-3 px-4 text-slate-600 font-medium whitespace-nowrap">
+                          <td className="py-1.5 px-4 text-slate-600 font-medium whitespace-nowrap">
                             {indexOfFirstItem + index + 1}
                           </td>
-                          <td className="py-3 px-4 text-slate-800 font-medium">
+                          <td className="py-1.5 px-4 text-slate-800 font-medium">
                             {g.gradation}
                           </td>
-                          <td className="py-3 px-4">
+                          <td className="py-1.5 px-4">
                             <button
                               onClick={() => handleToggleStatus(g.id, g.status)}
                               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
@@ -272,7 +300,7 @@ export default function Gradations() {
                               />
                             </button>
                           </td>
-                          <td className="py-3 px-4 text-right whitespace-nowrap">
+                          <td className="py-1.5 px-4 text-right whitespace-nowrap">
                             <div className="flex justify-end">
                               <button
                                 onClick={() => handleOpenModal(g)}
@@ -297,7 +325,7 @@ export default function Gradations() {
                           </td>
                         </tr>
                       ))}
-                      {filteredGradations.length === 0 && (
+                      {currentGradations.length === 0 && (
                         <tr>
                           <td
                             colSpan="4"
@@ -312,61 +340,69 @@ export default function Gradations() {
                 </div>
 
                 <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-500">
-                      Rows per page:
-                    </span>
-                    <select
-                      value={itemsPerPage}
-                      onChange={(e) => {
-                        setItemsPerPage(Number(e.target.value));
-                        setCurrentPage(1);
-                      }}
-                      className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                    >
-                      <option value={10}>10</option>
-                      <option value={50}>50</option>
-                      <option value={100}>100</option>
-                      <option value={200}>200</option>
-                    </select>
-                  </div>
-
-                  {totalPages > 1 && (
-                    <div className="flex items-center gap-4">
-                      <button
-                        onClick={() =>
-                          setCurrentPage((prev) => Math.max(prev - 1, 1))
-                        }
-                        disabled={currentPage === 1}
-                        className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
-                      >
-                        &lt;
-                      </button>
-                      <div className="flex items-center gap-2">
-                        {[...Array(totalPages)].map((_, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setCurrentPage(i + 1)}
-                            className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-[#212121] text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
-                          >
-                            {i + 1}
-                          </button>
-                        ))}
-                      </div>
-                      <button
-                        onClick={() =>
-                          setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages),
-                          )
-                        }
-                        disabled={currentPage === totalPages}
-                        className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
-                      >
-                        &gt;
-                      </button>
-                    </div>
-                  )}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-500">
+                    Rows per page:
+                  </span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      setItemsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={100}>100</option>
+                    <option value={200}>200</option>
+                  </select>
                 </div>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+
+                    {/* Prev */}
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                    >
+                      &lt;
+                    </button>
+
+                    {/* Sliding Pages */}
+                    {getSlidingPages().map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
+                          ? "bg-[#212121] text-white"
+                          : "border border-slate-200 text-slate-600"
+                          }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+
+                    {/* Next */}
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) =>
+                          Math.min(prev + 1, totalPages)
+                        )
+                      }
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                    >
+                      &gt;
+                    </button>
+
+                  </div>
+                )}
+              </div>
               </div>
             </>
           )}

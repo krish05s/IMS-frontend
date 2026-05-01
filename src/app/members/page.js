@@ -215,11 +215,37 @@ function Members() {
       u.email?.toLowerCase().includes(filters.email.toLowerCase()) &&
       u.role?.toLowerCase().includes(filters.role.toLowerCase()),
   );
-
-  const indexOfLastItem = currentPage * itemsPerPage;
+const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+  const currentUsers = filteredUsers.slice(
+    indexOfFirstItem,
+    indexOfLastItem,
+  );
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+  const getSlidingPages = () => {
+    const visibleCount = 5;
+
+    // ✅ If total pages less than visible count
+    if (totalPages <= visibleCount) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    let start = currentPage - Math.floor(visibleCount / 2);
+    let end = currentPage + Math.floor(visibleCount / 2);
+
+    if (start < 1) {
+      start = 1;
+      end = visibleCount;
+    }
+
+    if (end > totalPages) {
+      end = totalPages;
+      start = totalPages - visibleCount + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
 
   return (
     <div className="flex min-h-screen bg-[#f1f1f1]">
@@ -338,10 +364,10 @@ function Members() {
                           key={user.id}
                           className="hover:bg-slate-50 transition-colors"
                         >
-                          <td className="px-5 py-4 text-slate-400 font-mono text-xs whitespace-nowrap">
+                          <td className="px-5 py-1.5 text-slate-400 font-mono text-xs whitespace-nowrap">
                             {indexOfFirstItem + idx + 1}
                           </td>
-                          <td className="px-5 py-4">
+                          <td className="px-5 py-1.5">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded-full bg-emerald-100 text-[emerald-600] font-bold text-sm flex items-center justify-center uppercase">
                                 {user.name?.charAt(0)}
@@ -351,20 +377,20 @@ function Members() {
                               </span>
                             </div>
                           </td>
-                          <td className="px-5 py-4 text-slate-500">
+                          <td className="px-5 py-1.5 text-slate-500">
                             {user.email}
                           </td>
-                          <td className="px-5 py-4 text-slate-500">
+                          <td className="px-5 py-1.5 text-slate-500">
                             {user.mobile}
                           </td>
-                          <td className="px-5 py-4">
+                          <td className="px-5 py-1.5">
                             <span
                               className={`px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${user.role === "admin" ? "bg-amber-100 text-amber-700" : "bg-sky-100 text-sky-700"}`}
                             >
                               {user.role}
                             </span>
                           </td>
-                          <td className="px-5 py-4">
+                          <td className="px-5 py-1.5">
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => handleToggleStatus(user)}
@@ -381,7 +407,7 @@ function Members() {
                               </span>
                             </div>
                           </td>
-                          <td className="px-5 py-4">
+                          <td className="px-5 py-1.5">
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => openEdit(user)}
@@ -445,17 +471,19 @@ function Members() {
                         setItemsPerPage(Number(e.target.value));
                         setCurrentPage(1);
                       }}
-                      className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                      className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                     >
                       <option value={10}>10</option>
-                      <option value={50}>50</option>
+                      <option value={20}>20</option>
                       <option value={100}>100</option>
                       <option value={200}>200</option>
                     </select>
                   </div>
 
                   {totalPages > 1 && (
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+
+                      {/* Prev */}
                       <button
                         onClick={() =>
                           setCurrentPage((prev) => Math.max(prev - 1, 1))
@@ -465,21 +493,26 @@ function Members() {
                       >
                         &lt;
                       </button>
-                      <div className="flex items-center gap-2">
-                        {[...Array(totalPages)].map((_, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setCurrentPage(i + 1)}
-                            className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-emerald-500 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
-                          >
-                            {i + 1}
-                          </button>
-                        ))}
-                      </div>
+
+                      {/* Sliding Pages */}
+                      {getSlidingPages().map((page) => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
+                              ? "bg-[#212121] text-white"
+                              : "border border-slate-200 text-slate-600"
+                            }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+
+                      {/* Next */}
                       <button
                         onClick={() =>
                           setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages),
+                            Math.min(prev + 1, totalPages)
                           )
                         }
                         disabled={currentPage === totalPages}
@@ -487,6 +520,7 @@ function Members() {
                       >
                         &gt;
                       </button>
+
                     </div>
                   )}
                 </div>

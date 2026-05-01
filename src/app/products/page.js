@@ -188,6 +188,31 @@ export default function Products() {
   );
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
+
+const getSlidingPages = () => {
+  const visibleCount = 5;
+
+  // ✅ If total pages less than visible count
+  if (totalPages <= visibleCount) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  let start = currentPage - Math.floor(visibleCount / 2);
+  let end = currentPage + Math.floor(visibleCount / 2);
+
+  if (start < 1) {
+    start = 1;
+    end = visibleCount;
+  }
+
+  if (end > totalPages) {
+    end = totalPages;
+    start = totalPages - visibleCount + 1;
+  }
+
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+};
+
   return (
     <div className="min-h-screen bg-[#f1f1f1] flex">
       <Sidebar />
@@ -317,23 +342,23 @@ export default function Products() {
                           key={p.id}
                           className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition"
                         >
-                          <td className="py-3 px-4 text-slate-600 font-medium whitespace-nowrap">
+                          <td className="py-1.5 px-4 text-slate-600 font-medium whitespace-nowrap">
                             {indexOfFirstItem + index + 1}
                           </td>
-                          <td className="py-3 px-4 text-orange-600 font-semibold">
+                          <td className="py-1.5 px-4 text-orange-600 font-semibold">
                             {p.product_code}
                           </td>
-                          <td className="py-3 px-4 text-slate-800 font-medium">
+                          <td className="py-1.5 px-4 text-slate-800 font-medium">
                             {p.product_name}
                           </td>
-                          <td className="py-3 px-4 text-slate-600">
+                          <td className="py-1.5 px-4 text-slate-600">
                             {p.gradation}
                           </td>
-                          <td className="py-3 px-4 text-slate-600 text-center font-medium">
+                          <td className="py-1.5 px-4 text-slate-600 text-center font-medium">
                             {p.quantity || 0} {p.unit || "Pieces"}
                           </td>
                           {role === "admin" && (
-                            <td className="py-3 px-4 text-right">
+                            <td className="py-1.5 px-4 text-right">
                               <div className="flex justify-end gap-2">
                                 <button
                                   onClick={() => handleOpenModal(p)}
@@ -395,7 +420,7 @@ export default function Products() {
                   </table>
                 </div>
 
-                <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
+               <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-slate-500">
                       Rows per page:
@@ -416,7 +441,9 @@ export default function Products() {
                   </div>
 
                   {totalPages > 1 && (
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+
+                      {/* Prev */}
                       <button
                         onClick={() =>
                           setCurrentPage((prev) => Math.max(prev - 1, 1))
@@ -426,21 +453,26 @@ export default function Products() {
                       >
                         &lt;
                       </button>
-                      <div className="flex items-center gap-2">
-                        {[...Array(totalPages)].map((_, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setCurrentPage(i + 1)}
-                            className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-[#212121] text-white" : "border border-slate-200 text-slate-600 "}`}
-                          >
-                            {i + 1}
-                          </button>
-                        ))}
-                      </div>
+
+                      {/* Sliding Pages */}
+                      {getSlidingPages().map((page) => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
+                              ? "bg-[#212121] text-white"
+                              : "border border-slate-200 text-slate-600"
+                            }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+
+                      {/* Next */}
                       <button
                         onClick={() =>
                           setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages),
+                            Math.min(prev + 1, totalPages)
                           )
                         }
                         disabled={currentPage === totalPages}
@@ -448,6 +480,7 @@ export default function Products() {
                       >
                         &gt;
                       </button>
+
                     </div>
                   )}
                 </div>

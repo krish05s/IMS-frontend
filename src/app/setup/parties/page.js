@@ -13,6 +13,9 @@ export default function Page() {
   const [parties, setParties] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -123,6 +126,10 @@ export default function Page() {
     setIsDeleteModalOpen(true);
   };
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
+
   const executeDelete = async () => {
     if (!partyToDelete) return;
     setIsDeleting(true);
@@ -150,6 +157,36 @@ export default function Page() {
       setIsDeleteModalOpen(false);
       setPartyToDelete(null);
     }
+  };
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+  const currentParties = parties.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(parties.length / itemsPerPage);
+
+  const getSlidingPages = () => {
+    const visibleCount = 5;
+
+    // ✅ If total pages less than visible count
+    if (totalPages <= visibleCount) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    let start = currentPage - Math.floor(visibleCount / 2);
+    let end = currentPage + Math.floor(visibleCount / 2);
+
+    if (start < 1) {
+      start = 1;
+      end = visibleCount;
+    }
+
+    if (end > totalPages) {
+      end = totalPages;
+      start = totalPages - visibleCount + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
 
   return (
@@ -251,19 +288,19 @@ export default function Page() {
                         key={p.id}
                         className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition"
                       >
-                        <td className="py-3 px-4 text-center text-slate-600 font-medium whitespace-nowrap">
+                        <td className="py-1.5 px-4 text-center text-slate-600 font-medium whitespace-nowrap">
                           {index + 1}
                         </td>
-                        <td className="py-3 px-4 text-slate-800 font-bold">
+                        <td className="py-1.5 px-4 text-slate-800 font-bold">
                           {p.name}
                         </td>
-                        <td className="py-3 px-4 text-slate-600">
+                        <td className="py-1.5 px-4 text-slate-600">
                           {p.phone || "-"}
                         </td>
-                        <td className="py-3 px-4 text-slate-600 truncate max-w-[200px]">
+                        <td className="py-1.5 px-4 text-slate-600 truncate max-w-[200px]">
                           {p.address || "-"}
                         </td>
-                        <td className="py-3 px-4 text-center">
+                        <td className="py-1.5 px-4 text-center">
                           <div className="flex justify-center gap-2">
                             <button
                               onClick={() => handleOpenModal(p)}
@@ -321,6 +358,66 @@ export default function Page() {
                     )}
                   </tbody>
                 </table>
+              </div>
+
+              <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-500">Rows per page:</span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      setItemsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={100}>100</option>
+                    <option value={200}>200</option>
+                  </select>
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                    {/* Prev */}
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                    >
+                      &lt;
+                    </button>
+
+                    {/* Sliding Pages */}
+                    {getSlidingPages().map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                          currentPage === page
+                            ? "bg-[#212121] text-white"
+                            : "border border-slate-200 text-slate-600"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+
+                    {/* Next */}
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                    >
+                      &gt;
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}

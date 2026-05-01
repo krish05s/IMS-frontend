@@ -360,12 +360,37 @@ export default function Sales() {
         .toLowerCase()
         .includes(filters.driver_number.toLowerCase()),
   );
-
-  const indexOfLastItem = currentPage * itemsPerPage;
+const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentSales = filteredSales.slice(indexOfFirstItem, indexOfLastItem);
+  const currentSales = filteredSales.slice(
+    indexOfFirstItem,
+    indexOfLastItem,
+  );
   const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
 
+  const getSlidingPages = () => {
+    const visibleCount = 5;
+
+    // ✅ If total pages less than visible count
+    if (totalPages <= visibleCount) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    let start = currentPage - Math.floor(visibleCount / 2);
+    let end = currentPage + Math.floor(visibleCount / 2);
+
+    if (start < 1) {
+      start = 1;
+      end = visibleCount;
+    }
+
+    if (end > totalPages) {
+      end = totalPages;
+      start = totalPages - visibleCount + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
   const printInvoice = (sale) => {
     let totalKg = 0;
     let totalPieces = 0;
@@ -1091,14 +1116,16 @@ export default function Sales() {
                       className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                     >
                       <option value={10}>10</option>
-                      <option value={50}>50</option>
+                      <option value={20}>20</option>
                       <option value={100}>100</option>
                       <option value={200}>200</option>
                     </select>
                   </div>
 
                   {totalPages > 1 && (
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+
+                      {/* Prev */}
                       <button
                         onClick={() =>
                           setCurrentPage((prev) => Math.max(prev - 1, 1))
@@ -1108,21 +1135,26 @@ export default function Sales() {
                       >
                         &lt;
                       </button>
-                      <div className="flex items-center gap-2">
-                        {[...Array(totalPages)].map((_, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setCurrentPage(i + 1)}
-                            className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-emerald-500 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
-                          >
-                            {i + 1}
-                          </button>
-                        ))}
-                      </div>
+
+                      {/* Sliding Pages */}
+                      {getSlidingPages().map((page) => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
+                              ? "bg-[#212121] text-white"
+                              : "border border-slate-200 text-slate-600"
+                            }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+
+                      {/* Next */}
                       <button
                         onClick={() =>
                           setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages),
+                            Math.min(prev + 1, totalPages)
                           )
                         }
                         disabled={currentPage === totalPages}
@@ -1130,6 +1162,7 @@ export default function Sales() {
                       >
                         &gt;
                       </button>
+
                     </div>
                   )}
                 </div>

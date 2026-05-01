@@ -359,14 +359,37 @@ export default function Purchases() {
         .toLowerCase()
         .includes(filters.driver_number.toLowerCase()),
   );
-
-  const indexOfLastItem = currentPage * itemsPerPage;
+const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentPurchases = filteredPurchases.slice(
     indexOfFirstItem,
     indexOfLastItem,
   );
   const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
+
+  const getSlidingPages = () => {
+    const visibleCount = 5;
+
+    // ✅ If total pages less than visible count
+    if (totalPages <= visibleCount) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    let start = currentPage - Math.floor(visibleCount / 2);
+    let end = currentPage + Math.floor(visibleCount / 2);
+
+    if (start < 1) {
+      start = 1;
+      end = visibleCount;
+    }
+
+    if (end > totalPages) {
+      end = totalPages;
+      start = totalPages - visibleCount + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
 
   const printInvoice = (purchase) => {
     let totalKg = 0;
@@ -690,25 +713,25 @@ export default function Purchases() {
                       {currentPurchases.map((p, index) => (
                         <React.Fragment key={p.id}>
                           <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition">
-                            <td className="py-3 px-4 text-center text-slate-600 font-medium whitespace-nowrap">
+                            <td className="py-1.5 px-4 text-center text-slate-600 font-medium whitespace-nowrap">
                               {indexOfFirstItem + index + 1}
                             </td>
-                            <td className="py-3 px-4 text-slate-800 font-medium">
+                            <td className="py-1.5 px-4 text-slate-800 font-medium">
                               {p.bill_no}
                             </td>
-                            <td className="py-3 px-4 text-slate-800">
+                            <td className="py-1.5 px-4 text-slate-800">
                               {new Date(p.date).toLocaleDateString()}
                             </td>
-                            <td className="py-3 px-4 font-bold text-slate-800">
+                            <td className="py-1.5 px-4 font-bold text-slate-800">
                               {p.party_name || "-"}
                             </td>
-                            <td className="py-3 px-4 text-slate-600">
+                            <td className="py-1.5  px-4 text-slate-600">
                               {p.vehicle_no || "-"}
                             </td>
-                            <td className="py-3 px-4 text-orange-600 font-medium text-center">
+                            <td className="py-1.5  px-4 text-orange-600 font-medium text-center">
                               {p.items_count || (p.product_code ? 1 : 0)}
                             </td>
-                            <td className="py-3 px-4 text-slate-500 text-xs text-center whitespace-nowrap">
+                            <td className="py-1.5 px-4 text-slate-500 text-xs text-center whitespace-nowrap">
                               {p.created_at
                                 ? new Date(p.created_at).toLocaleString(
                                     "en-GB",
@@ -722,10 +745,10 @@ export default function Purchases() {
                                   )
                                 : "-"}
                             </td>
-                            <td className="py-3 px-4 text-slate-600 font-medium text-center whitespace-nowrap">
+                            <td className="py-1.5 px-4 text-slate-600 font-medium text-center whitespace-nowrap">
                               {p.created_by || "-"}
                             </td>
-                            <td className="py-3 px-4 text-center">
+                            <td className="py-1.5 px-4 text-center">
                               <div className="flex justify-center gap-2">
                                 <button
                                   onClick={() => toggleItemsExpansion(p)}
@@ -801,7 +824,7 @@ export default function Purchases() {
                                 </button>
                               </div>
                             </td>
-                            <td className="py-3 px-4 text-center">
+                            <td className="py-1.5 px-4 text-center">
                               <button
                                 onClick={() => printInvoice(p)}
                                 className="flex items-center justify-center mx-auto gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 font-semibold rounded-lg transition-colors text-xs"
@@ -840,7 +863,7 @@ export default function Purchases() {
                                       {expandedItems.map((item, idx) => (
                                         <div
                                           key={idx}
-                                          className="flex items-end gap-3 py-3 border-b border-slate-100 last:border-0"
+                                          className="flex items-end gap-3 py-1.5 border-b border-slate-100 last:border-0"
                                         >
                                           {!item.isEditing ? (
                                             <div className="flex-1 flex justify-between items-center text-slate-700">
@@ -1045,14 +1068,16 @@ export default function Purchases() {
                       className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                     >
                       <option value={10}>10</option>
-                      <option value={50}>50</option>
+                      <option value={20}>20</option>
                       <option value={100}>100</option>
                       <option value={200}>200</option>
                     </select>
                   </div>
 
                   {totalPages > 1 && (
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+
+                      {/* Prev */}
                       <button
                         onClick={() =>
                           setCurrentPage((prev) => Math.max(prev - 1, 1))
@@ -1062,21 +1087,26 @@ export default function Purchases() {
                       >
                         &lt;
                       </button>
-                      <div className="flex items-center gap-2">
-                        {[...Array(totalPages)].map((_, i) => (
-                          <button
-                            key={i}
-                            onClick={() => setCurrentPage(i + 1)}
-                            className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === i + 1 ? "bg-[#212121] text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}
-                          >
-                            {i + 1}
-                          </button>
-                        ))}
-                      </div>
+
+                      {/* Sliding Pages */}
+                      {getSlidingPages().map((page) => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
+                              ? "bg-[#212121] text-white"
+                              : "border border-slate-200 text-slate-600"
+                            }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+
+                      {/* Next */}
                       <button
                         onClick={() =>
                           setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages),
+                            Math.min(prev + 1, totalPages)
                           )
                         }
                         disabled={currentPage === totalPages}
@@ -1084,6 +1114,7 @@ export default function Purchases() {
                       >
                         &gt;
                       </button>
+
                     </div>
                   )}
                 </div>
