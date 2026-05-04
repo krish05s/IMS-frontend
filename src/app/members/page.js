@@ -576,7 +576,7 @@ function Members() {
                       value={addUser.name}
                       onChange={handleAddChange}
                       required
-                      placeholder="Full name"
+                      placeholder="Enter member name"
                       className={inputCls}
                     />
                   </div>
@@ -670,7 +670,7 @@ function Members() {
                         </svg>
                       ) : (
                         <svg
-                          className="w-4 h-4"
+                          className="w-4 h-4"           
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"

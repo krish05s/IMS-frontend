@@ -21,7 +21,7 @@ export default function Purchases() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-
+  const [isSavingProducts, setIsSavingProducts] = useState(false);
   // Header Data (For Modal)
   const [formData, setFormData] = useState({
     date: "",
@@ -228,6 +228,7 @@ export default function Purchases() {
   };
 
   const handleSaveExpandedItems = async (purchase) => {
+    setIsSavingProducts(true); // 👈
     const validItems = expandedItems.filter(
       (i) => i.product_code && i.quantity > 0,
     );
@@ -268,6 +269,8 @@ export default function Purchases() {
     } catch (error) {
       console.error("Error saving items:", error);
       toast.error("Failed to save products");
+    } finally {
+      setIsSavingProducts(false); // 👈
     }
   };
 
@@ -1028,10 +1031,45 @@ export default function Purchases() {
                                         onClick={() =>
                                           handleSaveExpandedItems(p)
                                         }
+                                        disabled={isSavingProducts}
+                                        className="bg-orange-500 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20 flex items-center gap-2 disabled:opacity-70"
+                                      >
+                                        {isSavingProducts ? (
+                                          <>
+                                            <svg
+                                              className="w-4 h-4 animate-spin"
+                                              viewBox="0 0 24 24"
+                                              fill="none"
+                                            >
+                                              <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                              />
+                                              <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8v8z"
+                                              />
+                                            </svg>
+                                            Saving...
+                                          </>
+                                        ) : (
+                                          "Save Products"
+                                        )}
+                                      </button>
+                                      {/* <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleSaveExpandedItems(p)
+                                        }
                                         className="bg-orange-500 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20"
                                       >
                                         Save Products
-                                      </button>
+                                      </button> */}
                                     </div>
                                   </div>
                                 </div>
@@ -1076,7 +1114,6 @@ export default function Purchases() {
 
                   {totalPages > 1 && (
                     <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-
                       {/* Prev */}
                       <button
                         onClick={() =>
@@ -1106,7 +1143,7 @@ export default function Purchases() {
                       <button
                         onClick={() =>
                           setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages)
+                            Math.min(prev + 1, totalPages),
                           )
                         }
                         disabled={currentPage === totalPages}
@@ -1114,7 +1151,6 @@ export default function Purchases() {
                       >
                         &gt;
                       </button>
-
                     </div>
                   )}
                 </div>
@@ -1307,6 +1343,7 @@ export default function Purchases() {
                         >
                           Cancel
                         </button>
+
                         <button
                           type="submit"
                           disabled={isSubmitting}

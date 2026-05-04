@@ -14,6 +14,7 @@ export default function Sales() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentSalesId, setCurrentSalesId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isSavingProducts, setIsSavingProducts] = useState(false);
   const [filters, setFilters] = useState({
     bill_no: "",
     customer_name: "",
@@ -223,51 +224,65 @@ export default function Sales() {
     }
     setExpandedItems(newItems);
   };
-
   const handleSaveExpandedItems = async (sale) => {
+    setIsSavingProducts(true); // 👈
     const validItems = expandedItems.filter(
       (i) => i.product_code && i.quantity > 0,
     );
 
     try {
-      const submissionData = {
-        date: sale.date,
-        bill_no: sale.bill_no,
-        customer_name: sale.customer_name,
-        vehicle_no: sale.vehicle_no,
-        driver_name: sale.driver_name,
-        driver_number: sale.driver_number,
-        transporter_name: sale.transporter_name,
-        lr_number: sale.lr_number,
-        items: validItems,
-      };
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/sales/update/${sale.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(submissionData),
-        },
-      );
-      const data = await response.json();
-      if (data.success) {
-        toast.success("Products saved successfully!");
-        fetchSales();
-        fetchProducts();
-        setExpandedRowId(null);
-        setExpandedItems([]);
-      } else {
-        toast.error(data.message);
-      }
+      // ... same code ...
     } catch (error) {
       console.error("Error saving items:", error);
       toast.error("Failed to save products");
+    } finally {
+      setIsSavingProducts(false); // 👈
     }
   };
+  // const handleSaveExpandedItems = async (sale) => {
+  //   const validItems = expandedItems.filter(
+  //     (i) => i.product_code && i.quantity > 0,
+  //   );
+
+  //   try {
+  //     const submissionData = {
+  //       date: sale.date,
+  //       bill_no: sale.bill_no,
+  //       customer_name: sale.customer_name,
+  //       vehicle_no: sale.vehicle_no,
+  //       driver_name: sale.driver_name,
+  //       driver_number: sale.driver_number,
+  //       transporter_name: sale.transporter_name,
+  //       lr_number: sale.lr_number,
+  //       items: validItems,
+  //     };
+
+  //     const response = await fetch(
+  //       `${process.env.NEXT_PUBLIC_API_URL}/api/sales/update/${sale.id}`,
+  //       {
+  //         method: "PUT",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //         },
+  //         body: JSON.stringify(submissionData),
+  //       },
+  //     );
+  //     const data = await response.json();
+  //     if (data.success) {
+  //       toast.success("Products saved successfully!");
+  //       fetchSales();
+  //       fetchProducts();
+  //       setExpandedRowId(null);
+  //       setExpandedItems([]);
+  //     } else {
+  //       toast.error(data.message);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error saving items:", error);
+  //     toast.error("Failed to save products");
+  //   }
+  // };
 
   const handleDelete = (id) => {
     setSaleToDelete(id);
@@ -362,10 +377,7 @@ export default function Sales() {
   );
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentSales = filteredSales.slice(
-    indexOfFirstItem,
-    indexOfLastItem,
-  );
+  const currentSales = filteredSales.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
 
   const getSlidingPages = () => {
@@ -636,24 +648,6 @@ export default function Sales() {
             <TruckLoader />
           ) : (
             <>
-              {/* <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
-                <div>
-                  <h1 className="text-2xl font-bold text-slate-800">Sales</h1>
-                  {/* <p className="text-sm text-slate-500 mt-1">Manage outbound dispatch and customer bills</p> 
-                </div>
-                <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
-                  <button
-                    onClick={() => handleOpenModal()}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl transition-all  whitespace-nowrap"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add Sales
-                  </button>
-                </div>
-              </div> */}
-
               {/* Filter Bar */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-3">
                 <input
@@ -1076,9 +1070,35 @@ export default function Sales() {
                                         onClick={() =>
                                           handleSaveExpandedItems(s)
                                         }
-                                        className="bg-orange-500 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20"
+                                        disabled={isSavingProducts}
+                                        className="bg-orange-500 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20 flex items-center gap-2 disabled:opacity-70"
                                       >
-                                        Save Products
+                                        {isSavingProducts ? (
+                                          <>
+                                            <svg
+                                              className="w-4 h-4 animate-spin"
+                                              viewBox="0 0 24 24"
+                                              fill="none"
+                                            >
+                                              <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                              />
+                                              <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8v8z"
+                                              />
+                                            </svg>
+                                            Saving...
+                                          </>
+                                        ) : (
+                                          "Save Products"
+                                        )}
                                       </button>
                                     </div>
                                   </div>
@@ -1124,7 +1144,6 @@ export default function Sales() {
 
                   {totalPages > 1 && (
                     <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-
                       {/* Prev */}
                       <button
                         onClick={() =>
@@ -1154,7 +1173,7 @@ export default function Sales() {
                       <button
                         onClick={() =>
                           setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages)
+                            Math.min(prev + 1, totalPages),
                           )
                         }
                         disabled={currentPage === totalPages}
@@ -1162,7 +1181,6 @@ export default function Sales() {
                       >
                         &gt;
                       </button>
-
                     </div>
                   )}
                 </div>
@@ -1173,7 +1191,6 @@ export default function Sales() {
                   <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl overflow-y-auto max-h-[90vh]">
                     <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555] rounded-t-2xl -mx-8 -mt-8 mb-6">
                       <div className="flex items-center gap-2">
-
                         <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
                           <svg
                             className="w-4 h-4 text-white"
@@ -1191,7 +1208,9 @@ export default function Sales() {
                         </div>
 
                         <h2 className="text-base font-semibold text-white">
-                          {currentSalesId ? "Edit Sales Invoice" : "Create Sales Invoice"}
+                          {currentSalesId
+                            ? "Edit Sales Invoice"
+                            : "Create Sales Invoice"}
                         </h2>
                       </div>
 
@@ -1202,92 +1221,149 @@ export default function Sales() {
                         ✕
                       </button>
                     </div>
-                    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-
+                    <form
+                      onSubmit={handleSubmit}
+                      className="flex flex-col gap-6"
+                    >
                       {/* Header Information */}
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-1">Date</label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Date
+                          </label>
                           <input
                             type="date"
                             required
                             value={formData.date}
-                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({ ...formData, date: e.target.value })
+                            }
                             className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-1">Bill No</label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Bill No
+                          </label>
                           <input
                             type="text"
                             required
                             value={formData.bill_no}
-                            onChange={(e) => setFormData({ ...formData, bill_no: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                bill_no: e.target.value,
+                              })
+                            }
                             placeholder="e.g. S-2039"
                             className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">Sales Party</label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Sales Party
+                          </label>
                           <select
                             required
                             value={formData.customer_name}
-                            onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                customer_name: e.target.value,
+                              })
+                            }
                             className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           >
                             <option value="">-- Select Customer --</option>
-                            {salesParties.map(p => (
-                              <option key={p.id} value={p.name}>{p.name}</option>
+                            {salesParties.map((p) => (
+                              <option key={p.id} value={p.name}>
+                                {p.name}
+                              </option>
                             ))}
                           </select>
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">Vehicle No</label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Vehicle No
+                          </label>
                           <input
                             type="text"
                             value={formData.vehicle_no}
-                            onChange={(e) => setFormData({ ...formData, vehicle_no: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                vehicle_no: e.target.value,
+                              })
+                            }
                             placeholder="e.g. GJ05 1234"
                             className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white uppercase focus:outline-none"
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">Driver Name</label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Driver Name
+                          </label>
                           <input
                             type="text"
                             required
                             value={formData.driver_name}
-                            onChange={(e) => setFormData({ ...formData, driver_name: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                driver_name: e.target.value,
+                              })
+                            }
                             placeholder="e.g. John Doe"
                             className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">Driver Number</label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Driver Number
+                          </label>
                           <input
                             type="text"
                             value={formData.driver_number}
-                            onChange={(e) => setFormData({ ...formData, driver_number: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                driver_number: e.target.value,
+                              })
+                            }
                             placeholder="e.g. 1234567890"
                             className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">Transporter Name</label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Transporter Name
+                          </label>
                           <input
                             type="text"
                             value={formData.transporter_name}
-                            onChange={(e) => setFormData({ ...formData, transporter_name: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                transporter_name: e.target.value,
+                              })
+                            }
                             placeholder="e.g. ABC Logistics"
                             className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">LR Number</label>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            LR Number
+                          </label>
                           <input
                             type="text"
                             value={formData.lr_number}
-                            onChange={(e) => setFormData({ ...formData, lr_number: e.target.value })}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                lr_number: e.target.value,
+                              })
+                            }
                             placeholder="e.g. LR-98765"
                             className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
                           />
@@ -1309,12 +1385,31 @@ export default function Sales() {
                           className="bg-[#212121] hover:bg-[#444444] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70"
                         >
                           {isSubmitting && (
-                            <svg className="animate-spin h-4 w-4 mr-2 inline" viewBox="0 0 24 24" fill="none">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                            <svg
+                              className="animate-spin h-4 w-4 mr-2 inline"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v8z"
+                              />
                             </svg>
                           )}
-                          {isSubmitting ? "Saving..." : (currentSalesId ? "Update Dispatch" : "Save Dispatch")}
+                          {isSubmitting
+                            ? "Saving..."
+                            : currentSalesId
+                              ? "Update Dispatch"
+                              : "Save Dispatch"}
                         </button>
                       </div>
                     </form>
@@ -1325,12 +1420,9 @@ export default function Sales() {
               {/* Delete Confirmation Modal */}
               {isDeleteModalOpen && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-
                   <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden">
-
                     {/* HEADER (same as Edit Member) */}
                     <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555]">
-
                       <div className="flex items-center gap-2">
                         <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
                           <svg
@@ -1364,7 +1456,8 @@ export default function Sales() {
                     {/* BODY */}
                     <div className="p-6 text-center">
                       <p className="text-sm text-slate-600 mb-6">
-                        Are you sure you want to delete this sale? Inventory will be reverted.
+                        Are you sure you want to delete this sale? Inventory
+                        will be reverted.
                       </p>
 
                       <div className="flex gap-3">
