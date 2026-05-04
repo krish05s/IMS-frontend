@@ -84,11 +84,11 @@ export default function Products() {
     setFormData(
       product
         ? {
-            product_name: product.product_name,
-            gradation_id: product.gradation_id,
-            gradation: product.gradation,
-            unit: product.unit || "Kg",
-          }
+          product_name: product.product_name,
+          gradation_id: product.gradation_id,
+          gradation: product.gradation,
+          unit: product.unit || "Kg",
+        }
         : { product_name: "", gradation_id: "", gradation: "", unit: "Pieces" },
     );
     setIsModalOpen(true);
@@ -189,29 +189,29 @@ export default function Products() {
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
 
-const getSlidingPages = () => {
-  const visibleCount = 5;
+  const getSlidingPages = () => {
+    const visibleCount = 5;
 
-  // ✅ If total pages less than visible count
-  if (totalPages <= visibleCount) {
-    return Array.from({ length: totalPages }, (_, i) => i + 1);
-  }
+    // ✅ If total pages less than visible count
+    if (totalPages <= visibleCount) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
 
-  let start = currentPage - Math.floor(visibleCount / 2);
-  let end = currentPage + Math.floor(visibleCount / 2);
+    let start = currentPage - Math.floor(visibleCount / 2);
+    let end = currentPage + Math.floor(visibleCount / 2);
 
-  if (start < 1) {
-    start = 1;
-    end = visibleCount;
-  }
+    if (start < 1) {
+      start = 1;
+      end = visibleCount;
+    }
 
-  if (end > totalPages) {
-    end = totalPages;
-    start = totalPages - visibleCount + 1;
-  }
+    if (end > totalPages) {
+      end = totalPages;
+      start = totalPages - visibleCount + 1;
+    }
 
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-};
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
 
   return (
     <div className="min-h-screen bg-[#f1f1f1] flex">
@@ -287,7 +287,7 @@ const getSlidingPages = () => {
                   onChange={(e) =>
                     setFilters({ ...filters, product_code: e.target.value })
                   }
-                  className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -296,7 +296,7 @@ const getSlidingPages = () => {
                   onChange={(e) =>
                     setFilters({ ...filters, product_name: e.target.value })
                   }
-                  className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -305,7 +305,7 @@ const getSlidingPages = () => {
                   onChange={(e) =>
                     setFilters({ ...filters, gradation: e.target.value })
                   }
-                  className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
               </div>
 
@@ -420,7 +420,7 @@ const getSlidingPages = () => {
                   </table>
                 </div>
 
-               <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
+                <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-slate-500">
                       Rows per page:
@@ -460,8 +460,8 @@ const getSlidingPages = () => {
                           key={page}
                           onClick={() => setCurrentPage(page)}
                           className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
-                              ? "bg-[#212121] text-white"
-                              : "border border-slate-200 text-slate-600"
+                            ? "bg-[#212121] text-white"
+                            : "border border-slate-200 text-slate-600"
                             }`}
                         >
                           {page}
@@ -538,7 +538,8 @@ const getSlidingPages = () => {
                               product_name: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none text-slate-800 bg-white"
+                          placeholder="Enter product name"
+                          className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none text-slate-800 bg-white placeholder-black"
                         />
                       </div>
                       <div>

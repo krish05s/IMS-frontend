@@ -366,15 +366,15 @@ export default function LoginPage() {
       {showForgotModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-slate-50">
-              <h3 className="text-lg font-bold text-slate-800">
+            <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555] rounded-t-2xl">
+              <h3 className="text-lg font-bold text-white">
                 {forgotStep === 1 && "Forgot Password"}
                 {forgotStep === 2 && "Enter OTP"}
                 {forgotStep === 3 && "Reset Password"}
               </h3>
               <button 
                 onClick={() => setShowForgotModal(false)}
-                className="text-gray-400 hover:text-gray-700 transition-colors"
+                className="text-white hover:text-gray-300 transition-colors"
               >
                 ✕
               </button>
@@ -404,12 +404,12 @@ export default function LoginPage() {
                     className="w-full px-4 py-3 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border border-gray-200 focus:border-orange-500 focus:bg-white mb-4"
                   />
                   <button
-                    onClick={handleForgotSubmitEmail}
-                    disabled={forgotLoading}
-                    className="w-full py-3 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold rounded-xl transition-all disabled:opacity-70 shadow-md shadow-orange-200"
-                  >
-                    {forgotLoading ? "Sending..." : "Send OTP"}
-                  </button>
+  onClick={handleForgotSubmitEmail}
+  disabled={forgotLoading}
+  className="w-full py-3 bg-[#212121] hover:bg-[#333333] active:bg-black text-white font-bold rounded-xl transition-all duration-200 disabled:opacity-70 shadow-md shadow-black/20 hover:shadow-lg hover:scale-[1.02]"
+>
+  {forgotLoading ? "Sending..." : "Send OTP"}
+</button>
                 </div>
               )}
 

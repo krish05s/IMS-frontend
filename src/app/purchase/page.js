@@ -158,25 +158,25 @@ export default function Purchases() {
       const itemsLoaded =
         purchase.items && purchase.items.length > 0
           ? purchase.items.map((i) => {
-              const prod = products.find(
-                (p) => p.product_code === i.product_code,
-              );
-              return { ...i, unit: prod?.unit || "Kg", isEditing: false };
-            })
+            const prod = products.find(
+              (p) => p.product_code === i.product_code,
+            );
+            return { ...i, unit: prod?.unit || "Kg", isEditing: false };
+          })
           : purchase.product_code
             ? [
-                {
-                  product_code: purchase.product_code,
-                  product_name: purchase.product_name,
-                  gradation: "",
-                  quantity: purchase.quantity,
-                  unit:
-                    products.find(
-                      (p) => p.product_code === purchase.product_code,
-                    )?.unit || "Kg",
-                  isEditing: false,
-                },
-              ]
+              {
+                product_code: purchase.product_code,
+                product_name: purchase.product_name,
+                gradation: "",
+                quantity: purchase.quantity,
+                unit:
+                  products.find(
+                    (p) => p.product_code === purchase.product_code,
+                  )?.unit || "Kg",
+                isEditing: false,
+              },
+            ]
             : [];
 
       // Always ensure there is one default product entry box visible at the end
@@ -359,7 +359,7 @@ export default function Purchases() {
         .toLowerCase()
         .includes(filters.driver_number.toLowerCase()),
   );
-const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentPurchases = filteredPurchases.slice(
     indexOfFirstItem,
@@ -399,23 +399,23 @@ const indexOfLastItem = currentPage * itemsPerPage;
     const itemsHtml =
       purchase.items && purchase.items.length > 0
         ? purchase.items
-            .map((item, idx) => {
-              const prod = products.find(
-                (p) => p.product_code === item.product_code,
-              );
-              const unit = prod?.unit || "Kg";
-              const qty = Number(item.quantity) || 0;
+          .map((item, idx) => {
+            const prod = products.find(
+              (p) => p.product_code === item.product_code,
+            );
+            const unit = prod?.unit || "Kg";
+            const qty = Number(item.quantity) || 0;
 
-              if (unit.toLowerCase() === "kg") totalKg += qty;
-              else totalPieces += qty;
+            if (unit.toLowerCase() === "kg") totalKg += qty;
+            else totalPieces += qty;
 
-              const grad = item.gradation || "N/A";
-              if (!gradationTotals[grad])
-                gradationTotals[grad] = { kg: 0, pieces: 0 };
-              if (unit.toLowerCase() === "kg") gradationTotals[grad].kg += qty;
-              else gradationTotals[grad].pieces += qty;
+            const grad = item.gradation || "N/A";
+            if (!gradationTotals[grad])
+              gradationTotals[grad] = { kg: 0, pieces: 0 };
+            if (unit.toLowerCase() === "kg") gradationTotals[grad].kg += qty;
+            else gradationTotals[grad].pieces += qty;
 
-              return `
+            return `
         <tr>
           <td>${idx + 1}</td>
           <td>${item.product_code}</td>
@@ -424,25 +424,25 @@ const indexOfLastItem = currentPage * itemsPerPage;
           <td>${qty} ${unit}</td>
         </tr>
       `;
-            })
-            .join("")
+          })
+          .join("")
         : (() => {
-            const prod = products.find(
-              (p) => p.product_code === purchase.product_code,
-            );
-            const unit = prod?.unit || "Kg";
-            const qty = Number(purchase.quantity) || 0;
-            const grad = prod?.gradation || "N/A";
+          const prod = products.find(
+            (p) => p.product_code === purchase.product_code,
+          );
+          const unit = prod?.unit || "Kg";
+          const qty = Number(purchase.quantity) || 0;
+          const grad = prod?.gradation || "N/A";
 
-            if (unit.toLowerCase() === "kg") totalKg += qty;
-            else totalPieces += qty;
+          if (unit.toLowerCase() === "kg") totalKg += qty;
+          else totalPieces += qty;
 
-            if (!gradationTotals[grad])
-              gradationTotals[grad] = { kg: 0, pieces: 0 };
-            if (unit.toLowerCase() === "kg") gradationTotals[grad].kg += qty;
-            else gradationTotals[grad].pieces += qty;
+          if (!gradationTotals[grad])
+            gradationTotals[grad] = { kg: 0, pieces: 0 };
+          if (unit.toLowerCase() === "kg") gradationTotals[grad].kg += qty;
+          else gradationTotals[grad].pieces += qty;
 
-            return `
+          return `
         <tr>
           <td>1</td>
           <td>${purchase.product_code}</td>
@@ -451,7 +451,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
           <td>${qty} ${unit}</td>
         </tr>
       `;
-          })();
+        })();
 
     const gradationSummaryHtml = Object.keys(gradationTotals)
       .map((grad) => {
@@ -651,7 +651,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                   onChange={(e) =>
                     setFilters({ ...filters, bill_no: e.target.value })
                   }
-                  className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none  transition-colors"
+                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -660,7 +660,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                   onChange={(e) =>
                     setFilters({ ...filters, vehicle_no: e.target.value })
                   }
-                  className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none  transition-colors"
+                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -669,7 +669,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                   onChange={(e) =>
                     setFilters({ ...filters, driver_number: e.target.value })
                   }
-                  className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none  transition-colors"
+                 className="flex-1 min-w-[150px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
               </div>
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-w-full overflow-hidden flex flex-col">
@@ -734,15 +734,15 @@ const indexOfLastItem = currentPage * itemsPerPage;
                             <td className="py-1.5 px-4 text-slate-500 text-xs text-center whitespace-nowrap">
                               {p.created_at
                                 ? new Date(p.created_at).toLocaleString(
-                                    "en-GB",
-                                    {
-                                      day: "2-digit",
-                                      month: "2-digit",
-                                      year: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    },
-                                  )
+                                  "en-GB",
+                                  {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  },
+                                )
                                 : "-"}
                             </td>
                             <td className="py-1.5 px-4 text-slate-600 font-medium text-center whitespace-nowrap">
@@ -922,10 +922,10 @@ const indexOfLastItem = currentPage * itemsPerPage;
                                                   value={
                                                     item.product_code
                                                       ? {
-                                                          value:
-                                                            item.product_code,
-                                                          label: `${item.product_name || item.product_code} (${item.gradation || ""})`,
-                                                        }
+                                                        value:
+                                                          item.product_code,
+                                                        label: `${item.product_name || item.product_code} (${item.gradation || ""})`,
+                                                      }
                                                       : null
                                                   }
                                                   onChange={(selectedOption) =>
@@ -957,7 +957,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                                                   }}
                                                   menuPortalTarget={
                                                     typeof document !==
-                                                    "undefined"
+                                                      "undefined"
                                                       ? document.body
                                                       : null
                                                   }
@@ -1094,8 +1094,8 @@ const indexOfLastItem = currentPage * itemsPerPage;
                           key={page}
                           onClick={() => setCurrentPage(page)}
                           className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
-                              ? "bg-[#212121] text-white"
-                              : "border border-slate-200 text-slate-600"
+                            ? "bg-[#212121] text-white"
+                            : "border border-slate-200 text-slate-600"
                             }`}
                         >
                           {page}
@@ -1408,20 +1408,50 @@ const indexOfLastItem = currentPage * itemsPerPage;
               {/* View Details Modal */}
               {isViewModalOpen && viewPurchase && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-                  <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-                    <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-xl font-bold text-slate-800">
-                        Purchase Order Details
-                      </h2>
+                  <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl max-h-[90vh] overflow-hidden">
+                    <div className="flex items-center justify-between px-6 py-4 
+                bg-gradient-to-r from-[#2c2c2c] to-[#555555] 
+                rounded-t-2xl -mx-8 -mt-8 mb-6">
+
+                      {/* Left Side (Icon + Title) */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+                          <svg
+                            className="w-5 h-5 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                            />
+                          </svg>
+                        </div>
+
+                        <h2 className="text-lg font-semibold text-white">
+                          Purchase Order Details
+                        </h2>
+                      </div>
+
+                      {/* Close Button */}
                       <button
                         onClick={() => {
                           setIsViewModalOpen(false);
                           setViewPurchase(null);
                         }}
-                        className="text-slate-400 hover:text-slate-600 transition"
+                        className="w-9 h-9 flex items-center justify-center text-white hover:text-gray-300 transition"
                       >
                         <svg
-                          className="w-6 h-6"
+                          className="w-5 h-5"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -1521,81 +1551,83 @@ const indexOfLastItem = currentPage * itemsPerPage;
                       Products
                     </h3>
                     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-                      <table className="w-full text-left text-sm">
-                        <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
-                          <tr>
-                            <th className="py-2 px-4 font-semibold w-12 text-center">
-                              #
-                            </th>
-                            <th className="py-2 px-4 font-semibold">
-                              Product Code
-                            </th>
-                            <th className="py-2 px-4 font-semibold">
-                              Product Name
-                            </th>
-                            <th className="py-2 px-4 font-semibold">
-                              Gradation
-                            </th>
-                            <th className="py-2 px-4 font-semibold text-right">
-                              Quantity
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {viewPurchase.items &&
-                          viewPurchase.items.length > 0 ? (
-                            viewPurchase.items.map((item, idx) => (
-                              <tr
-                                key={idx}
-                                className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
-                              >
+                      <div className="max-h-64 overflow-y-auto">
+                        <table className="w-full text-left text-sm">
+                          <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+                            <tr>
+                              <th className="py-2 px-4 font-semibold w-12 text-center">
+                                #
+                              </th>
+                              <th className="py-2 px-4 font-semibold">
+                                Product Code
+                              </th>
+                              <th className="py-2 px-4 font-semibold">
+                                Product Name
+                              </th>
+                              <th className="py-2 px-4 font-semibold">
+                                Gradation
+                              </th>
+                              <th className="py-2 px-4 font-semibold text-right">
+                                Quantity
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {viewPurchase.items &&
+                              viewPurchase.items.length > 0 ? (
+                              viewPurchase.items.map((item, idx) => (
+                                <tr
+                                  key={idx}
+                                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
+                                >
+                                  <td className="py-2 px-4 text-center text-slate-500">
+                                    {idx + 1}
+                                  </td>
+                                  <td className="py-2 px-4 font-medium">
+                                    {item.product_code}
+                                  </td>
+                                  <td className="py-2 px-4 text-slate-600">
+                                    {item.product_name}
+                                  </td>
+                                  <td className="py-2 px-4 text-slate-600">
+                                    {item.gradation || "-"}
+                                  </td>
+                                  <td className="py-2 px-4 text-right font-bold text-slate-800">
+                                    {item.quantity}
+                                  </td>
+                                </tr>
+                              ))
+                            ) : viewPurchase.product_code ? (
+                              <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                                 <td className="py-2 px-4 text-center text-slate-500">
-                                  {idx + 1}
+                                  1
                                 </td>
                                 <td className="py-2 px-4 font-medium">
-                                  {item.product_code}
+                                  {viewPurchase.product_code}
                                 </td>
                                 <td className="py-2 px-4 text-slate-600">
-                                  {item.product_name}
+                                  {viewPurchase.product_name || "-"}
                                 </td>
                                 <td className="py-2 px-4 text-slate-600">
-                                  {item.gradation || "-"}
+                                  {viewPurchase.gradation || "-"}
                                 </td>
                                 <td className="py-2 px-4 text-right font-bold text-slate-800">
-                                  {item.quantity}
+                                  {viewPurchase.quantity}
                                 </td>
                               </tr>
-                            ))
-                          ) : viewPurchase.product_code ? (
-                            <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                              <td className="py-2 px-4 text-center text-slate-500">
-                                1
-                              </td>
-                              <td className="py-2 px-4 font-medium">
-                                {viewPurchase.product_code}
-                              </td>
-                              <td className="py-2 px-4 text-slate-600">
-                                {viewPurchase.product_name || "-"}
-                              </td>
-                              <td className="py-2 px-4 text-slate-600">
-                                {viewPurchase.gradation || "-"}
-                              </td>
-                              <td className="py-2 px-4 text-right font-bold text-slate-800">
-                                {viewPurchase.quantity}
-                              </td>
-                            </tr>
-                          ) : (
-                            <tr>
-                              <td
-                                colSpan="5"
-                                className="py-4 text-center text-slate-500"
-                              >
-                                No products found.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
+                            ) : (
+                              <tr>
+                                <td
+                                  colSpan="5"
+                                  className="py-4 text-center text-slate-500"
+                                >
+                                  No products found.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 </div>
