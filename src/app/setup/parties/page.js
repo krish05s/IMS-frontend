@@ -237,21 +237,19 @@ export default function Page() {
           <div className="bg-white p-2 rounded-xl shadow-sm border border-slate-200 mb-6 inline-flex w-full md:w-auto overflow-x-auto">
             <button
               onClick={() => setActiveTab("purchase")}
-              className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${
-                activeTab === "purchase"
-                  ? "bg-[#212121] text-white "
-                  : "text-slate-600 hover:bg-slate-100"
-              }`}
+              className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${activeTab === "purchase"
+                ? "bg-[#212121] text-white "
+                : "text-slate-600 hover:bg-slate-100"
+                }`}
             >
               Purchase Party
             </button>
             <button
               onClick={() => setActiveTab("sales")}
-              className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${
-                activeTab === "sales"
-                  ? "bg-[#212121] text-white"
-                  : "text-slate-600 hover:bg-slate-100"
-              }`}
+              className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${activeTab === "sales"
+                ? "bg-[#212121] text-white"
+                : "text-slate-600 hover:bg-slate-100"
+                }`}
             >
               Sales Party
             </button>
@@ -396,11 +394,10 @@ export default function Page() {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                          currentPage === page
-                            ? "bg-[#212121] text-white"
-                            : "border border-slate-200 text-slate-600"
-                        }`}
+                        className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
+                          ? "bg-[#212121] text-white"
+                          : "border border-slate-200 text-slate-600"
+                          }`}
                       >
                         {page}
                       </button>
@@ -470,7 +467,10 @@ export default function Page() {
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] focus:outline-none focus:ring-0 focus:border-[#C19A6B] bg-white"
+                      placeholder="Enter your name"
+                      className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] 
+  focus:outline-none focus:ring-0 focus:border-[#C19A6B] 
+  bg-white placeholder:text-gray-400"
                     />
                   </div>
 
@@ -480,12 +480,12 @@ export default function Page() {
                     </label>
                     <input
                       type="text"
-                      value={formData.phone}
+                      value={formData.name}
                       onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
+                        setFormData({ ...formData, name: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] focus:outline-none focus:ring-0 focus:border-[#C19A6B] bg-white"
-                      placeholder="e.g. +1 234 567 8900"
+                      className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] focus:outline-none focus:ring-0 focus:border-[#C19A6B] bg-white placeholder:text-gray-400"
+                      placeholder="Enter your mobile.no"
                     />
                   </div>
 
@@ -499,7 +499,9 @@ export default function Page() {
                       onChange={(e) =>
                         setFormData({ ...formData, address: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] focus:outline-none focus:ring-0 focus:border-[#C19A6B] bg-white"
+                      className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] 
+  focus:outline-none focus:ring-0 focus:border-[#C19A6B] 
+  bg-white placeholder:text-gray-400"
                       placeholder="Enter complete address"
                     />
                   </div>

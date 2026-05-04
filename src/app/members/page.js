@@ -206,7 +206,7 @@ function Members() {
 
   // Reusable input class
   const inputCls =
-    "w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition placeholder:text-slate-400";
+    "w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none focus:ring-0 focus:border-[#C19A6B]";
   const labelCls = "block text-sm font-bold text-slate-700 mb-1.5";
 
   const filteredUsers = users.filter(
@@ -215,7 +215,7 @@ function Members() {
       u.email?.toLowerCase().includes(filters.email.toLowerCase()) &&
       u.role?.toLowerCase().includes(filters.role.toLowerCase()),
   );
-const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentUsers = filteredUsers.slice(
     indexOfFirstItem,
@@ -312,7 +312,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                   onChange={(e) =>
                     setFilters({ ...filters, name: e.target.value })
                   }
-                  className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="flex-1 min-w-[120px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -321,7 +321,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                   onChange={(e) =>
                     setFilters({ ...filters, email: e.target.value })
                   }
-                  className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="flex-1 min-w-[120px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -330,7 +330,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                   onChange={(e) =>
                     setFilters({ ...filters, role: e.target.value })
                   }
-                  className="flex-1 min-w-[150px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="flex-1 min-w-[120px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
               </div>
 
@@ -500,8 +500,8 @@ const indexOfLastItem = currentPage * itemsPerPage;
                           key={page}
                           onClick={() => setCurrentPage(page)}
                           className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
-                              ? "bg-[#212121] text-white"
-                              : "border border-slate-200 text-slate-600"
+                            ? "bg-[#212121] text-white"
+                            : "border border-slate-200 text-slate-600"
                             }`}
                         >
                           {page}
@@ -534,7 +534,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
           <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-t-2xl">
+              <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555] rounded-t-2xl">
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
                     <svg
@@ -557,7 +557,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                 </div>
                 <button
                   onClick={() => setAddModal(false)}
-                  className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors"
+                  className="w-7 h-7 flex items-center justify-center text-white hover:opacity-70"
                 >
                   ✕
                 </button>
@@ -693,7 +693,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-400 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
+                <p className="text-xs text-gray-200 bg-[#555555] border border-[#444444] rounded-xl px-3 py-2">
                   💡 <span className="text-rose-400 font-semibold">*</span>{" "}
                   marked fields are required. New user will be Active by
                   default.
@@ -710,7 +710,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                   <button
                     type="submit"
                     disabled={addLoading}
-                    className="px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-60 flex items-center gap-2 shadow-md shadow-emerald-200"
+                    className="px-5 py-2 bg-[#212121] hover:bg-[#444444] text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-60 flex items-center gap-2"
                   >
                     {addLoading && (
                       <svg
@@ -768,7 +768,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                 </div>
                 <button
                   onClick={() => setEditModal(false)}
-                  className="w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors"
+                  className="w-7 h-7 flex items-center justify-center text-white hover:opacity-70"
                 >
                   ✕
                 </button>

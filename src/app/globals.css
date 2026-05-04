@@ -88,15 +88,35 @@ body {
   }
 }
 
-/* Globally hide all scrollbars visually but retain functionality */
-*::-webkit-scrollbar {
-  display: none !important;
+/* Hide scrollbar globally BUT allow override */
+/* Hide scrollbar only where needed */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
-* {
-  -ms-overflow-style: none !important; /* IE and Edge */
-  scrollbar-width: none !important; /* Firefox */
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 .topbar-offset {
   padding-top: 64px;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* slate-300 */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* override global hidden */
+.custom-scrollbar {
+  -ms-overflow-style: auto !important;
+  scrollbar-width: thin !important;
 }

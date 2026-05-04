@@ -157,24 +157,24 @@ export default function Sales() {
       const itemsLoaded =
         sale.items && sale.items.length > 0
           ? sale.items.map((i) => {
-              const prod = products.find(
-                (p) => p.product_code === i.product_code,
-              );
-              return { ...i, unit: prod?.unit || "Kg", isEditing: false };
-            })
+            const prod = products.find(
+              (p) => p.product_code === i.product_code,
+            );
+            return { ...i, unit: prod?.unit || "Kg", isEditing: false };
+          })
           : sale.product_code
             ? [
-                {
-                  product_code: sale.product_code,
-                  product_name: sale.product_name,
-                  gradation: "",
-                  quantity: sale.quantity,
-                  unit:
-                    products.find((p) => p.product_code === sale.product_code)
-                      ?.unit || "Kg",
-                  isEditing: false,
-                },
-              ]
+              {
+                product_code: sale.product_code,
+                product_name: sale.product_name,
+                gradation: "",
+                quantity: sale.quantity,
+                unit:
+                  products.find((p) => p.product_code === sale.product_code)
+                    ?.unit || "Kg",
+                isEditing: false,
+              },
+            ]
             : [];
 
       // Always ensure there is one default product entry box visible at the end
@@ -360,7 +360,7 @@ export default function Sales() {
         .toLowerCase()
         .includes(filters.driver_number.toLowerCase()),
   );
-const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentSales = filteredSales.slice(
     indexOfFirstItem,
@@ -399,23 +399,23 @@ const indexOfLastItem = currentPage * itemsPerPage;
     const itemsHtml =
       sale.items && sale.items.length > 0
         ? sale.items
-            .map((item, idx) => {
-              const prod = products.find(
-                (p) => p.product_code === item.product_code,
-              );
-              const unit = prod?.unit || "Kg";
-              const qty = Number(item.quantity) || 0;
+          .map((item, idx) => {
+            const prod = products.find(
+              (p) => p.product_code === item.product_code,
+            );
+            const unit = prod?.unit || "Kg";
+            const qty = Number(item.quantity) || 0;
 
-              if (unit.toLowerCase() === "kg") totalKg += qty;
-              else totalPieces += qty;
+            if (unit.toLowerCase() === "kg") totalKg += qty;
+            else totalPieces += qty;
 
-              const grad = item.gradation || "N/A";
-              if (!gradationTotals[grad])
-                gradationTotals[grad] = { kg: 0, pieces: 0 };
-              if (unit.toLowerCase() === "kg") gradationTotals[grad].kg += qty;
-              else gradationTotals[grad].pieces += qty;
+            const grad = item.gradation || "N/A";
+            if (!gradationTotals[grad])
+              gradationTotals[grad] = { kg: 0, pieces: 0 };
+            if (unit.toLowerCase() === "kg") gradationTotals[grad].kg += qty;
+            else gradationTotals[grad].pieces += qty;
 
-              return `
+            return `
         <tr>
           <td>${idx + 1}</td>
           <td>${item.product_code}</td>
@@ -424,25 +424,25 @@ const indexOfLastItem = currentPage * itemsPerPage;
           <td>${qty} ${unit}</td>
         </tr>
       `;
-            })
-            .join("")
+          })
+          .join("")
         : (() => {
-            const prod = products.find(
-              (p) => p.product_code === sale.product_code,
-            );
-            const unit = prod?.unit || "Kg";
-            const qty = Number(sale.quantity) || 0;
-            const grad = prod?.gradation || "N/A";
+          const prod = products.find(
+            (p) => p.product_code === sale.product_code,
+          );
+          const unit = prod?.unit || "Kg";
+          const qty = Number(sale.quantity) || 0;
+          const grad = prod?.gradation || "N/A";
 
-            if (unit.toLowerCase() === "kg") totalKg += qty;
-            else totalPieces += qty;
+          if (unit.toLowerCase() === "kg") totalKg += qty;
+          else totalPieces += qty;
 
-            if (!gradationTotals[grad])
-              gradationTotals[grad] = { kg: 0, pieces: 0 };
-            if (unit.toLowerCase() === "kg") gradationTotals[grad].kg += qty;
-            else gradationTotals[grad].pieces += qty;
+          if (!gradationTotals[grad])
+            gradationTotals[grad] = { kg: 0, pieces: 0 };
+          if (unit.toLowerCase() === "kg") gradationTotals[grad].kg += qty;
+          else gradationTotals[grad].pieces += qty;
 
-            return `
+          return `
         <tr>
           <td>1</td>
           <td>${sale.product_code}</td>
@@ -451,7 +451,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
           <td>${qty} ${unit}</td>
         </tr>
       `;
-          })();
+        })();
 
     const gradationSummaryHtml = Object.keys(gradationTotals)
       .map((grad) => {
@@ -655,7 +655,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
               </div> */}
 
               {/* Filter Bar */}
-              <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
+              <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-3">
                 <input
                   type="text"
                   placeholder="Filter by Bill No..."
@@ -663,7 +663,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                   onChange={(e) =>
                     setFilters({ ...filters, bill_no: e.target.value })
                   }
-                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -672,7 +672,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                   onChange={(e) =>
                     setFilters({ ...filters, customer_name: e.target.value })
                   }
-                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -681,7 +681,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                   onChange={(e) =>
                     setFilters({ ...filters, vehicle_no: e.target.value })
                   }
-                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -690,7 +690,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                   onChange={(e) =>
                     setFilters({ ...filters, driver_number: e.target.value })
                   }
-                  className="flex-1 min-w-[120px] px-4 py-2 border border-slate-200 rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
               </div>
 
@@ -756,15 +756,15 @@ const indexOfLastItem = currentPage * itemsPerPage;
                             <td className="py-3 px-4 text-slate-500 text-xs text-center whitespace-nowrap">
                               {s.created_at
                                 ? new Date(s.created_at).toLocaleString(
-                                    "en-GB",
-                                    {
-                                      day: "2-digit",
-                                      month: "2-digit",
-                                      year: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    },
-                                  )
+                                  "en-GB",
+                                  {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  },
+                                )
                                 : "-"}
                             </td>
                             <td className="py-3 px-4 text-slate-600 font-medium text-center whitespace-nowrap">
@@ -944,10 +944,10 @@ const indexOfLastItem = currentPage * itemsPerPage;
                                                   value={
                                                     item.product_code
                                                       ? {
-                                                          value:
-                                                            item.product_code,
-                                                          label: `${item.product_name || item.product_code} (${item.gradation || ""})`,
-                                                        }
+                                                        value:
+                                                          item.product_code,
+                                                        label: `${item.product_name || item.product_code} (${item.gradation || ""})`,
+                                                      }
                                                       : null
                                                   }
                                                   onChange={(
@@ -994,7 +994,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
                                                   }}
                                                   menuPortalTarget={
                                                     typeof document !==
-                                                    "undefined"
+                                                      "undefined"
                                                       ? document.body
                                                       : null
                                                   }
@@ -1142,8 +1142,8 @@ const indexOfLastItem = currentPage * itemsPerPage;
                           key={page}
                           onClick={() => setCurrentPage(page)}
                           className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
-                              ? "bg-[#212121] text-white"
-                              : "border border-slate-200 text-slate-600"
+                            ? "bg-[#212121] text-white"
+                            : "border border-slate-200 text-slate-600"
                             }`}
                         >
                           {page}
@@ -1167,8 +1167,8 @@ const indexOfLastItem = currentPage * itemsPerPage;
                   )}
                 </div>
               </div>
-{/* Edit Modal */}
-               {isModalOpen && (
+              {/* Edit Modal */}
+              {isModalOpen && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
                   <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl overflow-y-auto max-h-[90vh]">
                     <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555] rounded-t-2xl -mx-8 -mt-8 mb-6">
@@ -1323,7 +1323,7 @@ const indexOfLastItem = currentPage * itemsPerPage;
               )}
 
               {/* Delete Confirmation Modal */}
-             {isDeleteModalOpen && (
+              {isDeleteModalOpen && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
 
                   <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden">
@@ -1392,30 +1392,49 @@ const indexOfLastItem = currentPage * itemsPerPage;
               {/* View Details Modal */}
               {isViewModalOpen && viewSale && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-                  <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-                    <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-xl font-bold text-slate-800">
-                        Sales Order Details
-                      </h2>
+                  <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl max-h-[90vh] overflow-hidden">
+                    <div className="flex items-center justify-between px-6 py-4 
+  bg-gradient-to-r from-[#2c2c2c] to-[#555555] 
+  rounded-t-2xl -mx-8 -mt-8 mb-0">
+
+                      {/* Left Side */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 flex items-center justify-center">
+                          {/* Eye Icon */}
+                          <svg
+                            className="w-5 h-5 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </div>
+
+                        <h2 className="text-lg font-semibold text-white">
+                          Sales Order Details
+                        </h2>
+                      </div>
+
+                      {/* Close Button */}
                       <button
                         onClick={() => {
                           setIsViewModalOpen(false);
                           setViewSale(null);
                         }}
-                        className="text-slate-400 hover:text-slate-600 transition"
+                        className="w-9 h-9 flex items-center justify-center text-white hover:text-gray-300 transition"
                       >
                         <svg
-                          className="w-6 h-6"
+                          className="w-5 h-5"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                     </div>
@@ -1505,80 +1524,82 @@ const indexOfLastItem = currentPage * itemsPerPage;
                       Products
                     </h3>
                     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-                      <table className="w-full text-left text-sm">
-                        <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
-                          <tr>
-                            <th className="py-2 px-4 font-semibold w-12 text-center">
-                              #
-                            </th>
-                            <th className="py-2 px-4 font-semibold">
-                              Product Code
-                            </th>
-                            <th className="py-2 px-4 font-semibold">
-                              Product Name
-                            </th>
-                            <th className="py-2 px-4 font-semibold">
-                              Gradation
-                            </th>
-                            <th className="py-2 px-4 font-semibold text-right">
-                              Quantity
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {viewSale.items && viewSale.items.length > 0 ? (
-                            viewSale.items.map((item, idx) => (
-                              <tr
-                                key={idx}
-                                className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
-                              >
+                      <div className="max-h-64 overflow-y-auto custom-scrollbar">
+                        <table className="w-full text-left text-sm">
+                          <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+                            <tr>
+                              <th className="py-2 px-4 font-semibold w-12 text-center">
+                                #
+                              </th>
+                              <th className="py-2 px-4 font-semibold">
+                                Product Code
+                              </th>
+                              <th className="py-2 px-4 font-semibold">
+                                Product Name
+                              </th>
+                              <th className="py-2 px-4 font-semibold">
+                                Gradation
+                              </th>
+                              <th className="py-2 px-4 font-semibold text-right">
+                                Quantity
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {viewSale.items && viewSale.items.length > 0 ? (
+                              viewSale.items.map((item, idx) => (
+                                <tr
+                                  key={idx}
+                                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
+                                >
+                                  <td className="py-2 px-4 text-center text-slate-500">
+                                    {idx + 1}
+                                  </td>
+                                  <td className="py-2 px-4 font-medium">
+                                    {item.product_code}
+                                  </td>
+                                  <td className="py-2 px-4 text-slate-600">
+                                    {item.product_name}
+                                  </td>
+                                  <td className="py-2 px-4 text-slate-600">
+                                    {item.gradation || "-"}
+                                  </td>
+                                  <td className="py-2 px-4 text-right font-bold text-slate-800">
+                                    {item.quantity}
+                                  </td>
+                                </tr>
+                              ))
+                            ) : viewSale.product_code ? (
+                              <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
                                 <td className="py-2 px-4 text-center text-slate-500">
-                                  {idx + 1}
+                                  1
                                 </td>
                                 <td className="py-2 px-4 font-medium">
-                                  {item.product_code}
+                                  {viewSale.product_code}
                                 </td>
                                 <td className="py-2 px-4 text-slate-600">
-                                  {item.product_name}
+                                  {viewSale.product_name || "-"}
                                 </td>
                                 <td className="py-2 px-4 text-slate-600">
-                                  {item.gradation || "-"}
+                                  {viewSale.gradation || "-"}
                                 </td>
                                 <td className="py-2 px-4 text-right font-bold text-slate-800">
-                                  {item.quantity}
+                                  {viewSale.quantity}
                                 </td>
                               </tr>
-                            ))
-                          ) : viewSale.product_code ? (
-                            <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                              <td className="py-2 px-4 text-center text-slate-500">
-                                1
-                              </td>
-                              <td className="py-2 px-4 font-medium">
-                                {viewSale.product_code}
-                              </td>
-                              <td className="py-2 px-4 text-slate-600">
-                                {viewSale.product_name || "-"}
-                              </td>
-                              <td className="py-2 px-4 text-slate-600">
-                                {viewSale.gradation || "-"}
-                              </td>
-                              <td className="py-2 px-4 text-right font-bold text-slate-800">
-                                {viewSale.quantity}
-                              </td>
-                            </tr>
-                          ) : (
-                            <tr>
-                              <td
-                                colSpan="5"
-                                className="py-4 text-center text-slate-500"
-                              >
-                                No products found.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
+                            ) : (
+                              <tr>
+                                <td
+                                  colSpan="5"
+                                  className="py-4 text-center text-slate-500"
+                                >
+                                  No products found.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 </div>
