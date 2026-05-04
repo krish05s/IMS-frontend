@@ -14,6 +14,7 @@ export default function Gradations() {
   const [filters, setFilters] = useState({ gradation: "" });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     gradationName: "",
     thickness: "",
@@ -67,9 +68,9 @@ export default function Gradations() {
     setCurrentGradation(null);
     setFormData({ gradationName: "", thickness: "" });
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSaving(true); // 👈 start spinner
     const combinedGradation =
       `${formData.gradationName} ${formData.thickness}`.trim();
     const payload = { gradation: combinedGradation };
@@ -103,8 +104,48 @@ export default function Gradations() {
     } catch (error) {
       console.error("Error saving gradation:", error);
       toast.error("Failed to save gradation");
+    } finally {
+      setIsSaving(false); // 👈 stop spinner
     }
   };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const combinedGradation =
+  //     `${formData.gradationName} ${formData.thickness}`.trim();
+  //   const payload = { gradation: combinedGradation };
+
+  //   const url = currentGradation
+  //     ? `${process.env.NEXT_PUBLIC_API_URL}/api/gradation/update/${currentGradation.id}`
+  //     : `${process.env.NEXT_PUBLIC_API_URL}/api/gradation/create`;
+  //   const method = currentGradation ? "PUT" : "POST";
+
+  //   try {
+  //     const response = await fetch(url, {
+  //       method,
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //       },
+  //       body: JSON.stringify(payload),
+  //     });
+  //     const data = await response.json();
+  //     if (data.success) {
+  //       toast.success(
+  //         currentGradation
+  //           ? "Gradation updated successfully!"
+  //           : "Gradation added successfully!",
+  //       );
+  //       fetchGradations();
+  //       handleCloseModal();
+  //     } else {
+  //       toast.error(data.message);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error saving gradation:", error);
+  //     toast.error("Failed to save gradation");
+  //   }
+  // };
 
   const handleToggleStatus = async (id, currentStatus) => {
     try {
@@ -210,36 +251,6 @@ export default function Gradations() {
             <TruckLoader />
           ) : (
             <>
-              {/* <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
-                <div>
-                  <h1 className="text-2xl font-bold text-slate-800">
-                    Gradations
-                  </h1>
-                  {/* <p className="text-sm text-slate-500 mt-1">Manage and organize product gradations</p> 
-                </div>
-                <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
-                  <button
-                    onClick={() => handleOpenModal()}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-orange-200 whitespace-nowrap"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 4v16m8-8H4"
-                      />
-                    </svg>
-                    Add Gradation
-                  </button>
-                </div>
-              </div> */}
-
               {/* Filter Bar */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
                 <input
@@ -359,7 +370,6 @@ export default function Gradations() {
 
                   {totalPages > 1 && (
                     <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-
                       {/* Prev */}
                       <button
                         onClick={() =>
@@ -397,7 +407,6 @@ export default function Gradations() {
                       >
                         &gt;
                       </button>
-
                     </div>
                   )}
                 </div>
@@ -409,12 +418,9 @@ export default function Gradations() {
 
           {isModalOpen && (
             <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-
               <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-
                 {/* HEADER */}
                 <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555]">
-
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
                       <svg
@@ -447,7 +453,6 @@ export default function Gradations() {
 
                 {/* FORM */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
-
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
                       Gradation Name
@@ -457,7 +462,10 @@ export default function Gradations() {
                       required
                       value={formData.gradationName}
                       onChange={(e) =>
-                        setFormData({ ...formData, gradationName: e.target.value })
+                        setFormData({
+                          ...formData,
+                          gradationName: e.target.value,
+                        })
                       }
                       className="w-full px-4 py-2.5 rounded-xl border border-[#D2A185] bg-white focus:outline-none"
                     />
@@ -489,17 +497,42 @@ export default function Gradations() {
 
                     <button
                       type="submit"
-                      className="px-5 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl hover:bg-[#444]"
+                      disabled={isSaving}
+                      className="px-5 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl hover:bg-[#444] flex items-center gap-2 disabled:opacity-70"
                     >
-                      Save
+                      {isSaving ? (
+                        <>
+                          <svg
+                            className="w-4 h-4 animate-spin"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v8z"
+                            />
+                          </svg>
+                          Saving...
+                        </>
+                      ) : (
+                        "Save"
+                      )}
                     </button>
+                   
                   </div>
                 </form>
-
               </div>
             </div>
           )}
-
         </div>
       </div>
     </div>

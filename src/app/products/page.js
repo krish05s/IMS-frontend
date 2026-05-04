@@ -15,7 +15,7 @@ export default function Products() {
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteProduct, setDeleteProduct] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-
+  const [isSaving, setIsSaving] = useState(false);
   const [filters, setFilters] = useState({
     product_code: "",
     product_name: "",
@@ -104,9 +104,9 @@ export default function Products() {
       unit: "Pieces",
     });
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSaving(true); // 👈 add karo
     const url = currentProduct
       ? `${process.env.NEXT_PUBLIC_API_URL}/api/product/update/${currentProduct.id}`
       : `${process.env.NEXT_PUBLIC_API_URL}/api/product/create`;
@@ -136,8 +136,11 @@ export default function Products() {
     } catch (error) {
       console.error("Error saving product:", error);
       toast.error("Failed to save product");
+    } finally {
+      setIsSaving(false); // 👈 add karo
     }
   };
+
 
   const handleDelete = async () => {
     setDeleteLoading(true);
@@ -187,7 +190,6 @@ export default function Products() {
     indexOfLastItem,
   );
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-
 
   const getSlidingPages = () => {
     const visibleCount = 5;
@@ -246,37 +248,7 @@ export default function Products() {
             <TruckLoader />
           ) : (
             <>
-              {/* <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
-                <div>
-                  <h1 className="text-2xl font-bold text-slate-800">
-                    Products
-                  </h1>
-                  {/* <p className="text-sm text-slate-500 mt-1">Manage physical inventory products</p> 
-                </div>
-                <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
-                  {role === "admin" && (
-                    <button
-                      onClick={() => handleOpenModal()}
-                      className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-orange-200 whitespace-nowrap"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 4v16m8-8H4"
-                        />
-                      </svg>
-                      Add Product
-                    </button>
-                  )}
-                </div>
-              </div> */}
+            
 
               {/* Filter Bar */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
@@ -442,7 +414,6 @@ export default function Products() {
 
                   {totalPages > 1 && (
                     <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-
                       {/* Prev */}
                       <button
                         onClick={() =>
@@ -459,10 +430,11 @@ export default function Products() {
                         <button
                           key={page}
                           onClick={() => setCurrentPage(page)}
-                          className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
-                            ? "bg-[#212121] text-white"
-                            : "border border-slate-200 text-slate-600"
-                            }`}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                            currentPage === page
+                              ? "bg-[#212121] text-white"
+                              : "border border-slate-200 text-slate-600"
+                          }`}
                         >
                           {page}
                         </button>
@@ -472,7 +444,7 @@ export default function Products() {
                       <button
                         onClick={() =>
                           setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages)
+                            Math.min(prev + 1, totalPages),
                           )
                         }
                         disabled={currentPage === totalPages}
@@ -480,7 +452,6 @@ export default function Products() {
                       >
                         &gt;
                       </button>
-
                     </div>
                   )}
                 </div>
@@ -595,12 +566,40 @@ export default function Products() {
                         >
                           Cancel
                         </button>
+
                         <button
                           type="submit"
-                          className="px-5 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl hover:bg-[#444]"
+                          disabled={isSaving}
+                          className="px-5 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl hover:bg-[#444] flex items-center gap-2 disabled:opacity-70"
                         >
-                          Save
+                          {isSaving ? (
+                            <>
+                              <svg
+                                className="w-4 h-4 animate-spin"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                />
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8v8z"
+                                />
+                              </svg>
+                              Saving...
+                            </>
+                          ) : (
+                            "Save"
+                          )}
                         </button>
+                        
                       </div>
                     </form>
                   </div>
