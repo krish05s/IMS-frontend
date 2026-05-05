@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
 import useRoleCheck from "../../hooks/useRoleCheck";
-import TruckLoader from "../../components/TruckLoader";
 import { toast } from "react-toastify";
 import Topbar from "../../components/Topbar";
 

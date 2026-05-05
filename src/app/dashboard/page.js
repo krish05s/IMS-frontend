@@ -21,7 +21,6 @@ import {
   Bar,
 } from "recharts";
 import Link from "next/link";
-import TruckLoader from "../components/TruckLoader";
 import Topbar from "../components/Topbar";
 
 export default function Dashboard() {
