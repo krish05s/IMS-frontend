@@ -255,9 +255,7 @@ export default function Page() {
             </button>
           </div>
 
-          {loading ? (
-            <TruckLoader />
-          ) : (
+         
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-w-full overflow-hidden flex flex-col">
               <div className="overflow-x-auto scrollbar-hide">
                 <table className="w-full text-left text-sm">
@@ -417,7 +415,7 @@ export default function Page() {
                 )}
               </div>
             </div>
-          )}
+         
 
           {/* Add/Edit Modal */}
           {isModalOpen && (
@@ -480,9 +478,9 @@ export default function Page() {
                     </label>
                     <input
                       type="text"
-                      value={formData.name}
+                      value={formData.phone}
                       onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
+                        setFormData({ ...formData, phone: e.target.value })
                       }
                       className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] focus:outline-none focus:ring-0 focus:border-[#C19A6B] bg-white placeholder:text-gray-400"
                       placeholder="Enter your mobile.no"

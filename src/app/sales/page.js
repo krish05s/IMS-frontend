@@ -225,64 +225,63 @@ export default function Sales() {
     setExpandedItems(newItems);
   };
   const handleSaveExpandedItems = async (sale) => {
-    setIsSavingProducts(true); // 👈
-    const validItems = expandedItems.filter(
-      (i) => i.product_code && i.quantity > 0,
+  setIsSavingProducts(true);
+
+  const validItems = expandedItems.filter(
+    (i) => i.product_code && Number(i.quantity) > 0
+  );
+
+  if (validItems.length === 0) {
+    toast.error("Please add at least one valid product");
+    setIsSavingProducts(false);
+    return;
+  }
+
+  try {
+    const submissionData = {
+      date: sale.date,
+      bill_no: sale.bill_no,
+      customer_name: sale.customer_name,
+      vehicle_no: sale.vehicle_no,
+      driver_name: sale.driver_name,
+      driver_number: sale.driver_number,
+      transporter_name: sale.transporter_name,
+      lr_number: sale.lr_number,
+      items: validItems,
+    };
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/sales/update/${sale.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(submissionData),
+      }
     );
 
-    try {
-      // ... same code ...
-    } catch (error) {
-      console.error("Error saving items:", error);
-      toast.error("Failed to save products");
-    } finally {
-      setIsSavingProducts(false); // 👈
+    const data = await response.json();
+
+    if (data.success) {
+      toast.success("Products saved successfully!");
+
+      await fetchSales();      // ✅ ensure refresh
+      await fetchProducts();   // ✅ stock update
+
+      setExpandedRowId(null);
+      setExpandedItems([]);
+    } else {
+      toast.error(data.message || "Failed to save");
     }
-  };
-  // const handleSaveExpandedItems = async (sale) => {
-  //   const validItems = expandedItems.filter(
-  //     (i) => i.product_code && i.quantity > 0,
-  //   );
-
-  //   try {
-  //     const submissionData = {
-  //       date: sale.date,
-  //       bill_no: sale.bill_no,
-  //       customer_name: sale.customer_name,
-  //       vehicle_no: sale.vehicle_no,
-  //       driver_name: sale.driver_name,
-  //       driver_number: sale.driver_number,
-  //       transporter_name: sale.transporter_name,
-  //       lr_number: sale.lr_number,
-  //       items: validItems,
-  //     };
-
-  //     const response = await fetch(
-  //       `${process.env.NEXT_PUBLIC_API_URL}/api/sales/update/${sale.id}`,
-  //       {
-  //         method: "PUT",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${localStorage.getItem("token")}`,
-  //         },
-  //         body: JSON.stringify(submissionData),
-  //       },
-  //     );
-  //     const data = await response.json();
-  //     if (data.success) {
-  //       toast.success("Products saved successfully!");
-  //       fetchSales();
-  //       fetchProducts();
-  //       setExpandedRowId(null);
-  //       setExpandedItems([]);
-  //     } else {
-  //       toast.error(data.message);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error saving items:", error);
-  //     toast.error("Failed to save products");
-  //   }
-  // };
+  } catch (error) {
+    console.error("Error saving items:", error);
+    toast.error("Server error while saving products");
+  } finally {
+    setIsSavingProducts(false);
+  }
+};
 
   const handleDelete = (id) => {
     setSaleToDelete(id);
@@ -644,9 +643,7 @@ export default function Sales() {
           }
         />
         <div className="p-4 md:p-8 topbar-offset mt-4">
-          {loading ? (
-            <TruckLoader />
-          ) : (
+          
             <>
               {/* Filter Bar */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-3">
@@ -1698,7 +1695,7 @@ export default function Sales() {
                 </div>
               )}
             </>
-          )}
+        
         </div>
       </div>
     </div>

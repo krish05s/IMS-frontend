@@ -247,9 +247,7 @@ export default function Gradations() {
           }
         />
         <div className="p-4 md:p-8 topbar-offset mt-4">
-          {loading ? (
-            <TruckLoader />
-          ) : (
+         
             <>
               {/* Filter Bar */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
@@ -412,7 +410,7 @@ export default function Gradations() {
                 </div>
               </div>
             </>
-          )}
+          
 
           {/* edit add model */}
 

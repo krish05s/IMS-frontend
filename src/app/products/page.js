@@ -244,9 +244,7 @@ export default function Products() {
           }
         />
         <div className="p-4 md:p-8 topbar-offset mt-4">
-          {loading ? (
-            <TruckLoader />
-          ) : (
+         
             <>
             
 
@@ -606,7 +604,7 @@ export default function Products() {
                 </div>
               )}
             </>
-          )}
+          
 
           {/*delete model */}
           {deleteModal && deleteProduct && (

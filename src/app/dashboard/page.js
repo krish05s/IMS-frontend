@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
+import { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -32,7 +33,6 @@ export default function Dashboard() {
     totalSalesQty: 0,
     totalPurchaseQty: 0,
   });
-  const [chartData, setChartData] = useState([]);
   const [rawSalesData, setRawSalesData] = useState([]);
   const [rawPurchaseData, setRawPurchaseData] = useState([]);
 
@@ -51,220 +51,162 @@ export default function Dashboard() {
     const fetchStats = async () => {
       try {
         const token = localStorage.getItem("token") || "";
+        const headers = { Authorization: `Bearer ${token}` };
+
+        // ✅ Decode user once
         if (token) {
           try {
             const payload = JSON.parse(atob(token.split(".")[1]));
-            setUserName(
-              payload.name || payload.username || payload.email || "User",
-            );
-          } catch (e) {}
-        }
-        const headers = { Authorization: `Bearer ${token}` };
-
-        // Fetch Data conditionally based on role
-        const fetches = [
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/product/read`, {
-            headers,
-          }),
-        ];
-
-        if (role === "admin" || role === "sales") {
-          fetches.push(
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sales/read`, {
-              headers,
-            }),
-          );
-        }
-        if (role === "admin" || role === "purchase") {
-          fetches.push(
-            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/purchase/read`, {
-              headers,
-            }),
-          );
+            setUserName(payload.name || payload.username || payload.email || "User");
+          } catch { }
         }
 
-        const responses = await Promise.all(fetches);
-        const prodData = await responses[0].json();
+        // ✅ Parallel API calls (optimized)
+        const endpoints = [
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/product/read`, { headers }),
+          (role === "admin" || role === "sales")
+            ? fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sales/read`, { headers })
+            : null,
+          (role === "admin" || role === "purchase")
+            ? fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/purchase/read`, { headers })
+            : null,
+        ].filter(Boolean);
 
-        let sData = [];
-        let pData = [];
+        const responses = await Promise.all(endpoints);
 
-        if (role === "admin") {
-          const sd = await responses[1].json();
-          const pd = await responses[2].json();
-          if (sd.success) sData = sd.data;
-          if (pd.success) pData = pd.data;
-        } else if (role === "sales") {
-          const sd = await responses[1].json();
-          if (sd.success) sData = sd.data;
-        } else if (role === "purchase") {
-          const pd = await responses[1].json();
-          if (pd.success) pData = pd.data;
-        }
+        // ✅ Parse once
+        const [prodRes, salesRes, purchaseRes] = await Promise.all(
+          responses.map((r) => r.json())
+        );
 
-        // --- Process Products ---
-        let products = 0;
+        const pList = prodRes?.data || [];
+        const sData = salesRes?.data || [];
+        const pData = purchaseRes?.data || [];
+
+        // ✅ FAST calculations (single loop)
         let totalQuantity = 0;
-        let pList = [];
-        if (prodData.success) {
-          pList = prodData.data;
-          products = pList.length;
-          totalQuantity = pList.reduce(
-            (acc, curr) => acc + (curr.quantity || 0),
-            0,
-          );
+        const lowStock = [];
+        const topStock = [];
 
-          setTopProducts(
-            [...pList]
-              .sort((a, b) => (b.quantity || 0) - (a.quantity || 0))
-              .slice(0, 5)
-              .map((p) => ({
-                name: p.product_code,
-                stock: p.quantity || 0,
-              })),
-          );
+        for (let p of pList) {
+          const qty = p.quantity || 0;
+          totalQuantity += qty;
 
-          setLowStockProducts(
-            [...pList]
-              .filter((p) => (p.quantity || 0) < 50)
-              .sort((a, b) => (a.quantity || 0) - (b.quantity || 0))
-              .slice(0, 5)
-              .map((p) => ({
-                name: p.product_code,
-                stock: p.quantity || 0,
-              })),
-          );
+          topStock.push({ name: p.product_code, stock: qty });
+
+          if (qty < 50) {
+            lowStock.push({ name: p.product_code, stock: qty });
+          }
         }
+
+        // ✅ sort once
+        topStock.sort((a, b) => b.stock - a.stock);
+        lowStock.sort((a, b) => a.stock - b.stock);
+
+        // ✅ Sales + Purchase aggregation (optimized)
+        const processItems = (data) => {
+          const map = {};
+          let total = 0;
+
+          for (let r of data) {
+            const items = r.items || [];
+            for (let item of items) {
+              const code = item.product_code;
+              const qty = item.quantity || 0;
+
+              total += qty;
+              map[code] = (map[code] || 0) + qty;
+            }
+          }
+
+          return {
+            total,
+            top: Object.entries(map)
+              .map(([name, qty]) => ({ name, qty }))
+              .sort((a, b) => b.qty - a.qty)
+              .slice(0, 5),
+          };
+        };
+
+        const sales = processItems(sData);
+        const purchase = processItems(pData);
+
+        // ✅ Batch state update (IMPORTANT for performance)
+        setStats({
+          products: pList.length,
+          totalQuantity,
+          totalSalesQty: sales.total,
+          totalPurchaseQty: purchase.total,
+        });
+
+        setTopProducts(topStock.slice(0, 5));
+        setLowStockProducts(lowStock.slice(0, 5));
+        setTopSalesProducts(sales.top);
+        setTopPurchaseProducts(purchase.top);
 
         setRawSalesData(sData);
         setRawPurchaseData(pData);
 
-        const sQty = sData.reduce(
-          (sum, r) =>
-            sum +
-            (r.items?.reduce((a, c) => a + (c.quantity || 0), 0) ||
-              r.quantity ||
-              0),
-          0,
-        );
-        const pQty = pData.reduce(
-          (sum, r) =>
-            sum +
-            (r.items?.reduce((a, c) => a + (c.quantity || 0), 0) ||
-              r.quantity ||
-              0),
-          0,
-        );
-
-        // Top Sales Products
-        const salesMap = {};
-        sData.forEach((r) => {
-          (r.items || []).forEach((item) => {
-            if (!salesMap[item.product_code]) salesMap[item.product_code] = 0;
-            salesMap[item.product_code] += item.quantity || 0;
-          });
-        });
-        setTopSalesProducts(
-          Object.keys(salesMap)
-            .map((k) => ({ name: k, qty: salesMap[k] }))
-            .sort((a, b) => b.qty - a.qty)
-            .slice(0, 5),
-        );
-
-        // Top Purchase Products
-        const purchaseMap = {};
-        pData.forEach((r) => {
-          (r.items || []).forEach((item) => {
-            if (!purchaseMap[item.product_code])
-              purchaseMap[item.product_code] = 0;
-            purchaseMap[item.product_code] += item.quantity || 0;
-          });
-        });
-        setTopPurchaseProducts(
-          Object.keys(purchaseMap)
-            .map((k) => ({ name: k, qty: purchaseMap[k] }))
-            .sort((a, b) => b.qty - a.qty)
-            .slice(0, 5),
-        );
-
-        setStats({
-          products,
-          totalQuantity,
-          totalSalesQty: sQty,
-          totalPurchaseQty: pQty,
-        });
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching stats:", error);
+      } catch (err) {
+        console.error(err);
+      } finally {
         setLoading(false);
       }
     };
     fetchStats();
   }, [role]);
 
-  useEffect(() => {
-    if (loading) return;
-    const dateMap = {};
+  const chartData = useMemo(() => {
+  if (loading) return [];
 
-    const processData = (dataArr, type) => {
-      (dataArr || []).forEach((record) => {
-        const dateObj = new Date(record.date);
-        let key = "";
+  const dateMap = {};
 
-        if (timeFilter === "Daily") {
-          key = dateObj.toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-          });
-        } else if (timeFilter === "Monthly") {
-          key = dateObj.toLocaleDateString("en-US", {
-            month: "short",
-            year: "numeric",
-          });
-        } else if (timeFilter === "Yearly") {
-          key = dateObj.toLocaleDateString("en-US", { year: "numeric" });
-        }
+  const process = (data, type) => {
+    for (let record of data || []) {
+      const dateObj = new Date(record.date);
 
-        if (!dateMap[key])
-          dateMap[key] = {
-            date: key,
-            salesQty: 0,
-            purchaseQty: 0,
-            rawDate: dateObj.getTime(),
-          };
+      let key =
+        timeFilter === "Daily"
+          ? dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+          : timeFilter === "Monthly"
+          ? dateObj.toLocaleDateString("en-US", { month: "short", year: "numeric" })
+          : dateObj.toLocaleDateString("en-US", { year: "numeric" });
 
-        const qty =
-          record.items?.reduce((acc, curr) => acc + (curr.quantity || 0), 0) ||
-          record.quantity ||
-          0;
-        if (type === "sales") {
-          dateMap[key].salesQty += qty;
-        } else {
-          dateMap[key].purchaseQty += qty;
-        }
-      });
-    };
+      if (!dateMap[key]) {
+        dateMap[key] = {
+          date: key,
+          salesQty: 0,
+          purchaseQty: 0,
+          rawDate: dateObj.getTime(),
+        };
+      }
 
-    processData(rawSalesData, "sales");
-    processData(rawPurchaseData, "purchase");
+      const qty =
+        record.items?.reduce((a, c) => a + (c.quantity || 0), 0) ||
+        record.quantity ||
+        0;
 
-    const cData = Object.keys(dateMap)
-      .map((k) => dateMap[k])
-      .sort((a, b) => a.rawDate - b.rawDate);
-    setChartData(cData);
-  }, [rawSalesData, rawPurchaseData, timeFilter, loading]);
+      if (type === "sales") dateMap[key].salesQty += qty;
+      else dateMap[key].purchaseQty += qty;
+    }
+  };
 
-  return (
-    <div className="min-h-screen flex bg-[#f1f1f1] font-sans">
-      <Sidebar />
+  process(rawSalesData, "sales");
+  process(rawPurchaseData, "purchase");
 
-      {/* <Topbar /> */}
-      <div className="flex-1 md:ml-64   overflow-x-hidden">
-        <Topbar />
-        <div className="p-4 md:p-8 topbar-offset mt-4">
-          {loading || !role ? (
-            <TruckLoader />
-          ) : (
+  return Object.values(dateMap).sort((a, b) => a.rawDate - b.rawDate);
+}, [rawSalesData, rawPurchaseData, timeFilter, loading]);
+
+
+    return (
+      <div className="min-h-screen flex bg-[#f1f1f1] font-sans">
+        <Sidebar />
+
+        {/* <Topbar /> */}
+        <div className="flex-1 md:ml-64   overflow-x-hidden">
+          <Topbar />
+          <div className="p-4 md:p-8 topbar-offset mt-4">
+
             <>
               {/* Header Section */}
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-white p-6  shadow-sm border border-slate-100">
@@ -405,134 +347,134 @@ export default function Dashboard() {
                 {(role === "admin" ||
                   role === "sales" ||
                   role === "purchase") && (
-                  <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-lg font-bold text-slate-800">
-                        Activity Overview
-                      </h2>
-                      <div className="flex bg-slate-100 p-1 rounded-lg">
-                        {["Daily", "Monthly", "Yearly"].map((filter) => (
-                          <button
-                            key={filter}
-                            onClick={() => setTimeFilter(filter)}
-                            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${timeFilter === filter ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
-                          >
-                            {filter}
-                          </button>
-                        ))}
+                    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                      <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-lg font-bold text-slate-800">
+                          Activity Overview
+                        </h2>
+                        <div className="flex bg-slate-100 p-1 rounded-lg">
+                          {["Daily", "Monthly", "Yearly"].map((filter) => (
+                            <button
+                              key={filter}
+                              onClick={() => setTimeFilter(filter)}
+                              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${timeFilter === filter ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                            >
+                              {filter}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="h-[350px] w-full text-xs font-semibold">
+                        {chartData.length > 0 ? (
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart
+                              data={chartData}
+                              margin={{
+                                top: 10,
+                                right: 10,
+                                left: -20,
+                                bottom: 0,
+                              }}
+                            >
+                              <defs>
+                                <linearGradient
+                                  id="colorSales"
+                                  x1="0"
+                                  y1="0"
+                                  x2="0"
+                                  y2="1"
+                                >
+                                  <stop
+                                    offset="5%"
+                                    stopColor="#3b82f6"
+                                    stopOpacity={0.3}
+                                  />
+                                  <stop
+                                    offset="95%"
+                                    stopColor="#3b82f6"
+                                    stopOpacity={0}
+                                  />
+                                </linearGradient>
+                                <linearGradient
+                                  id="colorPurchase"
+                                  x1="0"
+                                  y1="0"
+                                  x2="0"
+                                  y2="1"
+                                >
+                                  <stop
+                                    offset="5%"
+                                    stopColor="#10b981"
+                                    stopOpacity={0.3}
+                                  />
+                                  <stop
+                                    offset="95%"
+                                    stopColor="#10b981"
+                                    stopOpacity={0}
+                                  />
+                                </linearGradient>
+                              </defs>
+                              <CartesianGrid
+                                strokeDasharray="3 3"
+                                vertical={false}
+                                stroke="#e2e8f0"
+                              />
+                              <XAxis
+                                dataKey="date"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: "#64748b" }}
+                                dy={10}
+                              />
+                              <YAxis
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: "#64748b" }}
+                              />
+                              <Tooltip
+                                contentStyle={{
+                                  borderRadius: "12px",
+                                  border: "1px solid #e2e8f0",
+                                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                                }}
+                              />
+                              <Legend
+                                verticalAlign="bottom"
+                                height={20}
+                                iconType="circle"
+                              />
+                              {(role === "admin" || role === "sales") && (
+                                <Area
+                                  type="monotone"
+                                  dataKey="salesQty"
+                                  name="Sales (Qty)"
+                                  stroke="#3b82f6"
+                                  strokeWidth={3}
+                                  fillOpacity={1}
+                                  fill="url(#colorSales)"
+                                />
+                              )}
+                              {(role === "admin" || role === "purchase") && (
+                                <Area
+                                  type="monotone"
+                                  dataKey="purchaseQty"
+                                  name="Purchases (Qty)"
+                                  stroke="#10b981"
+                                  strokeWidth={3}
+                                  fillOpacity={1}
+                                  fill="url(#colorPurchase)"
+                                />
+                              )}
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        ) : (
+                          <div className="flex items-center justify-center h-full text-slate-400 font-medium">
+                            No activity data available
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div className="h-[350px] w-full text-xs font-semibold">
-                      {chartData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart
-                            data={chartData}
-                            margin={{
-                              top: 10,
-                              right: 10,
-                              left: -20,
-                              bottom: 0,
-                            }}
-                          >
-                            <defs>
-                              <linearGradient
-                                id="colorSales"
-                                x1="0"
-                                y1="0"
-                                x2="0"
-                                y2="1"
-                              >
-                                <stop
-                                  offset="5%"
-                                  stopColor="#3b82f6"
-                                  stopOpacity={0.3}
-                                />
-                                <stop
-                                  offset="95%"
-                                  stopColor="#3b82f6"
-                                  stopOpacity={0}
-                                />
-                              </linearGradient>
-                              <linearGradient
-                                id="colorPurchase"
-                                x1="0"
-                                y1="0"
-                                x2="0"
-                                y2="1"
-                              >
-                                <stop
-                                  offset="5%"
-                                  stopColor="#10b981"
-                                  stopOpacity={0.3}
-                                />
-                                <stop
-                                  offset="95%"
-                                  stopColor="#10b981"
-                                  stopOpacity={0}
-                                />
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid
-                              strokeDasharray="3 3"
-                              vertical={false}
-                              stroke="#e2e8f0"
-                            />
-                            <XAxis
-                              dataKey="date"
-                              axisLine={false}
-                              tickLine={false}
-                              tick={{ fill: "#64748b" }}
-                              dy={10}
-                            />
-                            <YAxis
-                              axisLine={false}
-                              tickLine={false}
-                              tick={{ fill: "#64748b" }}
-                            />
-                            <Tooltip
-                              contentStyle={{
-                                borderRadius: "12px",
-                                border: "1px solid #e2e8f0",
-                                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                              }}
-                            />
-                            <Legend
-                              verticalAlign="bottom"
-                              height={20}
-                              iconType="circle"
-                            />
-                            {(role === "admin" || role === "sales") && (
-                              <Area
-                                type="monotone"
-                                dataKey="salesQty"
-                                name="Sales (Qty)"
-                                stroke="#3b82f6"
-                                strokeWidth={3}
-                                fillOpacity={1}
-                                fill="url(#colorSales)"
-                              />
-                            )}
-                            {(role === "admin" || role === "purchase") && (
-                              <Area
-                                type="monotone"
-                                dataKey="purchaseQty"
-                                name="Purchases (Qty)"
-                                stroke="#10b981"
-                                strokeWidth={3}
-                                fillOpacity={1}
-                                fill="url(#colorPurchase)"
-                              />
-                            )}
-                          </AreaChart>
-                        </ResponsiveContainer>
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-slate-400 font-medium">
-                          No activity data available
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Chart: Top Stocked Items (Admin Only) */}
                 {role === "admin" && (
@@ -771,11 +713,10 @@ export default function Dashboard() {
                 )}
               </div>
             </>
-          )}
+          </div>
         </div>
-      </div>
 
-      <style jsx global>{`
+        <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }
@@ -787,6 +728,6 @@ export default function Dashboard() {
           border-radius: 20px;
         }
       `}</style>
-    </div>
-  );
-}
+      </div>
+    );
+  }

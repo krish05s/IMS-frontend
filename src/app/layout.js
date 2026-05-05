@@ -1,7 +1,9 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ToastContainer } from "react-toastify";
+import ToastProvider from "./components/toastify";
 import "react-toastify/dist/ReactToastify.css";
+import TruckPageTransition from "./components/TruckPageTransition";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,10 +16,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`h-full antialiased ${inter.className}`}>
       <body className="min-h-full flex flex-col bg-slate-50">
-       
-         <ToastContainer position="top-right" autoClose={3000} theme="colored" />
-        {children}
-       
+
+          {children}
+
+      {/* ✅ mount loader separately */}
+        <TruckPageTransition />
+        <ToastProvider />
       </body>
     </html>
   );

@@ -635,9 +635,7 @@ export default function Purchases() {
           }
         />
         <div className="p-4 md:p-8 topbar-offset mt-4">
-          {loading ? (
-            <TruckLoader />
-          ) : (
+         
             <>
               {/* <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-8">
               <div>
@@ -1670,7 +1668,7 @@ export default function Purchases() {
                 </div>
               )}
             </>
-          )}
+          
         </div>
       </div>
     </div>
