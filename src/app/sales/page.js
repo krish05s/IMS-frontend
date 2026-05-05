@@ -1092,12 +1092,7 @@ export default function Sales() {
                                         onClick={() =>
                                           handleSaveExpandedItems(s)
                                         }
-<<<<<<< Updated upstream
-                                        disabled={isSavingProducts}
-                                        className="bg-orange-500 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20 flex items-center gap-2 disabled:opacity-70"
-=======
                                         className="bg-black text-white px-8 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition shadow-md shadow-black/20"
->>>>>>> Stashed changes
                                       >
                                         {isSavingProducts ? (
                                           <>
@@ -1137,7 +1132,7 @@ export default function Sales() {
                       {filteredSales.length === 0 && (
                         <tr>
                           <td
-                            colSpan="8"
+                            colSpan="10"
                             className="py-8 text-center text-slate-500"
                           >
                             No sales found.
@@ -1257,10 +1252,6 @@ export default function Sales() {
                           <label className="block text-sm font-medium text-slate-700 mb-1">
                             Date
                           </label>
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
                           <input
                             type="date"
                             required
@@ -1268,12 +1259,8 @@ export default function Sales() {
                             onChange={(e) =>
                               setFormData({ ...formData, date: e.target.value })
                             }
-<<<<<<< Updated upstream
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
-=======
                             className={`w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium bg-white focus:outline-none ${formData.date ? "text-black" : "text-slate-400"
                               }`}
->>>>>>> Stashed changes
                           />
                         </div>
                         <div>
@@ -1285,14 +1272,7 @@ export default function Sales() {
                             required
                             value={formData.bill_no}
                             onChange={(e) =>
-<<<<<<< Updated upstream
-                              setFormData({
-                                ...formData,
-                                bill_no: e.target.value,
-                              })
-=======
                               setFormData({ ...formData, bill_no: e.target.value })
->>>>>>> Stashed changes
                             }
                             placeholder="e.g. S-2039"
                             className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
@@ -1302,22 +1282,6 @@ export default function Sales() {
                           <label className="block text-sm font-medium text-slate-700 mb-1">
                             Sales Party
                           </label>
-<<<<<<< Updated upstream
-                          <select
-                            required
-                            value={formData.customer_name}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                customer_name: e.target.value,
-                              })
-                            }
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
-                          >
-                            <option value="">-- Select Customer --</option>
-                            {salesParties.map((p) => (
-                              <option key={p.id} value={p.name}>
-=======
 
                           <select
                             required
@@ -1334,7 +1298,6 @@ export default function Sales() {
 
                             {salesParties.map((p) => (
                               <option key={p.id} value={p.name} className="text-slate-400">
->>>>>>> Stashed changes
                                 {p.name}
                               </option>
                             ))}
@@ -1348,14 +1311,7 @@ export default function Sales() {
                             type="text"
                             value={formData.vehicle_no}
                             onChange={(e) =>
-<<<<<<< Updated upstream
-                              setFormData({
-                                ...formData,
-                                vehicle_no: e.target.value,
-                              })
-=======
                               setFormData({ ...formData, vehicle_no: e.target.value })
->>>>>>> Stashed changes
                             }
                             placeholder="e.g. GJ05 1234"
                             className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white uppercase focus:outline-none placeholder-slate-400"
@@ -1370,14 +1326,7 @@ export default function Sales() {
                             required
                             value={formData.driver_name}
                             onChange={(e) =>
-<<<<<<< Updated upstream
-                              setFormData({
-                                ...formData,
-                                driver_name: e.target.value,
-                              })
-=======
                               setFormData({ ...formData, driver_name: e.target.value })
->>>>>>> Stashed changes
                             }
                             placeholder="e.g. John Doe"
                             className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
@@ -1391,14 +1340,7 @@ export default function Sales() {
                             type="text"
                             value={formData.driver_number}
                             onChange={(e) =>
-<<<<<<< Updated upstream
-                              setFormData({
-                                ...formData,
-                                driver_number: e.target.value,
-                              })
-=======
                               setFormData({ ...formData, driver_number: e.target.value })
->>>>>>> Stashed changes
                             }
                             placeholder="e.g. 1234567890"
                             className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
@@ -1412,14 +1354,7 @@ export default function Sales() {
                             type="text"
                             value={formData.transporter_name}
                             onChange={(e) =>
-<<<<<<< Updated upstream
-                              setFormData({
-                                ...formData,
-                                transporter_name: e.target.value,
-                              })
-=======
                               setFormData({ ...formData, transporter_name: e.target.value })
->>>>>>> Stashed changes
                             }
                             placeholder="e.g. ABC Logistics"
                             className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
@@ -1433,14 +1368,7 @@ export default function Sales() {
                             type="text"
                             value={formData.lr_number}
                             onChange={(e) =>
-<<<<<<< Updated upstream
-                              setFormData({
-                                ...formData,
-                                lr_number: e.target.value,
-                              })
-=======
                               setFormData({ ...formData, lr_number: e.target.value })
->>>>>>> Stashed changes
                             }
                             placeholder="e.g. LR-98765"
                             className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"

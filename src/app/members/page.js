@@ -90,7 +90,7 @@ function Members() {
       });
       const data = await res.json();
       if (data.success) {
-        toast.success("New user successfully added! ✅");
+        toast.success("New user added");
         setAddModal(false);
         setAddUser({
           name: "",
@@ -126,11 +126,6 @@ function Members() {
       });
       const data = await res.json();
       if (data.success) {
-        toast.success(
-          newStatus === 1
-            ? `${user.name} Active ✅`
-            : `${user.name} Inactive ⛔`,
-        );
         fetchUsers();
       } else toast.error(data.message);
     } catch {
@@ -366,7 +361,7 @@ function Members() {
                           </td>
                           <td className="px-5 py-1.5">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-[#747474] text-[emerald-600] font-bold text-sm flex items-center justify-center uppercase">
+                              <div className="w-8 h-8 rounded-full bg-[#747474] text-white text-[emerald-600] font-bold text-sm flex items-center justify-center uppercase">
                                 {user.name?.charAt(0)}
                               </div>
                               <span className="font-medium text-slate-800">

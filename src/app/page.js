@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { toast } from "react-toastify";
 
 const carouselImages = [
   {
@@ -92,19 +93,19 @@ export default function LoginPage() {
       // ✅ FIX 3: res.ok ni jagye data.success check karo
       // Backend always HTTP 200 return kare — success/fail data.success ma hoy chhe
       if (data.success) {
-        setShowTruckToast(true);
-        setServerMessage("");
+        toast.success("Login successful!");
+
         localStorage.setItem("token", data.token);
 
         setTimeout(() => {
           router.push("/dashboard");
-        }, 2000);
+        }, 1500);
       } else {
-        setServerMessage(data.message || "Invalid email or password.");
+        toast.error(data.message || "Invalid email or password.");
         setLoading(false);
       }
     } catch (err) {
-      setServerMessage("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
       setLoading(false);
     }
   };
@@ -297,7 +298,7 @@ export default function LoginPage() {
             </div>
 
             <div className="text-right mb-5">
-              <span 
+              <span
                 className="text-sm text-gray-400 cursor-pointer hover:text-orange-500 transition-colors"
                 onClick={() => {
                   setShowForgotModal(true);
@@ -372,14 +373,14 @@ export default function LoginPage() {
                 {forgotStep === 2 && "Enter OTP"}
                 {forgotStep === 3 && "Reset Password"}
               </h3>
-              <button 
+              <button
                 onClick={() => setShowForgotModal(false)}
                 className="text-white hover:text-gray-300 transition-colors"
               >
                 ✕
               </button>
             </div>
-            
+
             <div className="p-6">
               {forgotMessage && (
                 <div className="mb-4 text-sm px-4 py-2.5 rounded-lg bg-green-50 text-green-700 border border-green-200">
@@ -404,12 +405,12 @@ export default function LoginPage() {
                     className="w-full px-4 py-3 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border border-gray-200 focus:border-orange-500 focus:bg-white mb-4"
                   />
                   <button
-  onClick={handleForgotSubmitEmail}
-  disabled={forgotLoading}
-  className="w-full py-3 bg-[#212121] hover:bg-[#333333] active:bg-black text-white font-bold rounded-xl transition-all duration-200 disabled:opacity-70 shadow-md shadow-black/20 hover:shadow-lg hover:scale-[1.02]"
->
-  {forgotLoading ? "Sending..." : "Send OTP"}
-</button>
+                    onClick={handleForgotSubmitEmail}
+                    disabled={forgotLoading}
+                    className="w-full py-3 bg-[#212121] hover:bg-[#333333] active:bg-black text-white font-bold rounded-xl transition-all duration-200 disabled:opacity-70 shadow-md shadow-black/20 hover:shadow-lg hover:scale-[1.02]"
+                  >
+                    {forgotLoading ? "Sending..." : "Send OTP"}
+                  </button>
                 </div>
               )}
 
@@ -425,13 +426,13 @@ export default function LoginPage() {
                     maxLength={6}
                     className="w-full px-4 py-3 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border border-gray-200 focus:border-orange-500 focus:bg-white mb-4 tracking-widest text-center text-lg font-mono"
                   />
-      <button
-  onClick={handleForgotSubmitOtp}
-  disabled={forgotLoading}
-  className="w-full py-3 bg-[#212121] hover:bg-[#333333] active:bg-black text-white font-bold rounded-xl transition-all duration-200 disabled:opacity-70 shadow-md shadow-black/20 hover:shadow-lg hover:scale-[1.02]"
->
-  {forgotLoading ? "Verifying..." : "Verify OTP"}
-</button>
+                  <button
+                    onClick={handleForgotSubmitOtp}
+                    disabled={forgotLoading}
+                    className="w-full py-3 bg-[#212121] hover:bg-[#333333] active:bg-black text-white font-bold rounded-xl transition-all duration-200 disabled:opacity-70 shadow-md shadow-black/20 hover:shadow-lg hover:scale-[1.02]"
+                  >
+                    {forgotLoading ? "Verifying..." : "Verify OTP"}
+                  </button>
                 </div>
               )}
 

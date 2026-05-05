@@ -1051,53 +1051,11 @@ export default function Purchases() {
                                     <div className="flex justify-end items-center mt-6 pt-5 border-t border-slate-100">
                                       <button
                                         type="button"
-<<<<<<< Updated upstream
-                                        onClick={() =>
-                                          handleSaveExpandedItems(p)
-                                        }
-                                        disabled={isSavingProducts}
-                                        className="bg-orange-500 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20 flex items-center gap-2 disabled:opacity-70"
-                                      >
-                                        {isSavingProducts ? (
-                                          <>
-                                            <svg
-                                              className="w-4 h-4 animate-spin"
-                                              viewBox="0 0 24 24"
-                                              fill="none"
-                                            >
-                                              <circle
-                                                className="opacity-25"
-                                                cx="12"
-                                                cy="12"
-                                                r="10"
-                                                stroke="currentColor"
-                                                strokeWidth="4"
-                                              />
-                                              <path
-                                                className="opacity-75"
-                                                fill="currentColor"
-                                                d="M4 12a8 8 0 018-8v8z"
-                                              />
-                                            </svg>
-                                            Saving...
-                                          </>
-                                        ) : (
-                                          "Save Products"
-                                        )}
-                                      </button>
-                                      {/* <button
-                                        type="button"
-                                        onClick={() =>
-                                          handleSaveExpandedItems(p)
-                                        }
-                                        className="bg-orange-500 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20"
-=======
                                         onClick={() => handleSaveExpandedItems(p)}
                                         className="bg-black text-white px-8 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition shadow-md shadow-black/20"
->>>>>>> Stashed changes
                                       >
                                         Save Products
-                                      </button> */}
+                                      </button> 
                                     </div>
                                   </div>
                                 </div>
@@ -1109,7 +1067,7 @@ export default function Purchases() {
                       {filteredPurchases.length === 0 && (
                         <tr>
                           <td
-                            colSpan="7"
+                            colSpan="10"
                             className="py-8 text-center text-slate-500"
                           >
                             No purchases found.
