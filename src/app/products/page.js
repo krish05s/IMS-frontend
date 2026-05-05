@@ -256,7 +256,7 @@ export default function Products() {
                   onChange={(e) =>
                     setFilters({ ...filters, product_code: e.target.value })
                   }
-                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -265,7 +265,7 @@ export default function Products() {
                   onChange={(e) =>
                     setFilters({ ...filters, product_name: e.target.value })
                   }
-                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -274,7 +274,7 @@ export default function Products() {
                   onChange={(e) =>
                     setFilters({ ...filters, gradation: e.target.value })
                   }
-                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
               </div>
 
@@ -496,65 +496,80 @@ export default function Products() {
                         <label className="block text-sm font-medium text-slate-700 mb-1">
                           Product Name
                         </label>
-                        <input
-                          type="text"
-                          required
-                          value={formData.product_name}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              product_name: e.target.value,
-                            })
-                          }
-                          placeholder="Enter product name"
-                          className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none text-slate-800 bg-white placeholder-black"
-                        />
+                      <input
+  type="text"
+  required
+  value={formData.product_name}
+  onChange={(e) =>
+    setFormData({
+      ...formData,
+      product_name: e.target.value,
+    })
+  }
+  placeholder="Enter product name"
+  className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none text-black bg-white placeholder-slate-400"
+/>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                          Gradation
-                        </label>
-                        <select
-                          required
-                          value={formData.gradation_id}
-                          onChange={(e) => {
-                            const selected = gradations.find(
-                              (g) => g.id.toString() === e.target.value,
-                            );
-                            setFormData({
-                              ...formData,
-                              gradation_id: e.target.value,
-                              gradation: selected ? selected.gradation : "",
-                            });
-                          }}
-                          className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none text-slate-800 bg-white"
-                        >
-                          <option value="" disabled>
-                            Select Gradation
-                          </option>
-                          {gradations.map((g) => (
-                            <option key={g.id} value={g.id}>
-                              {g.gradation}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">
-                          Unit
-                        </label>
-                        <select
-                          required
-                          value={formData.unit}
-                          onChange={(e) =>
-                            setFormData({ ...formData, unit: e.target.value })
-                          }
-                          className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none text-slate-800 bg-white"
-                        >
-                          <option value="Pieces">Pieces</option>
-                          <option value="Kg">Kg</option>
-                        </select>
-                      </div>
+<div>
+  <label className="block text-sm font-medium text-slate-700 mb-1">
+    Gradation
+  </label>
+
+  <select
+    required
+    value={formData.gradation_id || ""}
+    onChange={(e) => {
+      const selected = gradations.find(
+        (g) => g.id.toString() === e.target.value
+      );
+      setFormData({
+        ...formData,
+        gradation_id: e.target.value,
+        gradation: selected ? selected.gradation : "",
+      });
+    }}
+    className={`w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white ${
+      !formData.gradation_id ? "text-slate-400" : "text-black"
+    }`}
+  >
+    <option value="" disabled className="text-slate-400">
+      Select Gradation
+    </option>
+
+    {gradations.map((g) => (
+      <option key={g.id} value={g.id} className="text-black">
+        {g.gradation}
+      </option>
+    ))}
+  </select>
+</div>
+<div>
+  <label className="block text-sm font-medium text-slate-700 mb-1">
+    Unit
+  </label>
+
+  <select
+    required
+    value={formData.unit || ""}
+    onChange={(e) =>
+      setFormData({ ...formData, unit: e.target.value })
+    }
+    className={`w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white ${
+      !formData.unit ? "text-slate-400" : "text-black"
+    }`}
+  >
+    <option value="" disabled className="text-slate-400">
+      Select Unit
+    </option>
+
+    <option value="Pieces" className="text-slate-400">
+      Pieces
+    </option>
+    <option value="Kg" className="text-slate-400">
+      Kg
+    </option>
+  </select>
+</div>
                       <div className="flex justify-end gap-3 mt-2">
                         <button
                           type="button"

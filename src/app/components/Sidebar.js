@@ -251,7 +251,7 @@ export default function Sidebar() {
           )}
 
           {/* Gradations - admin only */}
-          {role === "admin" && (
+          {(role === "admin" || role === "sales" || role === "purchase") && (
             <NavItem
               href="/gradations"
               currentPath={pathname}

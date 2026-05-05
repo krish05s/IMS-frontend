@@ -254,167 +254,167 @@ export default function Page() {
             </button>
           </div>
 
-         
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-w-full overflow-hidden flex flex-col">
-              <div className="overflow-x-auto scrollbar-hide">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-100 text-slate-600 border-b border-slate-200 sticky top-0 z-10">
-                    <tr>
-                      <th className="py-3 px-4 font-semibold w-16 text-center whitespace-nowrap">
-                        ID
-                      </th>
-                      <th className="py-3 px-4 font-semibold whitespace-nowrap">
-                        Name
-                      </th>
-                      <th className="py-3 px-4 font-semibold whitespace-nowrap">
-                        Phone
-                      </th>
-                      <th className="py-3 px-4 font-semibold whitespace-nowrap">
-                        Address
-                      </th>
-                      <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
-                        Actions
-                      </th>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-w-full overflow-hidden flex flex-col">
+            <div className="overflow-x-auto scrollbar-hide">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-100 text-slate-600 border-b border-slate-200 sticky top-0 z-10">
+                  <tr>
+                    <th className="py-3 px-4 font-semibold w-16 text-center whitespace-nowrap">
+                      ID
+                    </th>
+                    <th className="py-3 px-4 font-semibold whitespace-nowrap">
+                      Name
+                    </th>
+                    <th className="py-3 px-4 font-semibold whitespace-nowrap">
+                      Phone
+                    </th>
+                    <th className="py-3 px-4 font-semibold whitespace-nowrap">
+                      Address
+                    </th>
+                    <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {parties.map((p, index) => (
+                    <tr
+                      key={p.id}
+                      className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition"
+                    >
+                      <td className="py-1.5 px-4 text-center text-slate-600 font-medium whitespace-nowrap">
+                        {index + 1}
+                      </td>
+                      <td className="py-1.5 px-4 text-slate-800 font-bold">
+                        {p.name}
+                      </td>
+                      <td className="py-1.5 px-4 text-slate-600">
+                        {p.phone || "-"}
+                      </td>
+                      <td className="py-1.5 px-4 text-slate-600 truncate max-w-[200px]">
+                        {p.address || "-"}
+                      </td>
+                      <td className="py-1.5 px-4 text-center">
+                        <div className="flex justify-center gap-2">
+                          <button
+                            onClick={() => handleOpenModal(p)}
+                            title="Edit"
+                            className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => confirmDelete(p)}
+                            title="Delete"
+                            className="p-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg transition-colors"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {parties.map((p, index) => (
-                      <tr
-                        key={p.id}
-                        className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition"
+                  ))}
+                  {parties.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan="5"
+                        className="py-8 text-center text-slate-500"
                       >
-                        <td className="py-1.5 px-4 text-center text-slate-600 font-medium whitespace-nowrap">
-                          {index + 1}
-                        </td>
-                        <td className="py-1.5 px-4 text-slate-800 font-bold">
-                          {p.name}
-                        </td>
-                        <td className="py-1.5 px-4 text-slate-600">
-                          {p.phone || "-"}
-                        </td>
-                        <td className="py-1.5 px-4 text-slate-600 truncate max-w-[200px]">
-                          {p.address || "-"}
-                        </td>
-                        <td className="py-1.5 px-4 text-center">
-                          <div className="flex justify-center gap-2">
-                            <button
-                              onClick={() => handleOpenModal(p)}
-                              title="Edit"
-                              className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => confirmDelete(p)}
-                              title="Delete"
-                              className="p-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg transition-colors"
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                    {parties.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan="5"
-                          className="py-8 text-center text-slate-500"
-                        >
-                          No{" "}
-                          {activeTab === "purchase" ? "suppliers" : "customers"}{" "}
-                          found. Add one to get started.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-500">Rows per page:</span>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                      setItemsPerPage(Number(e.target.value));
-                      setCurrentPage(1);
-                    }}
-                    className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  >
-                    <option value={10}>10</option>
-                    <option value={20}>20</option>
-                    <option value={100}>100</option>
-                    <option value={200}>200</option>
-                  </select>
-                </div>
-
-                {totalPages > 1 && (
-                  <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-                    {/* Prev */}
-                    <button
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.max(prev - 1, 1))
-                      }
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
-                    >
-                      &lt;
-                    </button>
-
-                    {/* Sliding Pages */}
-                    {getSlidingPages().map((page) => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
-                          ? "bg-[#212121] text-white"
-                          : "border border-slate-200 text-slate-600"
-                          }`}
-                      >
-                        {page}
-                      </button>
-                    ))}
-
-                    {/* Next */}
-                    <button
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                      }
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
-                    >
-                      &gt;
-                    </button>
-                  </div>
-                )}
-              </div>
+                        No{" "}
+                        {activeTab === "purchase" ? "suppliers" : "customers"}{" "}
+                        found. Add one to get started.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
-         
+
+            <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-500">Rows per page:</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={100}>100</option>
+                  <option value={200}>200</option>
+                </select>
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                  {/* Prev */}
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                  >
+                    &lt;
+                  </button>
+
+                  {/* Sliding Pages */}
+                  {getSlidingPages().map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
+                        ? "bg-[#212121] text-white"
+                        : "border border-slate-200 text-slate-600"
+                        }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+
+                  {/* Next */}
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                  >
+                    &gt;
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
 
           {/* Add/Edit Modal */}
           {isModalOpen && (
@@ -466,8 +466,7 @@ export default function Page() {
                       }
                       placeholder="Enter your name"
                       className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] 
-  focus:outline-none focus:ring-0 focus:border-[#C19A6B] 
-  bg-white placeholder:text-gray-400"
+    focus:outline-none bg-white text-black placeholder:text-gray-400"
                     />
                   </div>
 
@@ -477,12 +476,13 @@ export default function Page() {
                     </label>
                     <input
                       type="text"
-                      value={formData.phone}
+                      value={formData.phone || ""}
                       onChange={(e) =>
                         setFormData({ ...formData, phone: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] focus:outline-none focus:ring-0 focus:border-[#C19A6B] bg-white placeholder:text-gray-400"
-                      placeholder="Enter your mobile.no"
+                      placeholder="Enter your mobile no"
+                      className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] 
+    focus:outline-none bg-white text-black placeholder:text-gray-400"
                     />
                   </div>
 
@@ -490,6 +490,7 @@ export default function Page() {
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       Address
                     </label>
+
                     <textarea
                       rows={3}
                       value={formData.address}
@@ -497,8 +498,8 @@ export default function Page() {
                         setFormData({ ...formData, address: e.target.value })
                       }
                       className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] 
-  focus:outline-none focus:ring-0 focus:border-[#C19A6B] 
-  bg-white placeholder:text-gray-400"
+    focus:outline-none focus:ring-0 focus:border-[#C19A6B] 
+    bg-white text-black placeholder:text-gray-400"
                       placeholder="Enter complete address"
                     />
                   </div>
@@ -515,7 +516,7 @@ export default function Page() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="bg-orange-500 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20 disabled:opacity-70 flex items-center"
+                      className="bg-[#212121] text-white px-6 py-2.5 rounded-lg font-bold hover:bg-[#444] transition shadow-md shadow-black/20 disabled:opacity-70 flex items-center"
                     >
                       {isSubmitting && (
                         <svg
@@ -538,6 +539,7 @@ export default function Page() {
                           />
                         </svg>
                       )}
+
                       {isSubmitting
                         ? "Saving..."
                         : currentPartyId

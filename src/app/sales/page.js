@@ -653,7 +653,7 @@ export default function Sales() {
                   onChange={(e) =>
                     setFilters({ ...filters, bill_no: e.target.value })
                   }
-                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -662,7 +662,7 @@ export default function Sales() {
                   onChange={(e) =>
                     setFilters({ ...filters, customer_name: e.target.value })
                   }
-                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -671,7 +671,7 @@ export default function Sales() {
                   onChange={(e) =>
                     setFilters({ ...filters, vehicle_no: e.target.value })
                   }
-                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -680,7 +680,7 @@ export default function Sales() {
                   onChange={(e) =>
                     setFilters({ ...filters, driver_number: e.target.value })
                   }
-                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
               </div>
 
@@ -967,19 +967,45 @@ export default function Sales() {
                                                   placeholder="Search Product..."
                                                   menuPosition="fixed"
                                                   styles={{
-                                                    control: (base) => ({
+                                                    control: (base, state) => ({
                                                       ...base,
                                                       padding: "2px",
                                                       borderRadius: "0.5rem",
-                                                      borderColor: "#cbd5e1",
+
+                                                      // 👇 same border color
+                                                      borderColor: "#D2A185",
+
+                                                      // ❌ remove blue focus ring
                                                       boxShadow: "none",
+
+                                                      // 👇 focus ma pan same border
                                                       "&:hover": {
-                                                        borderColor: "#f97316",
+                                                        borderColor: "#D2A185",
                                                       },
+
+                                                      // 👇 IMPORTANT (focus state handle)
+                                                      borderWidth: "1px",
                                                     }),
+
+                                                    menu: (base) => ({
+                                                      ...base,
+                                                      zIndex: 9999,
+                                                    }),
+
                                                     menuPortal: (base) => ({
                                                       ...base,
                                                       zIndex: 9999,
+                                                    }),
+
+                                                    // 👇 Ahiya navi line add kari che (IMPORTANT)
+                                                    option: (base, state) => ({
+                                                      ...base,
+                                                      backgroundColor: state.isSelected
+                                                        ? "#e5e7eb"   // selected
+                                                        : state.isFocused
+                                                          ? "#f3f4f6"   // hover
+                                                          : "#f9fafb",  // normal
+                                                      color: "#6b7280",
                                                     }),
                                                   }}
                                                   menuPortalTarget={
@@ -1039,7 +1065,7 @@ export default function Sales() {
                                                       }
                                                     }
                                                   }}
-                                                  className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                                                  className="w-full px-3 py-2.5 rounded-lg border border-[#D2A185] text-black focus:outline-none bg-white"
                                                   placeholder="Enter Qty (Press Enter)"
                                                 />
                                               </div>
@@ -1066,8 +1092,7 @@ export default function Sales() {
                                         onClick={() =>
                                           handleSaveExpandedItems(s)
                                         }
-                                        disabled={isSavingProducts}
-                                        className="bg-orange-500 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20 flex items-center gap-2 disabled:opacity-70"
+                                        className="bg-black text-white px-8 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition shadow-md shadow-black/20"
                                       >
                                         {isSavingProducts ? (
                                           <>
@@ -1107,7 +1132,7 @@ export default function Sales() {
                       {filteredSales.length === 0 && (
                         <tr>
                           <td
-                            colSpan="8"
+                            colSpan="10"
                             className="py-8 text-center text-slate-500"
                           >
                             No sales found.
@@ -1234,7 +1259,8 @@ export default function Sales() {
                             onChange={(e) =>
                               setFormData({ ...formData, date: e.target.value })
                             }
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
+                            className={`w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium bg-white focus:outline-none ${formData.date ? "text-black" : "text-slate-400"
+                              }`}
                           />
                         </div>
                         <div>
@@ -1246,33 +1272,32 @@ export default function Sales() {
                             required
                             value={formData.bill_no}
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                bill_no: e.target.value,
-                              })
+                              setFormData({ ...formData, bill_no: e.target.value })
                             }
                             placeholder="e.g. S-2039"
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
                           />
                         </div>
                         <div className="md:col-span-2">
                           <label className="block text-sm font-medium text-slate-700 mb-1">
                             Sales Party
                           </label>
+
                           <select
                             required
-                            value={formData.customer_name}
+                            value={formData.customer_name || ""}
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                customer_name: e.target.value,
-                              })
+                              setFormData({ ...formData, customer_name: e.target.value })
                             }
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
+                            className={`w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium bg-white focus:outline-none ${!formData.customer_name ? "text-slate-400" : "text-black"
+                              }`}
                           >
-                            <option value="">-- Select Customer --</option>
+                            <option value="" className="text-slate-400">
+                              -- Select Customer --
+                            </option>
+
                             {salesParties.map((p) => (
-                              <option key={p.id} value={p.name}>
+                              <option key={p.id} value={p.name} className="text-slate-400">
                                 {p.name}
                               </option>
                             ))}
@@ -1286,13 +1311,10 @@ export default function Sales() {
                             type="text"
                             value={formData.vehicle_no}
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                vehicle_no: e.target.value,
-                              })
+                              setFormData({ ...formData, vehicle_no: e.target.value })
                             }
                             placeholder="e.g. GJ05 1234"
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white uppercase focus:outline-none"
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white uppercase focus:outline-none placeholder-slate-400"
                           />
                         </div>
                         <div className="md:col-span-2">
@@ -1304,13 +1326,10 @@ export default function Sales() {
                             required
                             value={formData.driver_name}
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                driver_name: e.target.value,
-                              })
+                              setFormData({ ...formData, driver_name: e.target.value })
                             }
                             placeholder="e.g. John Doe"
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
                           />
                         </div>
                         <div className="md:col-span-2">
@@ -1321,13 +1340,10 @@ export default function Sales() {
                             type="text"
                             value={formData.driver_number}
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                driver_number: e.target.value,
-                              })
+                              setFormData({ ...formData, driver_number: e.target.value })
                             }
                             placeholder="e.g. 1234567890"
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
                           />
                         </div>
                         <div className="md:col-span-2">
@@ -1338,13 +1354,10 @@ export default function Sales() {
                             type="text"
                             value={formData.transporter_name}
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                transporter_name: e.target.value,
-                              })
+                              setFormData({ ...formData, transporter_name: e.target.value })
                             }
                             placeholder="e.g. ABC Logistics"
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
                           />
                         </div>
                         <div className="md:col-span-2">
@@ -1355,13 +1368,10 @@ export default function Sales() {
                             type="text"
                             value={formData.lr_number}
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                lr_number: e.target.value,
-                              })
+                              setFormData({ ...formData, lr_number: e.target.value })
                             }
                             placeholder="e.g. LR-98765"
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
+                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
                           />
                         </div>
                       </div>
