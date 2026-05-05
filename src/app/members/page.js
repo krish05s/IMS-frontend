@@ -280,9 +280,7 @@ function Members() {
           }
         />
         <div className="p-4 md:p-8 topbar-offset mt-4">
-          {loading ? (
-            <TruckLoader />
-          ) : (
+         
             <>
               {/* Header */}
               {/* <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
@@ -526,7 +524,7 @@ function Members() {
                 </div>
               </div>
             </>
-          )}
+          
         </div>
 
         {/* ═══════════ ADD MODAL ═══════════ */}
