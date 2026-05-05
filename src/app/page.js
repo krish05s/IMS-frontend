@@ -425,13 +425,13 @@ export default function LoginPage() {
                     maxLength={6}
                     className="w-full px-4 py-3 rounded-xl text-sm text-gray-700 bg-gray-50 outline-none border border-gray-200 focus:border-orange-500 focus:bg-white mb-4 tracking-widest text-center text-lg font-mono"
                   />
-                  <button
-                    onClick={handleForgotSubmitOtp}
-                    disabled={forgotLoading}
-                    className="w-full py-3 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-bold rounded-xl transition-all disabled:opacity-70 shadow-md shadow-orange-200"
-                  >
-                    {forgotLoading ? "Verifying..." : "Verify OTP"}
-                  </button>
+      <button
+  onClick={handleForgotSubmitOtp}
+  disabled={forgotLoading}
+  className="w-full py-3 bg-[#212121] hover:bg-[#333333] active:bg-black text-white font-bold rounded-xl transition-all duration-200 disabled:opacity-70 shadow-md shadow-black/20 hover:shadow-lg hover:scale-[1.02]"
+>
+  {forgotLoading ? "Verifying..." : "Verify OTP"}
+</button>
                 </div>
               )}
 

@@ -309,7 +309,7 @@ function Members() {
                   onChange={(e) =>
                     setFilters({ ...filters, name: e.target.value })
                   }
-                  className="flex-1 min-w-[120px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+                  className="flex-1 min-w-[120px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -318,7 +318,7 @@ function Members() {
                   onChange={(e) =>
                     setFilters({ ...filters, email: e.target.value })
                   }
-                  className="flex-1 min-w-[120px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+                  className="flex-1 min-w-[120px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -327,7 +327,7 @@ function Members() {
                   onChange={(e) =>
                     setFilters({ ...filters, role: e.target.value })
                   }
-                  className="flex-1 min-w-[120px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+                  className="flex-1 min-w-[120px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
               </div>
 
@@ -335,7 +335,7 @@ function Members() {
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
                 <div className="overflow-x-auto scrollbar-hide">
                   <table className="w-full text-sm">
-                    <thead className="bg-slate-50 border-b border-slate-100 sticky top-0 z-10">
+                    <thead className="bg-slate-100 text-slate-600 border-b border-slate-200 sticky top-0z-10">
                       <tr>
                         {[
                           "#",
@@ -348,8 +348,8 @@ function Members() {
                         ].map((h) => (
                           <th
                             key={h}
-                            className="px-5 py-3.5 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap"
-                          >
+                            className="px-4 py-3 font-semibold whitespace-nowrap">
+                          
                             {h}
                           </th>
                         ))}
@@ -366,7 +366,7 @@ function Members() {
                           </td>
                           <td className="px-5 py-1.5">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-emerald-100 text-[emerald-600] font-bold text-sm flex items-center justify-center uppercase">
+                              <div className="w-8 h-8 rounded-full bg-[#747474] text-[emerald-600] font-bold text-sm flex items-center justify-center uppercase">
                                 {user.name?.charAt(0)}
                               </div>
                               <span className="font-medium text-slate-800">
@@ -776,59 +776,71 @@ function Members() {
                   <div>
                     <label className={labelCls}>Name</label>
                     <input
-                      type="text"
-                      name="name"
-                      value={editUser.name || ""}
-                      onChange={handleEditChange}
-                      required
-                      className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
-                    />
+  type="text"
+  name="name"
+  value={editUser.name || ""}
+  onChange={handleEditChange}
+  required
+  placeholder="Enter name"
+  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
+/>
                   </div>
                   <div>
                     <label className={labelCls}>Email</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={editUser.email || ""}
-                      onChange={handleEditChange}
-                      required
-                      className="w-full border border-[#c19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
-                    />
+<input
+  type="email"
+  name="email"
+  value={editUser.email || ""}
+  onChange={handleEditChange}
+  required
+  placeholder="Enter email"
+  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
+/>
                   </div>
                   <div>
                     <label className={labelCls}>Mobile</label>
                     <input
-                      type="text"
-                      name="mobile"
-                      value={editUser.mobile || ""}
-                      onChange={handleEditChange}
-                      className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
-                    />
+  type="text"
+  name="mobile"
+  value={editUser.mobile || ""}
+  onChange={handleEditChange}
+  placeholder="Enter mobile number"
+  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
+/>
                   </div>
                   <div>
                     <label className={labelCls}>Date of Birth</label>
-                    <input
-                      type="date"
-                      name="date_of_birth"
-                      value={editUser.date_of_birth?.split("T")[0] || ""}
-                      onChange={handleEditChange}
-                      className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
-                    />
+                   <input
+  type="date"
+  name="date_of_birth"
+  value={editUser.date_of_birth?.split("T")[0] || ""}
+  onChange={handleEditChange}
+  className={`w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium bg-white focus:outline-none ${
+    editUser.date_of_birth ? "text-black" : "text-slate-400"
+  }`}
+/>
                   </div>
                   <div className="col-span-2">
-                    <label className={labelCls}>Role</label>
-                    <select
-                      name="role"
-                      value={editUser.role || "user"}
-                      onChange={handleEditChange}
-                      className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
-                    >
-                      <option value="user">User</option>
-                      <option value="admin">Admin</option>
-                      <option value="sales">Sales</option>
-                      <option value="purchase">Purchase</option>
-                    </select>
-                  </div>
+  <label className={labelCls}>Role</label>
+
+  <select
+    name="role"
+    value={editUser.role || ""}
+    onChange={handleEditChange}
+    className={`w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium bg-white focus:outline-none ${
+      !editUser.role ? "text-slate-400" : "text-black"
+    }`}
+  >
+    <option value="" disabled className="text-slate-400">
+      Select Role
+    </option>
+
+    <option value="user" className="text-slate-400">User</option>
+    <option value="admin" className="text-slate-400">Admin</option>
+    <option value="sales" className="text-slate-400">Sales</option>
+    <option value="purchase" className="text-slate-400">Purchase</option>
+  </select>
+</div>
                 </div>
 
                 <div>
@@ -840,13 +852,13 @@ function Members() {
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      value={editUser.password || ""}
-                      onChange={handleEditChange}
-                      placeholder="Enter new password..."
-                      className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 pr-10 text-sm font-medium text-slate-800 bg-white focus:outline-none"
-                    />
+  type={showPassword ? "text" : "password"}
+  name="password"
+  value={editUser.password || ""}
+  onChange={handleEditChange}
+  placeholder="Enter new password..."
+  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 pr-10 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
+/>
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}

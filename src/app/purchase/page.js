@@ -651,7 +651,7 @@ export default function Purchases() {
                   onChange={(e) =>
                     setFilters({ ...filters, bill_no: e.target.value })
                   }
-                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+                 className="flex-1 min-w-[150px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#EADBC8]"
                 />
                 <input
                   type="text"
@@ -660,7 +660,7 @@ export default function Purchases() {
                   onChange={(e) =>
                     setFilters({ ...filters, vehicle_no: e.target.value })
                   }
-                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
                 <input
                   type="text"
@@ -669,7 +669,7 @@ export default function Purchases() {
                   onChange={(e) =>
                     setFilters({ ...filters, driver_number: e.target.value })
                   }
-                 className="flex-1 min-w-[150px] px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+                  className="flex-1 min-w-[150px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
               </div>
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-w-full overflow-hidden flex flex-col">
@@ -940,19 +940,45 @@ export default function Purchases() {
                                                   placeholder="Search Product..."
                                                   menuPosition="fixed"
                                                   styles={{
-                                                    control: (base) => ({
+                                                    control: (base, state) => ({
                                                       ...base,
                                                       padding: "2px",
                                                       borderRadius: "0.5rem",
-                                                      borderColor: "#cbd5e1",
+
+                                                      // ✅ new border color
+                                                      borderColor: "#D2A185",
+
+                                                      // ❌ focus ring remove
                                                       boxShadow: "none",
+                                                      outline: "none",
+
+                                                      // same border on hover
                                                       "&:hover": {
-                                                        borderColor: "#f97316",
+                                                        borderColor: "#D2A185",
                                                       },
                                                     }),
                                                     menuPortal: (base) => ({
                                                       ...base,
                                                       zIndex: 9999,
+                                                    }),
+                                                    menu: (base) => ({
+                                                      ...base,
+                                                      backgroundColor: "#f9fafb",
+                                                    }),
+
+                                                    menuList: (base) => ({
+                                                      ...base,
+                                                      backgroundColor: "#f9fafb",
+                                                    }),
+
+                                                    option: (base, state) => ({
+                                                      ...base,
+                                                      backgroundColor: state.isSelected
+                                                        ? "#e5e7eb"
+                                                        : state.isFocused
+                                                          ? "#f3f4f6"
+                                                          : "#f9fafb",
+                                                      color: "#6b7280",
                                                     }),
                                                   }}
                                                   menuPortalTarget={
@@ -1001,7 +1027,7 @@ export default function Purchases() {
                                                       }
                                                     }
                                                   }}
-                                                  className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-orange-500/50 bg-white"
+                                                  className="w-full px-3 py-2.5 rounded-lg border border-[#D2A185] text-black focus:outline-none focus:ring-0 bg-white"
                                                   placeholder="Enter Qty (Press Enter)"
                                                 />
                                               </div>
@@ -1025,6 +1051,7 @@ export default function Purchases() {
                                     <div className="flex justify-end items-center mt-6 pt-5 border-t border-slate-100">
                                       <button
                                         type="button"
+<<<<<<< Updated upstream
                                         onClick={() =>
                                           handleSaveExpandedItems(p)
                                         }
@@ -1064,6 +1091,10 @@ export default function Purchases() {
                                           handleSaveExpandedItems(p)
                                         }
                                         className="bg-orange-500 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20"
+=======
+                                        onClick={() => handleSaveExpandedItems(p)}
+                                        className="bg-black text-white px-8 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition shadow-md shadow-black/20"
+>>>>>>> Stashed changes
                                       >
                                         Save Products
                                       </button> */}
@@ -1194,6 +1225,7 @@ export default function Purchases() {
                           <label className="block text-sm font-medium text-slate-700 mb-1">
                             Date
                           </label>
+
                           <input
                             type="date"
                             required
@@ -1201,7 +1233,8 @@ export default function Purchases() {
                             onChange={(e) =>
                               setFormData({ ...formData, date: e.target.value })
                             }
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-slate-800 bg-white focus:outline-none"
+                            className={`w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium bg-white focus:outline-none ${formData.date ? "text-black" : "text-slate-400"
+                              }`}
                           />
                         </div>
                         <div>
@@ -1218,14 +1251,15 @@ export default function Purchases() {
                                 bill_no: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
                             placeholder="e.g. INV-2039"
+                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white text-black placeholder-slate-400"
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-slate-700 mb-1">
                             Purchase Party
                           </label>
+
                           <select
                             value={formData.party_name || ""}
                             onChange={(e) =>
@@ -1234,11 +1268,15 @@ export default function Purchases() {
                                 party_name: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
+                            className={`w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white ${!formData.party_name ? "text-slate-400" : "text-black"
+                              }`}
                           >
-                            <option value="">-- Select Supplier --</option>
+                            <option value="" disabled className="text-slate-400">
+                              -- Select Supplier --
+                            </option>
+
                             {purchaseParties.map((p) => (
-                              <option key={p.id} value={p.name}>
+                              <option key={p.id} value={p.name} className="text-slate-400">
                                 {p.name}
                               </option>
                             ))}
@@ -1257,7 +1295,7 @@ export default function Purchases() {
                                 vehicle_no: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none uppercase bg-white"
+                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none uppercase bg-white text-black placeholder-slate-400"
                             placeholder="e.g. GJ05 1234"
                           />
                         </div>
@@ -1275,7 +1313,7 @@ export default function Purchases() {
                                 driver_name: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
+                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white text-black placeholder-slate-400"
                             placeholder="e.g. John Doe"
                           />
                         </div>
@@ -1292,7 +1330,7 @@ export default function Purchases() {
                                 driver_number: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
+                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white text-black placeholder-slate-400"
                             placeholder="e.g. 1234567890"
                           />
                         </div>
@@ -1309,7 +1347,7 @@ export default function Purchases() {
                                 transporter_name: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
+                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white text-black placeholder-slate-400"
                             placeholder="e.g. ABC Logistics"
                           />
                         </div>
@@ -1326,7 +1364,7 @@ export default function Purchases() {
                                 lr_number: e.target.value,
                               })
                             }
-                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white"
+                            className="w-full px-4 py-2.5 rounded-lg border border-[#D2A185] focus:outline-none bg-white text-black placeholder-slate-400"
                             placeholder="e.g. LR-98765"
                           />
                         </div>

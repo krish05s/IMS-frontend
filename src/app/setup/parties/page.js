@@ -466,8 +466,7 @@ export default function Page() {
                       }
                       placeholder="Enter your name"
                       className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] 
-  focus:outline-none focus:ring-0 focus:border-[#C19A6B] 
-  bg-white placeholder:text-gray-400"
+    focus:outline-none bg-white text-black placeholder:text-gray-400"
                     />
                   </div>
 
@@ -477,12 +476,17 @@ export default function Page() {
                     </label>
                     <input
                       type="text"
+<<<<<<< Updated upstream
                       value={formData.phone}
+=======
+                      value={formData.phone || ""}
+>>>>>>> Stashed changes
                       onChange={(e) =>
                         setFormData({ ...formData, phone: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] focus:outline-none focus:ring-0 focus:border-[#C19A6B] bg-white placeholder:text-gray-400"
-                      placeholder="Enter your mobile.no"
+                      placeholder="Enter your mobile no"
+                      className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] 
+    focus:outline-none bg-white text-black placeholder:text-gray-400"
                     />
                   </div>
 
@@ -490,6 +494,7 @@ export default function Page() {
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       Address
                     </label>
+
                     <textarea
                       rows={3}
                       value={formData.address}
@@ -497,8 +502,8 @@ export default function Page() {
                         setFormData({ ...formData, address: e.target.value })
                       }
                       className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] 
-  focus:outline-none focus:ring-0 focus:border-[#C19A6B] 
-  bg-white placeholder:text-gray-400"
+    focus:outline-none focus:ring-0 focus:border-[#C19A6B] 
+    bg-white text-black placeholder:text-gray-400"
                       placeholder="Enter complete address"
                     />
                   </div>
@@ -515,7 +520,7 @@ export default function Page() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="bg-orange-500 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-orange-600 transition shadow-md shadow-orange-500/20 disabled:opacity-70 flex items-center"
+                      className="bg-[#212121] text-white px-6 py-2.5 rounded-lg font-bold hover:bg-[#444] transition shadow-md shadow-black/20 disabled:opacity-70 flex items-center"
                     >
                       {isSubmitting && (
                         <svg
@@ -538,6 +543,7 @@ export default function Page() {
                           />
                         </svg>
                       )}
+
                       {isSubmitting
                         ? "Saving..."
                         : currentPartyId

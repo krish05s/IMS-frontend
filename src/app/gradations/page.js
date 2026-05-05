@@ -257,7 +257,7 @@ export default function Gradations() {
                   onChange={(e) =>
                     setFilters({ ...filters, gradation: e.target.value })
                   }
-                  className="w-full md:w-1/3 px-4 py-2 border border-[#D2A185] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+                  className="w-full md:w-1/3 px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
                 />
               </div>
 
@@ -454,6 +454,7 @@ export default function Gradations() {
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
                       Gradation Name
                     </label>
+<<<<<<< Updated upstream
                     <input
                       type="text"
                       required
@@ -466,21 +467,34 @@ export default function Gradations() {
                       }
                       className="w-full px-4 py-2.5 rounded-xl border border-[#D2A185] bg-white focus:outline-none"
                     />
+=======
+                 <input
+  type="text"
+  required
+  value={formData.gradationName}
+  onChange={(e) =>
+    setFormData({ ...formData, gradationName: e.target.value })
+  }
+  placeholder="Enter gradation name"
+  className="w-full px-4 py-2.5 rounded-xl border border-[#D2A185] bg-white focus:outline-none text-black placeholder-slate-400"
+/>
+>>>>>>> Stashed changes
                   </div>
 
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-1">
                       Thickness
                     </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.thickness}
-                      onChange={(e) =>
-                        setFormData({ ...formData, thickness: e.target.value })
-                      }
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#D2A185] bg-white focus:outline-none"
-                    />
+                   <input
+  type="text"
+  required
+  value={formData.thickness}
+  onChange={(e) =>
+    setFormData({ ...formData, thickness: e.target.value })
+  }
+  placeholder="Enter thickness"
+  className="w-full px-4 py-2.5 rounded-xl border border-[#D2A185] bg-white focus:outline-none text-black placeholder-slate-400"
+/>
                   </div>
 
                   <div className="flex justify-end gap-3 pt-2">
