@@ -236,6 +236,40 @@ export default function Sales() {
     return;
   }
 
+  // Stock Validation Logic
+  const aggregatedNewQuantities = {};
+  for (const item of validItems) {
+    const q = Number(item.quantity) || 0;
+    aggregatedNewQuantities[item.product_code] = (aggregatedNewQuantities[item.product_code] || 0) + q;
+  }
+
+  const oldItems = sale.items || [];
+  const oldQuantityMap = {};
+  for (const old of oldItems) {
+    oldQuantityMap[old.product_code] = (oldQuantityMap[old.product_code] || 0) + (Number(old.quantity) || 0);
+  }
+
+  for (const code in aggregatedNewQuantities) {
+    const totalNeeded = aggregatedNewQuantities[code];
+    const product = products.find(p => p.product_code === code);
+    
+    if (!product) {
+      toast.error(`Product ${code} not found in local stock list.`);
+      setIsSavingProducts(false);
+      return;
+    }
+
+    const actualStock = product.quantity || 0;
+    const returningStock = oldQuantityMap[code] || 0;
+    const virtualStock = actualStock + returningStock;
+
+    if (virtualStock < totalNeeded) {
+      toast.error(`Insufficient stock for ${product.product_name} (${code}). Available: ${actualStock} (Virtual: ${virtualStock}). Required: ${totalNeeded}.`);
+      setIsSavingProducts(false);
+      return;
+    }
+  }
+
   try {
     const submissionData = {
       date: sale.date,
@@ -925,12 +959,17 @@ export default function Sales() {
                                                   Select Product
                                                 </label>
                                                 <Select
-                                                  options={products.map(
-                                                    (prod) => ({
+                                                  options={products
+                                                    .filter(p => {
+                                                      const oldQty = (s.items || [])
+                                                        .filter(oi => oi.product_code === p.product_code)
+                                                        .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                      return (p.quantity || 0) + oldQty > 0;
+                                                    })
+                                                    .map((prod) => ({
                                                       value: prod.product_code,
                                                       label: `${prod.product_name} (${prod.gradation}) - [Stock: ${prod.quantity}]`,
-                                                    }),
-                                                  )}
+                                                    }))}
                                                   value={
                                                     item.product_code
                                                       ? {
@@ -1024,13 +1063,27 @@ export default function Sales() {
                                                     ? `(${item.unit})`
                                                     : ""}
                                                   {item.product_code && (
-                                                    <span className="text-blue-500 font-normal ml-1">
+                                                    <span className={`font-normal ml-1 ${
+                                                      (() => {
+                                                        const totalNeeded = expandedItems
+                                                          .filter(i => i.product_code === item.product_code)
+                                                          .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
+                                                        const product = products.find(p => p.product_code === item.product_code);
+                                                        const oldQty = (s.items || [])
+                                                          .filter(oi => oi.product_code === item.product_code)
+                                                          .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                        const virtualStock = (product?.quantity || 0) + oldQty;
+                                                        return totalNeeded > virtualStock ? "text-red-500 font-bold" : "text-blue-500";
+                                                      })()
+                                                    }`}>
                                                       (Avail:{" "}
-                                                      {products.find(
-                                                        (p) =>
-                                                          p.product_code ===
-                                                          item.product_code,
-                                                      )?.quantity || 0}
+                                                      {(() => {
+                                                        const product = products.find(p => p.product_code === item.product_code);
+                                                        const oldQty = (s.items || [])
+                                                          .filter(oi => oi.product_code === item.product_code)
+                                                          .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                        return (product?.quantity || 0) + oldQty;
+                                                      })()}
                                                       )
                                                     </span>
                                                   )}
@@ -1052,6 +1105,22 @@ export default function Sales() {
                                                   onKeyDown={(e) => {
                                                     if (e.key === "Enter") {
                                                       e.preventDefault();
+
+                                                      // Stock check
+                                                      const totalNeeded = expandedItems
+                                                        .filter(i => i.product_code === item.product_code)
+                                                        .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
+                                                      const product = products.find(p => p.product_code === item.product_code);
+                                                      const oldQty = (s.items || [])
+                                                        .filter(oi => oi.product_code === item.product_code)
+                                                        .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                      const virtualStock = (product?.quantity || 0) + oldQty;
+
+                                                      if (totalNeeded > virtualStock) {
+                                                        toast.error(`Insufficient stock for ${product?.product_name || "this item"}! Available: ${virtualStock}`);
+                                                        return;
+                                                      }
+
                                                       if (
                                                         item.product_code &&
                                                         item.quantity > 0
@@ -1065,7 +1134,19 @@ export default function Sales() {
                                                       }
                                                     }
                                                   }}
-                                                  className="w-full px-3 py-2.5 rounded-lg border border-[#D2A185] text-black focus:outline-none bg-white"
+                                                  className={`w-full px-3 py-2.5 rounded-lg border text-black focus:outline-none bg-white ${
+                                                    (() => {
+                                                      const totalNeeded = expandedItems
+                                                        .filter(i => i.product_code === item.product_code)
+                                                        .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
+                                                      const product = products.find(p => p.product_code === item.product_code);
+                                                      const oldQty = (s.items || [])
+                                                        .filter(oi => oi.product_code === item.product_code)
+                                                        .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                      const virtualStock = (product?.quantity || 0) + oldQty;
+                                                      return totalNeeded > virtualStock ? "border-red-500 ring-1 ring-red-500" : "border-[#D2A185]";
+                                                    })()
+                                                  }`}
                                                   placeholder="Enter Qty (Press Enter)"
                                                 />
                                               </div>
@@ -1089,10 +1170,54 @@ export default function Sales() {
                                     <div className="flex justify-end items-center mt-6 pt-5 border-t border-slate-100">
                                       <button
                                         type="button"
+                                        disabled={
+                                          isSavingProducts ||
+                                          (() => {
+                                            const validItems = expandedItems.filter(i => i.product_code && Number(i.quantity) > 0);
+                                            const aggregatedNewQuantities = {};
+                                            for (const item of validItems) {
+                                              const q = Number(item.quantity) || 0;
+                                              aggregatedNewQuantities[item.product_code] = (aggregatedNewQuantities[item.product_code] || 0) + q;
+                                            }
+
+                                            for (const code in aggregatedNewQuantities) {
+                                              const totalNeeded = aggregatedNewQuantities[code];
+                                              const product = products.find(p => p.product_code === code);
+                                              const oldQty = (s.items || [])
+                                                .filter(oi => oi.product_code === code)
+                                                .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                              const virtualStock = (product?.quantity || 0) + oldQty;
+                                              if (totalNeeded > virtualStock) return true;
+                                            }
+                                            return false;
+                                          })()
+                                        }
                                         onClick={() =>
                                           handleSaveExpandedItems(s)
                                         }
-                                        className="bg-black text-white px-8 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition shadow-md shadow-black/20"
+                                        className={`px-8 py-2.5 rounded-lg font-bold transition shadow-md ${
+                                          isSavingProducts || 
+                                          (() => {
+                                            const validItems = expandedItems.filter(i => i.product_code && Number(i.quantity) > 0);
+                                            const aggregatedNewQuantities = {};
+                                            for (const item of validItems) {
+                                              const q = Number(item.quantity) || 0;
+                                              aggregatedNewQuantities[item.product_code] = (aggregatedNewQuantities[item.product_code] || 0) + q;
+                                            }
+                                            for (const code in aggregatedNewQuantities) {
+                                              const totalNeeded = aggregatedNewQuantities[code];
+                                              const product = products.find(p => p.product_code === code);
+                                              const oldQty = (s.items || [])
+                                                .filter(oi => oi.product_code === code)
+                                                .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                              const virtualStock = (product?.quantity || 0) + oldQty;
+                                              if (totalNeeded > virtualStock) return true;
+                                            }
+                                            return false;
+                                          })()
+                                            ? "bg-gray-400 cursor-not-allowed text-gray-200" 
+                                            : "bg-black text-white hover:bg-gray-800 shadow-black/20"
+                                        }`}
                                       >
                                         {isSavingProducts ? (
                                           <>
