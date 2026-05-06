@@ -231,6 +231,39 @@ export default function Purchases() {
     const validItems = expandedItems.filter(
       (i) => i.product_code && i.quantity > 0,
     );
+    if (validItems.length === 0) {
+      toast.error("Please add at least one valid product");
+      setIsSavingProducts(false);
+      return;
+    }
+
+    // Stock Validation for Purchase Update
+    const aggregatedNewQuantities = {};
+    for (const item of validItems) {
+      const q = Number(item.quantity) || 0;
+      aggregatedNewQuantities[item.product_code] = (aggregatedNewQuantities[item.product_code] || 0) + q;
+    }
+
+    const oldItems = purchase.items || [];
+    const oldQuantityMap = {};
+    for (const old of oldItems) {
+      oldQuantityMap[old.product_code] = (oldQuantityMap[old.product_code] || 0) + (Number(old.quantity) || 0);
+    }
+
+    for (const code in aggregatedNewQuantities) {
+      const totalNewQty = aggregatedNewQuantities[code];
+      const product = products.find(p => p.product_code === code);
+      const oldQty = oldQuantityMap[code] || 0;
+      
+      if (product) {
+        const virtualStock = (product.quantity || 0) - oldQty;
+        if (virtualStock + totalNewQty < 0) {
+          toast.error(`Cannot update purchase for ${product.product_name} (${code}). Current stock (${product.quantity}) minus old quantity (${oldQty}) would be negative.`);
+          setIsSavingProducts(false);
+          return;
+        }
+      }
+    }
 
     try {
       const submissionData = {
@@ -916,7 +949,7 @@ export default function Purchases() {
                                                   options={products.map(
                                                     (prod) => ({
                                                       value: prod.product_code,
-                                                      label: `${prod.product_name} (${prod.gradation})`,
+                                                      label: `${prod.product_name} (${prod.gradation}) - [Stock: ${prod.quantity}]`,
                                                     }),
                                                   )}
                                                   value={
@@ -992,10 +1025,24 @@ export default function Purchases() {
                                               </div>
                                               <div className="w-1/4">
                                                 <label className="block text-xs font-bold text-slate-600 mb-1">
-                                                  Quantity{" "}
-                                                  {item.unit
-                                                    ? `(${item.unit})`
-                                                    : ""}
+                                                  Quantity ({item.unit || "Kg"}){" "}
+                                                  {item.product_code && (
+                                                    <span className={`font-normal ml-1 ${
+                                                      (() => {
+                                                        const totalNewQty = expandedItems
+                                                          .filter(i => i.product_code === item.product_code)
+                                                          .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
+                                                        const product = products.find(prod => prod.product_code === item.product_code);
+                                                        const oldQty = (p.items || [])
+                                                          .filter(oi => oi.product_code === item.product_code)
+                                                          .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                        const virtualStock = (product?.quantity || 0) - oldQty;
+                                                        return virtualStock + totalNewQty < 0 ? "text-red-500 font-bold" : "text-blue-500";
+                                                      })()
+                                                    }`}>
+                                                      (Stock: {products.find(prod => prod.product_code === item.product_code)?.quantity || 0})
+                                                    </span>
+                                                  )}
                                                 </label>
                                                 <input
                                                   type="number"
@@ -1014,6 +1061,22 @@ export default function Purchases() {
                                                   onKeyDown={(e) => {
                                                     if (e.key === "Enter") {
                                                       e.preventDefault();
+
+                                                      // Stock check for Purchase reduction
+                                                      const totalNewQty = expandedItems
+                                                        .filter(i => i.product_code === item.product_code)
+                                                        .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
+                                                      const product = products.find(prod => prod.product_code === item.product_code);
+                                                      const oldQty = (p.items || [])
+                                                        .filter(oi => oi.product_code === item.product_code)
+                                                        .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                      const virtualStock = (product?.quantity || 0) - oldQty;
+
+                                                      if (virtualStock + totalNewQty < 0) {
+                                                         toast.error(`Cannot reduce purchase this much! Product already sold.`);
+                                                         return;
+                                                      }
+
                                                       if (
                                                         item.product_code &&
                                                         item.quantity > 0
@@ -1027,7 +1090,19 @@ export default function Purchases() {
                                                       }
                                                     }
                                                   }}
-                                                  className="w-full px-3 py-2.5 rounded-lg border border-[#D2A185] text-black focus:outline-none focus:ring-0 bg-white"
+                                                  className={`w-full px-3 py-2.5 rounded-lg border text-black focus:outline-none focus:ring-0 bg-white ${
+                                                    (() => {
+                                                      const totalNewQty = expandedItems
+                                                        .filter(i => i.product_code === item.product_code)
+                                                        .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
+                                                      const product = products.find(prod => prod.product_code === item.product_code);
+                                                      const oldQty = (p.items || [])
+                                                        .filter(oi => oi.product_code === item.product_code)
+                                                        .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                      const virtualStock = (product?.quantity || 0) - oldQty;
+                                                      return virtualStock + totalNewQty < 0 ? "border-red-500 ring-1 ring-red-500" : "border-[#D2A185]";
+                                                    })()
+                                                  }`}
                                                   placeholder="Enter Qty (Press Enter)"
                                                 />
                                               </div>
@@ -1051,10 +1126,54 @@ export default function Purchases() {
                                     <div className="flex justify-end items-center mt-6 pt-5 border-t border-slate-100">
                                       <button
                                         type="button"
+                                        disabled={
+                                          isSavingProducts ||
+                                          (() => {
+                                            const validItems = expandedItems.filter(i => i.product_code && Number(i.quantity) > 0);
+                                            const aggregatedNewQuantities = {};
+                                            for (const item of validItems) {
+                                              const q = Number(item.quantity) || 0;
+                                              aggregatedNewQuantities[item.product_code] = (aggregatedNewQuantities[item.product_code] || 0) + q;
+                                            }
+
+                                            for (const code in aggregatedNewQuantities) {
+                                              const totalNewQty = aggregatedNewQuantities[code];
+                                              const product = products.find(prod => prod.product_code === code);
+                                              const oldQty = (p.items || [])
+                                                .filter(oi => oi.product_code === code)
+                                                .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                              const virtualStock = (product?.quantity || 0) - oldQty;
+                                              if (virtualStock + totalNewQty < 0) return true;
+                                            }
+                                            return false;
+                                          })()
+                                        }
                                         onClick={() => handleSaveExpandedItems(p)}
-                                        className="bg-black text-white px-8 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition shadow-md shadow-black/20"
+                                        className={`px-8 py-2.5 rounded-lg font-bold transition shadow-md ${
+                                          isSavingProducts || 
+                                          (() => {
+                                            const validItems = expandedItems.filter(i => i.product_code && Number(i.quantity) > 0);
+                                            const aggregatedNewQuantities = {};
+                                            for (const item of validItems) {
+                                              const q = Number(item.quantity) || 0;
+                                              aggregatedNewQuantities[item.product_code] = (aggregatedNewQuantities[item.product_code] || 0) + q;
+                                            }
+                                            for (const code in aggregatedNewQuantities) {
+                                              const totalNewQty = aggregatedNewQuantities[code];
+                                              const product = products.find(prod => prod.product_code === code);
+                                              const oldQty = (p.items || [])
+                                                .filter(oi => oi.product_code === code)
+                                                .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                              const virtualStock = (product?.quantity || 0) - oldQty;
+                                              if (virtualStock + totalNewQty < 0) return true;
+                                            }
+                                            return false;
+                                          })()
+                                            ? "bg-gray-400 cursor-not-allowed text-gray-200" 
+                                            : "bg-black text-white hover:bg-gray-800 shadow-black/20"
+                                        }`}
                                       >
-                                        Save Products
+                                        {isSavingProducts ? "Saving..." : "Save Products"}
                                       </button> 
                                     </div>
                                   </div>

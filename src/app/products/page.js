@@ -60,8 +60,16 @@ export default function Products() {
       );
       const data = await response.json();
       if (data.success) {
-        // filter only active gradations (status === 1)
-        setGradations(data.data.filter((g) => g.status === 1));
+        // filter only active gradations (status === 1) and ensure unique names
+        const uniqueGradations = [];
+        const seenNames = new Set();
+        data.data.filter((g) => g.status === 1).forEach((g) => {
+          if (!seenNames.has(g.gradation)) {
+            uniqueGradations.push(g);
+            seenNames.add(g.gradation);
+          }
+        });
+        setGradations(uniqueGradations);
       }
     } catch (error) {
       console.error("Error fetching gradations:", error);
