@@ -364,7 +364,7 @@ function Members() {
                               <div className="w-8 h-8 rounded-full bg-[#747474] text-white text-[emerald-600] font-bold text-sm flex items-center justify-center uppercase">
                                 {user.name?.charAt(0)}
                               </div>
-                              <span className="font-medium text-slate-800">
+                              <span className="font-medium text-slate-800 truncate">
                                 {user.name}
                               </span>
                             </div>

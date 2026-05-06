@@ -324,7 +324,7 @@ export default function Sidebar() {
               Logged in as
             </p>
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 font-bold flex items-center justify-center uppercase shrink-0">
+              <div className="w-8 h-8 rounded-full text-white bg-[#747474] font-bold flex items-center justify-center uppercase shrink-0">
                 {userName ? userName.charAt(0) : "U"}
               </div>
               <div className="overflow-hidden">
