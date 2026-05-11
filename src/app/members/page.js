@@ -52,7 +52,7 @@ function Members() {
       if (data.success) setUsers(data.data);
       else setError(data.message);
     } catch {
-      setError("Server સાથે connection નથી");
+      setError("Connection Failed");
     } finally {
       setLoading(false);
     }
