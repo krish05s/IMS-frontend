@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import Topbar from "../components/Topbar";
 
 export default function Gradations() {
-  useRoleCheck(["admin", "sales", "purchase"]);
+  useRoleCheck(["super admin", "admin", "sales", "purchase"]);
   const [gradations, setGradations] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentGradation, setCurrentGradation] = useState(null);

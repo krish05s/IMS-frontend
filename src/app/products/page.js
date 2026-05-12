@@ -5,7 +5,7 @@ import useRoleCheck from "../hooks/useRoleCheck";
 import { toast } from "react-toastify";
 import Topbar from "../components/Topbar";
 export default function Products() {
-  const role = useRoleCheck(["admin", "sales", "purchase"]);
+  const role = useRoleCheck(["super admin", "admin", "sales", "purchase"]);
   const [products, setProducts] = useState([]);
   const [gradations, setGradations] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -306,7 +306,7 @@ export default function Products() {
                         <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
                           Qty / Unit
                         </th>
-                        {role === "admin" && (
+                        {role === "admin" || role === "super admin" && (
                           <th className="py-3 px-4 font-semibold text-right whitespace-nowrap">
                             Actions
                           </th>
@@ -334,7 +334,7 @@ export default function Products() {
                           <td className="py-1.5 px-4 text-slate-600 text-center font-medium">
                             {p.quantity || 0} {p.unit || "Pieces"}
                           </td>
-                          {role === "admin" && (
+                          {role === "admin" || role === "super admin" && (
                             <td className="py-1.5 px-4 text-right">
                               <div className="flex justify-end gap-2">
                                 <button
