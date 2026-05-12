@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import Topbar from "../../components/Topbar";
 
 export default function Page() {
-  useRoleCheck(["admin"]); // Only admin can access setup
+  useRoleCheck(["super admin","admin"]); // Only admin can access setup
 
   const [activeTab, setActiveTab] = useState("purchase"); // "purchase" or "sales"
   const [parties, setParties] = useState([]);

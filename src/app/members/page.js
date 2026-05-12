@@ -4,9 +4,10 @@ import Sidebar from "../components/Sidebar";
 import useRoleCheck from "../hooks/useRoleCheck";
 import { toast } from "react-toastify";
 import Topbar from "../components/Topbar";
+import { hasRoleAccess } from "../hooks/roleAccess";
 
 function Members() {
-  useRoleCheck(["admin"]);
+  useRoleCheck(["super admin","admin"]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -62,9 +63,7 @@ function Members() {
     fetchUsers();
   }, []);
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  
 
   useEffect(() => {
     setCurrentPage(1);
@@ -211,10 +210,7 @@ function Members() {
   );
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentUsers = filteredUsers.slice(
-    indexOfFirstItem,
-    indexOfLastItem,
-  );
+  const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
   const getSlidingPages = () => {
@@ -249,35 +245,36 @@ function Members() {
         {/* <Topbar /> */}
         <Topbar
           actions={
-            <button
-              onClick={() => {
-                setAddModal(true);
-                setShowAddPassword(false);
-              }}
-              className="flex items-center gap-2 px-2 py-2 bg-[#212121] text-white  text-sm font-semibold rounded-xl shadow-md whitespace-nowrap"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            hasRoleAccess(["super admin"]) && (
+              <button
+                onClick={() => {
+                  setAddModal(true);
+                  setShowAddPassword(false);
+                }}
+                className="flex items-center gap-2 px-2 py-2 bg-[#212121] text-white  text-sm font-semibold rounded-xl shadow-md whitespace-nowrap"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              Add Member
-            </button>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Add Member
+              </button>
+            )
           }
         />
         <div className="p-4 md:p-8 topbar-offset mt-4">
-         
-            <>
-              {/* Header */}
-              {/* <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
+          <>
+            {/* Header */}
+            {/* <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-slate-800">Members</h1>
                 {/* <p className="text-sm text-slate-500 mt-1">All users list</p> 
@@ -295,94 +292,108 @@ function Members() {
               </div>
             </div> */}
 
-              {/* Filter Bar */}
-              <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
-                <input
-                  type="text"
-                  placeholder="Filter by Name..."
-                  value={filters.name}
-                  onChange={(e) =>
-                    setFilters({ ...filters, name: e.target.value })
-                  }
-                  className="flex-1 min-w-[120px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
-                />
-                <input
-                  type="text"
-                  placeholder="Filter by Email..."
-                  value={filters.email}
-                  onChange={(e) =>
-                    setFilters({ ...filters, email: e.target.value })
-                  }
-                  className="flex-1 min-w-[120px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
-                />
-                <input
-                  type="text"
-                  placeholder="Filter by Role..."
-                  value={filters.role}
-                  onChange={(e) =>
-                    setFilters({ ...filters, role: e.target.value })
-                  }
-                  className="flex-1 min-w-[120px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
-                />
-              </div>
+            {/* Filter Bar */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
+              <input
+                type="text"
+                placeholder="Filter by Name..."
+                value={filters.name}
+                onChange={(e) =>
+                  setFilters({ ...filters, name: e.target.value })
+                }
+                className="flex-1 min-w-[120px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+              />
+              <input
+                type="text"
+                placeholder="Filter by Email..."
+                value={filters.email}
+                onChange={(e) =>
+                  setFilters({ ...filters, email: e.target.value })
+                }
+                className="flex-1 min-w-[120px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+              />
+              <input
+                type="text"
+                placeholder="Filter by Role..."
+                value={filters.role}
+                onChange={(e) =>
+                  setFilters({ ...filters, role: e.target.value })
+                }
+                className="flex-1 min-w-[120px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+              />
+            </div>
 
-              {/* Table */}
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-                <div className="overflow-x-auto scrollbar-hide">
-                  <table className="w-full text-sm">
-                    <thead className="bg-slate-100 text-slate-600 border-b border-slate-200 sticky top-0z-10">
-                      <tr>
-                        {[
-                          "#",
-                          "Name",
-                          "Email",
-                          "Mobile",
-                          "Role",
-                          "Status",
-                          "Actions",
-                        ].map((h) => (
-                          <th
-                            key={h}
-                            className="px-4 py-3 font-semibold whitespace-nowrap">
-                          
-                            {h}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                      {currentUsers.map((user, idx) => (
-                        <tr
-                          key={user.id}
-                          className="hover:bg-slate-50 transition-colors"
-                        >
-                          <td className="px-5 py-1.5 text-slate-400 font-mono text-xs whitespace-nowrap">
-                            {indexOfFirstItem + idx + 1}
-                          </td>
-                          <td className="px-5 py-1.5">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-[#747474] text-white text-[emerald-600] font-bold text-sm flex items-center justify-center uppercase">
-                                {user.name?.charAt(0)}
-                              </div>
-                              <span className="font-medium text-slate-800 truncate">
-                                {user.name}
-                              </span>
+            {/* Table */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+              <div className="overflow-x-auto scrollbar-hide">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-100 text-slate-700 border-b border-slate-200">
+                    <tr>
+                      <th className="px-4 py-4 text-left font-semibold">#</th>
+
+                      <th className="px-4 py-4 text-left font-semibold">
+                        Name
+                      </th>
+
+                      <th className="px-4 py-4 text-left font-semibold">
+                        Email
+                      </th>
+
+                      <th className="px-4 py-4 text-left font-semibold">
+                        Mobile
+                      </th>
+
+                      <th className="px-4 py-4 text-left font-semibold">
+                        Role
+                      </th>
+
+                      {hasRoleAccess(["super admin"]) && (
+                        <th className="px-4 py-4 text-left font-semibold">
+                          Status
+                        </th>
+                      )}
+
+                      {hasRoleAccess(["super admin"]) && (
+                        <th className="px-4 py-4 text-center font-semibold">
+                          Actions
+                        </th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {currentUsers.map((user, idx) => (
+                      <tr
+                        key={user.id}
+                        className="hover:bg-slate-50 transition-colors"
+                      >
+                        <td className="px-4 py-1.5 text-slate-400 font-mono text-xs whitespace-nowrap">
+                          {indexOfFirstItem + idx + 1}
+                        </td>
+                        <td className="px-4 py-1.5">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-[#747474] text-white text-[emerald-600] font-bold text-sm flex items-center justify-center uppercase">
+                              {user.name?.charAt(0)}
                             </div>
-                          </td>
-                          <td className="px-5 py-1.5 text-slate-500">
-                            {user.email}
-                          </td>
-                          <td className="px-5 py-1.5 text-slate-500">
-                            {user.mobile}
-                          </td>
-                          <td className="px-5 py-1.5">
-                            <span
-                              className={`px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${user.role === "admin" ? "bg-amber-100 text-amber-700" : "bg-sky-100 text-sky-700"}`}
-                            >
-                              {user.role}
+                            <span className="font-medium text-slate-800 truncate">
+                              {user.name}
                             </span>
-                          </td>
-                          <td className="px-5 py-1.5">
+                          </div>
+                        </td>
+                        <td className="px-4 py-1.5 text-slate-500">
+                          {user.email}
+                        </td>
+                        <td className="px-4 py-1.5 text-slate-500">
+                          {user.mobile}
+                        </td>
+                        <td className="px-4 py-1.5">
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize ${user.role === "admin" ? "bg-amber-100 text-amber-700" : "bg-sky-100 text-sky-700"}`}
+                          >
+                            {user.role}
+                          </span>
+                        </td>
+                        {hasRoleAccess(["super admin"]) && (
+                          <td className="px-4 py-1.5">
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => handleToggleStatus(user)}
@@ -399,7 +410,9 @@ function Members() {
                               </span>
                             </div>
                           </td>
-                          <td className="px-5 py-1.5">
+                        )}
+                        {hasRoleAccess(["super admin"]) && (
+                          <td className="px-4 py-1.5">
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => openEdit(user)}
@@ -441,84 +454,79 @@ function Members() {
                               </button>
                             </div>
                           </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {filteredUsers.length === 0 && (
-                    <div className="text-center py-16 text-slate-400">
-                      No users found
-                    </div>
-                  )}
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {filteredUsers.length === 0 && (
+                  <div className="text-center py-16 text-slate-400">
+                    No users found
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-500">Rows per page:</span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      setItemsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={100}>100</option>
+                    <option value={200}>200</option>
+                  </select>
                 </div>
 
-                <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-500">
-                      Rows per page:
-                    </span>
-                    <select
-                      value={itemsPerPage}
-                      onChange={(e) => {
-                        setItemsPerPage(Number(e.target.value));
-                        setCurrentPage(1);
-                      }}
-                      className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                    {/* Prev */}
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
                     >
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={100}>100</option>
-                      <option value={200}>200</option>
-                    </select>
-                  </div>
+                      &lt;
+                    </button>
 
-                  {totalPages > 1 && (
-                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-
-                      {/* Prev */}
+                    {/* Sliding Pages */}
+                    {getSlidingPages().map((page) => (
                       <button
-                        onClick={() =>
-                          setCurrentPage((prev) => Math.max(prev - 1, 1))
-                        }
-                        disabled={currentPage === 1}
-                        className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
-                      >
-                        &lt;
-                      </button>
-
-                      {/* Sliding Pages */}
-                      {getSlidingPages().map((page) => (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                          currentPage === page
                             ? "bg-[#212121] text-white"
                             : "border border-slate-200 text-slate-600"
-                            }`}
-                        >
-                          {page}
-                        </button>
-                      ))}
-
-                      {/* Next */}
-                      <button
-                        onClick={() =>
-                          setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages)
-                          )
-                        }
-                        disabled={currentPage === totalPages}
-                        className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                        }`}
                       >
-                        &gt;
+                        {page}
                       </button>
+                    ))}
 
-                    </div>
-                  )}
-                </div>
+                    {/* Next */}
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                      }
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                    >
+                      &gt;
+                    </button>
+                  </div>
+                )}
               </div>
-            </>
-          
+            </div>
+          </>
         </div>
 
         {/* ═══════════ ADD MODAL ═══════════ */}
@@ -619,6 +627,7 @@ function Members() {
                       className={inputCls}
                     >
                       <option value="user">User</option>
+                      <option value="super admin">Super Admin</option>
                       <option value="admin">Admin</option>
                       <option value="sales">Sales</option>
                       <option value="purchase">Purchase</option>
@@ -662,7 +671,7 @@ function Members() {
                         </svg>
                       ) : (
                         <svg
-                          className="w-4 h-4"           
+                          className="w-4 h-4"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -771,71 +780,79 @@ function Members() {
                   <div>
                     <label className={labelCls}>Name</label>
                     <input
-  type="text"
-  name="name"
-  value={editUser.name || ""}
-  onChange={handleEditChange}
-  required
-  placeholder="Enter name"
-  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
-/>
+                      type="text"
+                      name="name"
+                      value={editUser.name || ""}
+                      onChange={handleEditChange}
+                      required
+                      placeholder="Enter name"
+                      className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
+                    />
                   </div>
                   <div>
                     <label className={labelCls}>Email</label>
-<input
-  type="email"
-  name="email"
-  value={editUser.email || ""}
-  onChange={handleEditChange}
-  required
-  placeholder="Enter email"
-  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
-/>
+                    <input
+                      type="email"
+                      name="email"
+                      value={editUser.email || ""}
+                      onChange={handleEditChange}
+                      required
+                      placeholder="Enter email"
+                      className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
+                    />
                   </div>
                   <div>
                     <label className={labelCls}>Mobile</label>
                     <input
-  type="text"
-  name="mobile"
-  value={editUser.mobile || ""}
-  onChange={handleEditChange}
-  placeholder="Enter mobile number"
-  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
-/>
+                      type="text"
+                      name="mobile"
+                      value={editUser.mobile || ""}
+                      onChange={handleEditChange}
+                      placeholder="Enter mobile number"
+                      className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
+                    />
                   </div>
                   <div>
                     <label className={labelCls}>Date of Birth</label>
-                   <input
-  type="date"
-  name="date_of_birth"
-  value={editUser.date_of_birth?.split("T")[0] || ""}
-  onChange={handleEditChange}
-  className={`w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium bg-white focus:outline-none ${
-    editUser.date_of_birth ? "text-black" : "text-slate-400"
-  }`}
-/>
+                    <input
+                      type="date"
+                      name="date_of_birth"
+                      value={editUser.date_of_birth?.split("T")[0] || ""}
+                      onChange={handleEditChange}
+                      className={`w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium bg-white focus:outline-none ${
+                        editUser.date_of_birth ? "text-black" : "text-slate-400"
+                      }`}
+                    />
                   </div>
                   <div className="col-span-2">
-  <label className={labelCls}>Role</label>
+                    <label className={labelCls}>Role</label>
 
-  <select
-    name="role"
-    value={editUser.role || ""}
-    onChange={handleEditChange}
-    className={`w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium bg-white focus:outline-none ${
-      !editUser.role ? "text-slate-400" : "text-black"
-    }`}
-  >
-    <option value="" disabled className="text-slate-400">
-      Select Role
-    </option>
+                    <select
+                      name="role"
+                      value={editUser.role || ""}
+                      onChange={handleEditChange}
+                      className={`w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium bg-white focus:outline-none ${
+                        !editUser.role ? "text-slate-400" : "text-black"
+                      }`}
+                    >
+                      <option value="" disabled className="text-slate-400">
+                        Select Role
+                      </option>
 
-    <option value="user" className="text-slate-400">User</option>
-    <option value="admin" className="text-slate-400">Admin</option>
-    <option value="sales" className="text-slate-400">Sales</option>
-    <option value="purchase" className="text-slate-400">Purchase</option>
-  </select>
-</div>
+                      <option value="user" className="text-slate-400">
+                        User
+                      </option>
+                      <option value="admin" className="text-slate-400">
+                        Admin
+                      </option>
+                      <option value="sales" className="text-slate-400">
+                        Sales
+                      </option>
+                      <option value="purchase" className="text-slate-400">
+                        Purchase
+                      </option>
+                    </select>
+                  </div>
                 </div>
 
                 <div>
@@ -847,13 +864,13 @@ function Members() {
                   </label>
                   <div className="relative">
                     <input
-  type={showPassword ? "text" : "password"}
-  name="password"
-  value={editUser.password || ""}
-  onChange={handleEditChange}
-  placeholder="Enter new password..."
-  className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 pr-10 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
-/>
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={editUser.password || ""}
+                      onChange={handleEditChange}
+                      placeholder="Enter new password..."
+                      className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 pr-10 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
+                    />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}

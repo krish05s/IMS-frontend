@@ -25,7 +25,7 @@ import Topbar from "../components/Topbar";
 
 export default function Dashboard() {
   const COLORS = ["#3b82f6", "#10b981", "#f97316", "#8b5cf6", "#ef4444"];
-  const role = useRoleCheck(["admin", "sales", "purchase", "user"]);
+  const role = useRoleCheck(["super admin","admin", "sales", "purchase", "user"]);
   const [stats, setStats] = useState({
     products: 0,
     totalQuantity: 0,
@@ -63,10 +63,10 @@ export default function Dashboard() {
         // ✅ Parallel API calls (optimized)
         const endpoints = [
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/product/read`, { headers }),
-          (role === "admin" || role === "sales")
+          (role === "admin" || role === "super admin"  || role === "sales")
             ? fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sales/read`, { headers })
             : null,
-          (role === "admin" || role === "purchase")
+          (role === "admin" || role === "super admin"  || role === "purchase")
             ? fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/purchase/read`, { headers })
             : null,
         ].filter(Boolean);
@@ -215,7 +215,7 @@ export default function Dashboard() {
                       Welcome Back, {userName}!
                     </h1>
                     <p className="text-sm text-slate-500 font-medium mt-1">
-                      Here is your {role === "admin" ? "entire system" : role}{" "}
+                      Here is your {role === "admin" || role === "super admin"  ? "entire system" : role}{" "}
                       activity summary for today.
                     </p>
                   </div>
@@ -281,7 +281,7 @@ export default function Dashboard() {
                 </Link>
 
                 {/* Sales Card */}
-                {(role === "admin" || role === "sales") && (
+                {(role === "admin" || role === "super admin"  || role === "sales") && (
                   <Link
                     href="/sales"
                     className="group bg-gradient-to-br from-orange-100 to-white p-6 rounded-xl shadow-sm hover:shadow-md border border-slate-200 border-l-4 border-l-orange-500 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[130px]"
@@ -311,7 +311,7 @@ export default function Dashboard() {
                 )}
 
                 {/* Purchase Card */}
-                {(role === "admin" || role === "purchase") && (
+                {(role === "admin" || role === "super admin" || role === "purchase") && (
                   <Link
                     href="/purchase"
                     className="group bg-gradient-to-br from-purple-100 to-white p-6 rounded-xl shadow-sm hover:shadow-md border border-slate-200 border-l-4 border-l-purple-500 hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between min-h-[130px]"
@@ -344,6 +344,7 @@ export default function Dashboard() {
               {/* Dynamic Analytics Charts Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 {(role === "admin" ||
+                  role === "super admin" ||
                   role === "sales" ||
                   role === "purchase") && (
                     <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
@@ -442,7 +443,7 @@ export default function Dashboard() {
                                 height={20}
                                 iconType="circle"
                               />
-                              {(role === "admin" || role === "sales") && (
+                              {(role === "admin" || role === "super admin" || role === "sales") && (
                                 <Area
                                   type="monotone"
                                   dataKey="salesQty"
@@ -453,7 +454,7 @@ export default function Dashboard() {
                                   fill="url(#colorSales)"
                                 />
                               )}
-                              {(role === "admin" || role === "purchase") && (
+                              {(role === "admin" || role === "super admin" || role === "purchase") && (
                                 <Area
                                   type="monotone"
                                   dataKey="purchaseQty"
@@ -476,7 +477,7 @@ export default function Dashboard() {
                   )}
 
                 {/* Chart: Top Stocked Items (Admin Only) */}
-                {role === "admin" && (
+                {role === "admin" || role === "super admin" && (
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h2 className="text-lg font-bold text-slate-800 mb-6 flex justify-between items-center">
                       Top Stocked Items
@@ -528,7 +529,7 @@ export default function Dashboard() {
                 )}
 
                 {/* Chart: Top Selling Products (Admin & Sales) */}
-                {(role === "admin" || role === "sales") && (
+                {(role === "admin" || role === "super admin" || role === "sales") && (
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h2 className="text-lg font-bold text-slate-800 mb-6 flex justify-between items-center">
                       Trending Sales
@@ -594,7 +595,7 @@ export default function Dashboard() {
                 )}
 
                 {/* Alert List: Low Stock Watchlist (Admin & Purchase) */}
-                {(role === "admin" || role === "purchase") && (
+                {(role === "admin" || role === "super admin" || role === "purchase") && (
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h2 className="text-lg font-bold text-slate-800 mb-6 flex justify-between items-center">
                       Low Stock Products
@@ -650,7 +651,7 @@ export default function Dashboard() {
                 )}
 
                 {/* Chart: Top Purchased Products (Admin & Purchase) */}
-                {(role === "admin" || role === "purchase") && (
+                {(role === "admin" || role === "super admin" || role === "purchase") && (
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h2 className="text-lg font-bold text-slate-800 mb-6 flex justify-between items-center">
                       Recent Purchases

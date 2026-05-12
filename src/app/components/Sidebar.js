@@ -238,6 +238,7 @@ export default function Sidebar() {
         <nav className="flex flex-col gap-3 flex-1 overflow-y-auto pr-2 pb-4">
           {/* Dashboard - admin, sales, purchase, user */}
           {(role === "admin" ||
+            role === "super admin" ||
             role === "sales" ||
             role === "purchase" ||
             role === "user") && (
@@ -251,7 +252,7 @@ export default function Sidebar() {
           )}
 
           {/* Gradations - admin only */}
-          {(role === "admin" || role === "sales" || role === "purchase") && (
+          {(role === "admin" || role === "super admin"  || role === "sales" || role === "purchase") && (
             <NavItem
               href="/gradations"
               currentPath={pathname}
@@ -262,7 +263,7 @@ export default function Sidebar() {
           )}
 
           {/* Products - admin, sales, purchase */}
-          {(role === "admin" || role === "sales" || role === "purchase") && (
+          {(role === "admin" || role === "super admin"  || role === "sales" || role === "purchase") && (
             <NavItem
               href="/products"
               currentPath={pathname}
@@ -273,7 +274,7 @@ export default function Sidebar() {
           )}
 
           {/* Purchase - admin, purchase */}
-          {(role === "admin" || role === "purchase") && (
+          {(role === "admin" || role === "super admin"  || role === "purchase") && (
             <NavItem
               href="/purchase"
               currentPath={pathname}
@@ -284,7 +285,7 @@ export default function Sidebar() {
           )}
 
           {/* Sales - admin, sales */}
-          {(role === "admin" || role === "sales") && (
+          {(role === "admin" || role === "super admin"  || role === "sales") && (
             <NavItem
               href="/sales"
               currentPath={pathname}
@@ -295,7 +296,7 @@ export default function Sidebar() {
           )}
 
           {/* Members - admin only */}
-          {role === "admin" && (
+          {(role === "super admin" || role === "admin" ) && (
             <NavItem
               href="/members"
               currentPath={pathname}
@@ -306,7 +307,7 @@ export default function Sidebar() {
           )}
 
           {/* Setup - admin only */}
-          {role === "admin" && (
+          {(role === "admin" || role === "super admin" ) && (
             <NavItem
               href="/setup/parties"
               currentPath={pathname}
