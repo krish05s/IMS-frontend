@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import Topbar from "../components/Topbar";
 
 export default function Sales() {
-  useRoleCheck(["admin", "sales"]);
+  useRoleCheck(["super admin" ,"admin", "sales"]);
   const [sales, setSales] = useState([]);
   const [products, setProducts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
