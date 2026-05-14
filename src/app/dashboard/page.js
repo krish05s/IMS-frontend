@@ -477,7 +477,7 @@ export default function Dashboard() {
                   )}
 
                 {/* Chart: Top Stocked Items (Admin Only) */}
-                {role === "admin" || role === "super admin" && (
+                {(role === "admin" || role === "super admin") && (
                   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h2 className="text-lg font-bold text-slate-800 mb-6 flex justify-between items-center">
                       Top Stocked Items
