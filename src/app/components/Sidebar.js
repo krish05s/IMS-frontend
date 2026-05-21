@@ -131,11 +131,10 @@ function NavItem({ href, currentPath, onClick, icon, label }) {
     <Link
       href={href}
       onClick={onClick}
-      className={`px-4 py-3 rounded-xl transition flex items-center gap-3 font-semibold ${
-        isActive
+      className={`px-4 py-3 rounded-xl transition flex items-center gap-3 font-semibold ${isActive
           ? "bg-[#212121] text-white shadow-md shadow-orange-500/20"
           : "hover:bg-slate-200 hover:text-slate-900 text-slate-600"
-      }`}
+        }`}
     >
       <div
         className={`w-5 h-5 flex items-center justify-center ${isActive ? "opacity-100" : "opacity-70"}`}
@@ -242,17 +241,48 @@ export default function Sidebar() {
             role === "sales" ||
             role === "purchase" ||
             role === "user") && (
-            <NavItem
-              href="/dashboard"
-              currentPath={pathname}
-              onClick={() => setIsOpen(false)}
-              icon={Icons.Dashboard}
-              label="Dashboard"
-            />
-          )}
+              <NavItem
+                href="/dashboard"
+                currentPath={pathname}
+                onClick={() => setIsOpen(false)}
+                icon={Icons.Dashboard}
+                label="Dashboard"
+              />
+            )}
+
+          {(role === "admin" ||
+            role === "super admin" ||
+            role === "sales" ||
+            role === "purchase" ||
+            role === "user") && (
+              <NavItem
+                href="/todolist"
+                currentPath={pathname}
+                onClick={() => setIsOpen(false)}
+                icon={
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    className="w-5 h-5 md:w-6 md:h-6"
+                  >
+                    <rect
+                      x="7"
+                      y="3"
+                      width="10"
+                      height="18"
+                      rx="2.5"
+                      strokeWidth="1.8"
+                    />
+                  </svg>
+                }
+                label="To Do"
+              />
+            )}
 
           {/* Gradations - admin only */}
-          {(role === "admin" || role === "super admin"  || role === "sales" || role === "purchase") && (
+          {(role === "admin" || role === "super admin" || role === "sales" || role === "purchase") && (
             <NavItem
               href="/gradations"
               currentPath={pathname}
@@ -263,7 +293,7 @@ export default function Sidebar() {
           )}
 
           {/* Products - admin, sales, purchase */}
-          {(role === "admin" || role === "super admin"  || role === "sales" || role === "purchase") && (
+          {(role === "admin" || role === "super admin" || role === "sales" || role === "purchase") && (
             <NavItem
               href="/products"
               currentPath={pathname}
@@ -274,7 +304,7 @@ export default function Sidebar() {
           )}
 
           {/* Purchase - admin, purchase */}
-          {(role === "admin" || role === "super admin"  || role === "purchase") && (
+          {(role === "admin" || role === "super admin" || role === "purchase") && (
             <NavItem
               href="/purchase"
               currentPath={pathname}
@@ -285,7 +315,7 @@ export default function Sidebar() {
           )}
 
           {/* Sales - admin, sales */}
-          {(role === "admin" || role === "super admin"  || role === "sales") && (
+          {(role === "admin" || role === "super admin" || role === "sales") && (
             <NavItem
               href="/sales"
               currentPath={pathname}
@@ -296,7 +326,7 @@ export default function Sidebar() {
           )}
 
           {/* Members - admin only */}
-          {(role === "super admin" || role === "admin" ) && (
+          {(role === "super admin" || role === "admin") && (
             <NavItem
               href="/members"
               currentPath={pathname}
@@ -307,7 +337,7 @@ export default function Sidebar() {
           )}
 
           {/* Setup - admin only */}
-          {(role === "admin" || role === "super admin" ) && (
+          {(role === "admin" || role === "super admin") && (
             <NavItem
               href="/setup/parties"
               currentPath={pathname}
