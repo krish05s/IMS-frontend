@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import Topbar from "../components/Topbar";
 
 export default function Sales() {
-  useRoleCheck(["super admin" ,"admin", "sales"]);
+  useRoleCheck(["super admin", "admin", "sales"]);
   const [sales, setSales] = useState([]);
   const [products, setProducts] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,6 +19,7 @@ export default function Sales() {
     customer_name: "",
     vehicle_no: "",
     driver_number: "",
+    gradation: "",
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -224,97 +225,123 @@ export default function Sales() {
     setExpandedItems(newItems);
   };
   const handleSaveExpandedItems = async (sale) => {
-  setIsSavingProducts(true);
-
-  const validItems = expandedItems.filter(
-    (i) => i.product_code && Number(i.quantity) > 0
-  );
-
-  if (validItems.length === 0) {
-    toast.error("Please add at least one valid product");
-    setIsSavingProducts(false);
-    return;
-  }
-
-  // Stock Validation Logic
-  const aggregatedNewQuantities = {};
-  for (const item of validItems) {
-    const q = Number(item.quantity) || 0;
-    aggregatedNewQuantities[item.product_code] = (aggregatedNewQuantities[item.product_code] || 0) + q;
-  }
-
-  const oldItems = sale.items || [];
-  const oldQuantityMap = {};
-  for (const old of oldItems) {
-    oldQuantityMap[old.product_code] = (oldQuantityMap[old.product_code] || 0) + (Number(old.quantity) || 0);
-  }
-
-  for (const code in aggregatedNewQuantities) {
-    const totalNeeded = aggregatedNewQuantities[code];
-    const product = products.find(p => p.product_code === code);
-    
-    if (!product) {
-      toast.error(`Product ${code} not found in local stock list.`);
-      setIsSavingProducts(false);
+    // Prevent listing when completed
+    if (sale.status === "completed") {
+      toast.error(
+        "Status Completed, You Cannot Add"
+      );
       return;
     }
+    setIsSavingProducts(true);
 
-    const actualStock = product.quantity || 0;
-    const returningStock = oldQuantityMap[code] || 0;
-    const virtualStock = actualStock + returningStock;
-
-    if (virtualStock < totalNeeded) {
-      toast.error(`Insufficient stock for ${product.product_name} (${code}). Available: ${actualStock} (Virtual: ${virtualStock}). Required: ${totalNeeded}.`);
-      setIsSavingProducts(false);
-      return;
-    }
-  }
-
-  try {
-    const submissionData = {
-      date: sale.date,
-      bill_no: sale.bill_no,
-      customer_name: sale.customer_name,
-      vehicle_no: sale.vehicle_no,
-      driver_name: sale.driver_name,
-      driver_number: sale.driver_number,
-      transporter_name: sale.transporter_name,
-      lr_number: sale.lr_number,
-      items: validItems,
-    };
-
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/sales/update/${sale.id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(submissionData),
-      }
+    const rawItems = expandedItems.filter(
+      (i) => i.product_code && Number(i.quantity) > 0
     );
 
-    const data = await response.json();
+    // Merge same product + same gradation
+    const mergedMap = {};
 
-    if (data.success) {
-      toast.success("Products saved successfully!");
+    rawItems.forEach((item) => {
+      const key = `${item.product_code}_${item.gradation}`;
 
-      await fetchSales();      // ✅ ensure refresh
-      await fetchProducts();   // ✅ stock update
+      if (mergedMap[key]) {
+        mergedMap[key].quantity =
+          Number(mergedMap[key].quantity) + Number(item.quantity);
+      } else {
+        mergedMap[key] = {
+          ...item,
+          quantity: Number(item.quantity),
+        };
+      }
+    });
 
-      setExpandedRowId(null);
-      setExpandedItems([]);
-    } else {
-      toast.error(data.message || "Failed to save");
+    const validItems = Object.values(mergedMap);
+
+    if (validItems.length === 0) {
+      toast.error("Please add at least one valid product");
+      setIsSavingProducts(false);
+      return;
     }
-  } catch (error) {
-    console.error("Error saving items:", error);
-    toast.error("Server error while saving products");
-  } finally {
-    setIsSavingProducts(false);
-  }
-};
+
+    // Stock Validation Logic
+    const aggregatedNewQuantities = {};
+    for (const item of validItems) {
+      const q = Number(item.quantity) || 0;
+      aggregatedNewQuantities[item.product_code] = (aggregatedNewQuantities[item.product_code] || 0) + q;
+    }
+
+    const oldItems = sale.items || [];
+    const oldQuantityMap = {};
+    for (const old of oldItems) {
+      oldQuantityMap[old.product_code] = (oldQuantityMap[old.product_code] || 0) + (Number(old.quantity) || 0);
+    }
+
+    for (const code in aggregatedNewQuantities) {
+      const totalNeeded = aggregatedNewQuantities[code];
+      const product = products.find(p => p.product_code === code);
+
+      if (!product) {
+        toast.error(`Product ${code} not found in local stock list.`);
+        setIsSavingProducts(false);
+        return;
+      }
+
+      const actualStock = product.quantity || 0;
+      const returningStock = oldQuantityMap[code] || 0;
+      const virtualStock = actualStock + returningStock;
+
+      if (virtualStock < totalNeeded) {
+        toast.error(`Insufficient stock for ${product.product_name} (${code}). Available: ${actualStock} (Virtual: ${virtualStock}). Required: ${totalNeeded}.`);
+        setIsSavingProducts(false);
+        return;
+      }
+    }
+
+    try {
+      const submissionData = {
+        date: sale.date,
+        bill_no: sale.bill_no,
+        customer_name: sale.customer_name,
+        vehicle_no: sale.vehicle_no,
+        driver_name: sale.driver_name,
+        driver_number: sale.driver_number,
+        transporter_name: sale.transporter_name,
+        lr_number: sale.lr_number,
+        items: validItems,
+      };
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/sales/update/${sale.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(submissionData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Products saved successfully!");
+
+        await fetchSales();      // ✅ ensure refresh
+        await fetchProducts();   // ✅ stock update
+
+        setExpandedRowId(null);
+        setExpandedItems([]);
+      } else {
+        toast.error(data.message || "Failed to save");
+      }
+    } catch (error) {
+      console.error("Error saving items:", error);
+      toast.error("Server error while saving products");
+    } finally {
+      setIsSavingProducts(false);
+    }
+  };
 
   const handleDelete = (id) => {
     setSaleToDelete(id);
@@ -394,8 +421,21 @@ export default function Sales() {
     }
   };
 
-  const filteredSales = sales.filter(
-    (s) =>
+  const filteredSales = sales.filter((s) => {
+
+    const hasMatchingGradation =
+      !filters.gradation ||
+      (
+        s.items &&
+        s.items.some((item) =>
+          (item.gradation || "")
+            .toLowerCase()
+            .includes(filters.gradation.toLowerCase())
+        )
+      );
+
+    return (
+      hasMatchingGradation &&
       s.bill_no?.toLowerCase().includes(filters.bill_no.toLowerCase()) &&
       (s.customer_name || "")
         .toLowerCase()
@@ -405,8 +445,11 @@ export default function Sales() {
         .includes(filters.vehicle_no.toLowerCase()) &&
       (s.driver_number || "")
         .toLowerCase()
-        .includes(filters.driver_number.toLowerCase()),
-  );
+        .includes(filters.driver_number.toLowerCase())
+    );
+  });
+
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentSales = filteredSales.slice(indexOfFirstItem, indexOfLastItem);
@@ -440,62 +483,93 @@ export default function Sales() {
     let totalPieces = 0;
     const gradationTotals = {};
 
-    const itemsHtml =
-      sale.items && sale.items.length > 0
-        ? sale.items
-          .map((item, idx) => {
-            const prod = products.find(
-              (p) => p.product_code === item.product_code,
-            );
-            const unit = prod?.unit || "Kg";
-            const qty = Number(item.quantity) || 0;
+    let rowIndex = 1;
 
-            if (unit.toLowerCase() === "kg") totalKg += qty;
-            else totalPieces += qty;
+    // SORT ITEMS
+    // COUNT SERIES OCCURRENCES
+    const seriesCount = {};
 
-            const grad = item.gradation || "N/A";
-            if (!gradationTotals[grad])
-              gradationTotals[grad] = { kg: 0, pieces: 0 };
-            if (unit.toLowerCase() === "kg") gradationTotals[grad].kg += qty;
-            else gradationTotals[grad].pieces += qty;
+    (sale.items || []).forEach((item) => {
 
-            return `
-        <tr>
-          <td>${idx + 1}</td>
-          <td>${item.product_code}</td>
-          <td>${item.product_name}</td>
-          <td>${grad}</td>
-          <td>${qty} ${unit}</td>
-        </tr>
-      `;
-          })
-          .join("")
-        : (() => {
-          const prod = products.find(
-            (p) => p.product_code === sale.product_code,
-          );
-          const unit = prod?.unit || "Kg";
-          const qty = Number(sale.quantity) || 0;
-          const grad = prod?.gradation || "N/A";
+      const grad = (item.gradation || "").toUpperCase();
 
-          if (unit.toLowerCase() === "kg") totalKg += qty;
-          else totalPieces += qty;
+      const series = grad.split(" ")[0];
 
-          if (!gradationTotals[grad])
-            gradationTotals[grad] = { kg: 0, pieces: 0 };
-          if (unit.toLowerCase() === "kg") gradationTotals[grad].kg += qty;
-          else gradationTotals[grad].pieces += qty;
+      seriesCount[series] = (seriesCount[series] || 0) + 1;
+    });
 
-          return `
-        <tr>
-          <td>1</td>
-          <td>${sale.product_code}</td>
-          <td>${sale.product_name || "-"}</td>
-          <td>${grad}</td>
-          <td>${qty} ${unit}</td>
-        </tr>
-      `;
-        })();
+    // SORT ITEMS
+    const sortedItems = [...(sale.items || [])].sort((a, b) => {
+
+      const gradA = (a.gradation || "").toUpperCase();
+      const gradB = (b.gradation || "").toUpperCase();
+
+      const seriesA = gradA.split(" ")[0];
+      const seriesB = gradB.split(" ")[0];
+
+      // MOST USED SERIES FIRST
+      const countA = seriesCount[seriesA] || 0;
+      const countB = seriesCount[seriesB] || 0;
+
+      if (countA !== countB) {
+        return countB - countA;
+      }
+
+      // SAME SERIES → SORT MM
+      const mmA = parseInt(
+        gradA.match(/(\d+)/)?.[1] || 999
+      );
+
+      const mmB = parseInt(
+        gradB.match(/(\d+)/)?.[1] || 999
+      );
+
+      return mmA - mmB;
+    });
+
+    const itemsHtml = sortedItems
+      .map((item) => {
+
+        const prod = products.find(
+          (p) => p.product_code === item.product_code
+        );
+
+        const unit = prod?.unit || "Kg";
+
+        const qty = Number(item.quantity) || 0;
+
+        const gradation = item.gradation || "N/A";
+
+        if (unit.toLowerCase() === "kg") {
+          totalKg += qty;
+        } else {
+          totalPieces += qty;
+        }
+
+        if (!gradationTotals[gradation]) {
+          gradationTotals[gradation] = {
+            kg: 0,
+            pieces: 0,
+          };
+        }
+
+        if (unit.toLowerCase() === "kg") {
+          gradationTotals[gradation].kg += qty;
+        } else {
+          gradationTotals[gradation].pieces += qty;
+        }
+
+        return `
+      <tr>
+        <td>${rowIndex++}</td>
+        <td>${item.product_code}</td>
+        <td>${item.product_name}</td>
+        <td>${gradation}</td>
+        <td>${qty} ${unit}</td>
+      </tr>
+    `;
+      })
+      .join("");
 
     const gradationSummaryHtml = Object.keys(gradationTotals)
       .map((grad) => {
@@ -648,6 +722,37 @@ export default function Sales() {
     printWindow.document.close();
   };
 
+  const handleStatusChange = async (salesId, status) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/sales/update-status/${salesId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("Status updated successfully");
+
+        fetchSales();
+        fetchProducts();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.error("Status update error:", error);
+
+      toast.error("Failed to update status");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f1f1f1] flex">
       <Sidebar />
@@ -676,201 +781,279 @@ export default function Sales() {
           }
         />
         <div className="p-4 md:p-8 topbar-offset mt-4">
-          
-            <>
-              {/* Filter Bar */}
-              <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-3">
-                <input
-                  type="text"
-                  placeholder="Filter by Bill No..."
-                  value={filters.bill_no}
-                  onChange={(e) =>
-                    setFilters({ ...filters, bill_no: e.target.value })
-                  }
-                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
-                />
-                <input
-                  type="text"
-                  placeholder="Filter by Customer..."
-                  value={filters.customer_name}
-                  onChange={(e) =>
-                    setFilters({ ...filters, customer_name: e.target.value })
-                  }
-                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
-                />
-                <input
-                  type="text"
-                  placeholder="Filter by Vehicle No..."
-                  value={filters.vehicle_no}
-                  onChange={(e) =>
-                    setFilters({ ...filters, vehicle_no: e.target.value })
-                  }
-                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
-                />
-                <input
-                  type="text"
-                  placeholder="Filter by Driver No..."
-                  value={filters.driver_number}
-                  onChange={(e) =>
-                    setFilters({ ...filters, driver_number: e.target.value })
-                  }
-                  className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
-                />
-              </div>
 
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-w-full overflow-hidden flex flex-col">
-                <div className="overflow-x-auto scrollbar-hide">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-100 text-slate-600 border-b border-slate-200 sticky top-0 z-10">
-                      <tr>
-                        <th className="py-3 px-4 font-semibold w-16 text-center whitespace-nowrap">
-                          ID
-                        </th>
-                        <th className="py-3 px-4 font-semibold whitespace-nowrap">
-                          Bill No
-                        </th>
-                        <th className="py-3 px-4 font-semibold whitespace-nowrap">
-                          Date
-                        </th>
-                        <th className="py-3 px-4 font-semibold whitespace-nowrap">
-                          Customer Name
-                        </th>
-                        <th className="py-3 px-4 font-semibold whitespace-nowrap">
-                          Vehicle No
-                        </th>
-                        <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
-                          Items
-                        </th>
-                        <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
-                          Created At
-                        </th>
-                        <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
-                          Created By
-                        </th>
-                        <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
-                          Actions
-                        </th>
-                        <th className="py-3 px-4 font-semibold text-center text-blue-600 whitespace-nowrap">
-                          Bill
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentSales.map((s, index) => (
-                        <React.Fragment key={s.id}>
-                          <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition">
-                            <td className="py-3 px-4 text-center text-slate-600 font-medium whitespace-nowrap">
-                              {indexOfFirstItem + index + 1}
-                            </td>
-                            <td className="py-3 px-4 text-slate-800 font-medium">
-                              {s.bill_no}
-                            </td>
-                            <td className="py-3 px-4 text-slate-800">
-                              {new Date(s.date).toLocaleDateString()}
-                            </td>
-                            <td className="py-3 px-4 text-slate-800 font-bold">
-                              {s.customer_name}
-                            </td>
-                            <td className="py-3 px-4 text-slate-600">
-                              {s.vehicle_no || "-"}
-                            </td>
-                            <td className="py-3 px-4 text-orange-600 font-medium text-center">
-                              {s.items_count || (s.product_code ? 1 : 0)}
-                            </td>
-                            <td className="py-3 px-4 text-slate-500 text-xs text-center whitespace-nowrap">
-                              {s.created_at
-                                ? new Date(s.created_at).toLocaleString(
-                                  "en-GB",
-                                  {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  },
-                                )
-                                : "-"}
-                            </td>
-                            <td className="py-3 px-4 text-slate-600 font-medium text-center whitespace-nowrap">
-                              {s.created_by || "-"}
-                            </td>
-                            <td className="py-3 px-4 text-center">
-                              <div className="flex justify-center gap-2">
-                                <button
-                                  onClick={() => toggleItemsExpansion(s)}
-                                  className="flex items-center justify-center w-7 h-7 bg-orange-50 text-orange-600 hover:bg-orange-100 font-bold rounded-lg transition-colors shadow-sm"
+          <>
+            {/* Filter Bar */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-3">
+
+              <input
+                type="text"
+                placeholder="Filter by Gradation..."
+                value={filters.gradation}
+                onChange={(e) =>
+                  setFilters({ ...filters, gradation: e.target.value })
+                }
+                className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+              />
+
+              <input
+                type="text"
+                placeholder="Filter by Bill No..."
+                value={filters.bill_no}
+                onChange={(e) =>
+                  setFilters({ ...filters, bill_no: e.target.value })
+                }
+                className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+              />
+              <input
+                type="text"
+                placeholder="Filter by Customer..."
+                value={filters.customer_name}
+                onChange={(e) =>
+                  setFilters({ ...filters, customer_name: e.target.value })
+                }
+                className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+              />
+              <input
+                type="text"
+                placeholder="Filter by Vehicle No..."
+                value={filters.vehicle_no}
+                onChange={(e) =>
+                  setFilters({ ...filters, vehicle_no: e.target.value })
+                }
+                className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+              />
+              <input
+                type="text"
+                placeholder="Filter by Driver No..."
+                value={filters.driver_number}
+                onChange={(e) =>
+                  setFilters({ ...filters, driver_number: e.target.value })
+                }
+                className="w-full sm:w-[48%] lg:flex-1 px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
+              />
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 min-w-full overflow-hidden flex flex-col">
+              <div className="overflow-x-auto scrollbar-hide">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-100 text-slate-600 border-b border-slate-200 sticky top-0 z-10">
+                    <tr>
+                      <th className="py-3 px-4 font-semibold w-16 text-center whitespace-nowrap">
+                        ID
+                      </th>
+                      <th className="py-3 px-4 font-semibold whitespace-nowrap">
+                        Bill No
+                      </th>
+                      <th className="py-3 px-4 font-semibold whitespace-nowrap">
+                        Date
+                      </th>
+                      <th className="py-3 px-4 font-semibold whitespace-nowrap">
+                        Customer Name
+                      </th>
+                      <th className="py-3 px-4 font-semibold whitespace-nowrap">
+                        Vehicle No
+                      </th>
+                      <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
+                        Status
+                      </th>
+                      <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
+                        Items
+                      </th>
+                      <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
+                        Created At
+                      </th>
+                      <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
+                        Created By
+                      </th>
+                      <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
+                        Actions
+                      </th>
+                      <th className="py-3 px-4 font-semibold text-center text-blue-600 whitespace-nowrap">
+                        Bill
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentSales.map((s, index) => (
+                      <React.Fragment key={s.id}>
+                        <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition">
+                          <td className="py-1.5 px-4 text-center text-slate-600 font-medium whitespace-nowrap">
+                            {indexOfFirstItem + index + 1}
+                          </td>
+                          <td className="py-1.5 px-4 text-slate-800 font-medium">
+                            {s.bill_no}
+                          </td>
+                          <td className="py-1.5 px-4 text-slate-800">
+                            {new Date(s.date).toLocaleDateString()}
+                          </td>
+                          <td className="py-1.5 px-4 text-slate-800 font-bold">
+                            {s.customer_name}
+                          </td>
+                          <td className="py-1.5 px-4 text-slate-600">
+                            {s.vehicle_no || "-"}
+                          </td>
+                          <td className="py-1.5 px-1 text-center">
+                            <select
+                              value={s.status || "pending"}
+                              onChange={(e) =>
+                                handleStatusChange(s.id, e.target.value)
+                              }
+                              className={`px-1 py-1 rounded-lg text-xs font-semibold outline-none
+                               ${s.status === "pending"
+                                  ? "bg-gray-200 text-black"
+                                  : s.status === "stock_out"
+                                    ? "bg-blue-50 text-blue-700 border-blue-300"
+                                    : "bg-green-50 text-green-700 border-green-300"
+                                }
+                               `}>
+                              <option
+                                value="pending"
+                                disabled={s.status !== "pending"}
+                              >
+                                Pending
+                              </option>
+
+                              <option value="stock_out">
+                                Stock Out
+                              </option>
+
+                              <option value="completed">
+                                Completed
+                              </option>
+                            </select>
+                          </td>
+                          <td className="py-1.5 px-4 text-orange-600 font-medium text-center">
+                            {s.items_count || (s.product_code ? 1 : 0)}
+                          </td>
+                          <td className="py-1.5 px-4 text-slate-500 text-xs text-center whitespace-nowrap">
+                            {s.created_at
+                              ? new Date(s.created_at).toLocaleString(
+                                "en-GB",
+                                {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                },
+                              )
+                              : "-"}
+                          </td>
+                          <td className="py-1.5 px-4 text-slate-600 font-medium text-center whitespace-nowrap max-w-5 truncate">
+                            {s.created_by || "-"}
+                          </td>
+                          <td className="py-1.5 px-4 text-center">
+                            <div className="flex justify-center gap-2">
+                              <button
+                                onClick={() => {
+                                  if (s.status === "completed") {
+                                    toast.error("Completed sales cannot be modified!");
+                                    return;
+                                  }
+
+                                  toggleItemsExpansion(s);
+                                }}
+                                className="flex items-center justify-center w-7 h-7 bg-orange-50 text-orange-600 hover:bg-orange-100 font-bold rounded-lg transition-colors shadow-sm"
+                              >
+                                {expandedRowId === s.id ? "-" : "+"}
+                              </button>
+                              <button
+                                onClick={() => {
+                                  let filteredItems = s.items || [];
+
+                                  // If gradation filter applied
+                                  if (filters.gradation) {
+                                    filteredItems = filteredItems.filter((item) =>
+                                      (item.gradation || "")
+                                        .toLowerCase()
+                                        .includes(filters.gradation.toLowerCase())
+                                    );
+                                  }
+
+                                  setViewSale({
+                                    ...s,
+                                    items: filteredItems,
+                                  });
+                                  setIsViewModalOpen(true);
+                                }}
+                                title="View Details"
+                                className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-500 rounded-lg transition-colors"
+                              >
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
                                 >
-                                  {expandedRowId === s.id ? "-" : "+"}
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setViewSale(s);
-                                    setIsViewModalOpen(true);
-                                  }}
-                                  title="View Details"
-                                  className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-500 rounded-lg transition-colors"
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                  />
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                  />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handleOpenModal(s)}
+                                title="Edit"
+                                disabled={s.status === "completed"}
+                                className={`p-2 bg-emerald-50 hover:bg-emerald-100
+                                ${s.status === "completed"
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
+                                    : "bg-emerald-50 hover:bg-emerald-100 text-emerald-600"
+                                  }
+                              text-emerald-600 rounded-lg transition-colors`}
+                              >
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
                                 >
-                                  <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                    />
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={() => handleOpenModal(s)}
-                                  title="Edit"
-                                  className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                  />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handleDelete(s.id)}
+                                title="Delete"
+                                disabled={s.status === "completed"}
+                                className={`p-2 bg-red-50 hover:bg-red-100
+                                ${s.status === "completed"
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
+                                    : "bg-emerald-50 hover:bg-emerald-100 text-emerald-600"
+                                  }
+                                 text-red-500 rounded-lg transition-colors`}
+                              >
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
                                 >
-                                  <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                    />
-                                  </svg>
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(s.id)}
-                                  title="Delete"
-                                  className="p-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg transition-colors"
-                                >
-                                  <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                  </svg>
-                                </button>
-                              </div>
-                            </td>
-                            <td className="py-3 px-4 text-center">
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                          <td className="py-1.5 px-4 text-center">
+                            {s.status === "completed" ? (
                               <button
                                 onClick={() => printInvoice(s)}
                                 className="flex items-center justify-center mx-auto gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 font-semibold rounded-lg transition-colors text-xs"
@@ -891,922 +1074,924 @@ export default function Sales() {
                                 </svg>
                                 Bill
                               </button>
-                            </td>
-                          </tr>
-
-                          {expandedRowId === s.id && (
-                            <tr className="bg-slate-50 border-b border-slate-200">
-                              <td colSpan="9" className="p-0">
-                                <div className="px-8 py-6 bg-slate-50/80 border-t border-slate-200 shadow-inner">
-                                  <div className="flex justify-between items-center mb-4">
-                                    <h4 className="font-bold text-slate-800">
-                                      Dispatched Products (Bill: {s.bill_no})
-                                    </h4>
-                                  </div>
-
-                                  <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
-                                    <div className="flex flex-col gap-4 max-h-[350px] overflow-y-auto pr-4 custom-scrollbar">
-                                      {expandedItems.map((item, idx) => (
-                                        <div
-                                          key={idx}
-                                          className="flex items-end gap-3 py-3 border-b border-slate-100 last:border-0"
-                                        >
-                                          {!item.isEditing ? (
-                                            <div className="flex-1 flex justify-between items-center text-slate-700">
-                                              <div>
-                                                <p className="font-semibold">
-                                                  {item.product_name ||
-                                                    item.product_code}
-                                                </p>
-                                                <p className="text-xs text-slate-500">
-                                                  Gradation:{" "}
-                                                  {item.gradation || "N/A"}
-                                                </p>
-                                              </div>
-                                              <div className="flex gap-4 items-center">
-                                                <div className="text-center px-4 py-2 bg-orange-50 rounded text-orange-800 font-bold border border-orange-100">
-                                                  Qty: {item.quantity}{" "}
-                                                  {item.unit || "Kg"}
-                                                </div>
-                                                <button
-                                                  type="button"
-                                                  onClick={() =>
-                                                    handleExpandedItemChange(
-                                                      idx,
-                                                      "isEditing",
-                                                      true,
-                                                    )
-                                                  }
-                                                  className="text-blue-500 hover:text-blue-700 text-sm font-semibold flex gap-1 items-center px-2 py-1 transition"
-                                                >
-                                                  <i>✏️</i> Edit
-                                                </button>
-                                                <button
-                                                  type="button"
-                                                  onClick={() =>
-                                                    removeExpandedItemRow(idx)
-                                                  }
-                                                  className="text-red-500 hover:text-red-700 px-2 py-1 transition font-bold"
-                                                >
-                                                  Drop
-                                                </button>
-                                              </div>
-                                            </div>
-                                          ) : (
-                                            <>
-                                              <div className="flex-1">
-                                                <label className="block text-xs font-bold text-slate-600 mb-1">
-                                                  Select Product
-                                                </label>
-                                                <Select
-                                                  options={products
-                                                    .filter(p => {
-                                                      const oldQty = (s.items || [])
-                                                        .filter(oi => oi.product_code === p.product_code)
-                                                        .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
-                                                      return (p.quantity || 0) + oldQty > 0;
-                                                    })
-                                                    .map((prod) => ({
-                                                      value: prod.product_code,
-                                                      label: `${prod.product_name} (${prod.gradation}) - [Stock: ${prod.quantity}]`,
-                                                    }))}
-                                                  value={
-                                                    item.product_code
-                                                      ? {
-                                                        value:
-                                                          item.product_code,
-                                                        label: `${item.product_name || item.product_code} (${item.gradation || ""})`,
-                                                      }
-                                                      : null
-                                                  }
-                                                  onChange={(
-                                                    selectedOption,
-                                                  ) => {
-                                                    handleExpandedItemChange(
-                                                      idx,
-                                                      "product_code",
-                                                      selectedOption
-                                                        ? selectedOption.value
-                                                        : "",
-                                                    );
-                                                    const prod = products.find(
-                                                      (p) =>
-                                                        p.product_code ===
-                                                        (selectedOption
-                                                          ? selectedOption.value
-                                                          : ""),
-                                                    );
-                                                    if (prod)
-                                                      handleExpandedItemChange(
-                                                        idx,
-                                                        "unit",
-                                                        prod.unit || "Kg",
-                                                      );
-                                                  }}
-                                                  placeholder="Search Product..."
-                                                  menuPosition="fixed"
-                                                  styles={{
-                                                    control: (base, state) => ({
-                                                      ...base,
-                                                      padding: "2px",
-                                                      borderRadius: "0.5rem",
-
-                                                      // 👇 same border color
-                                                      borderColor: "#D2A185",
-
-                                                      // ❌ remove blue focus ring
-                                                      boxShadow: "none",
-
-                                                      // 👇 focus ma pan same border
-                                                      "&:hover": {
-                                                        borderColor: "#D2A185",
-                                                      },
-
-                                                      // 👇 IMPORTANT (focus state handle)
-                                                      borderWidth: "1px",
-                                                    }),
-
-                                                    menu: (base) => ({
-                                                      ...base,
-                                                      zIndex: 9999,
-                                                    }),
-
-                                                    menuPortal: (base) => ({
-                                                      ...base,
-                                                      zIndex: 9999,
-                                                    }),
-
-                                                    // 👇 Ahiya navi line add kari che (IMPORTANT)
-                                                    option: (base, state) => ({
-                                                      ...base,
-                                                      backgroundColor: state.isSelected
-                                                        ? "#e5e7eb"   // selected
-                                                        : state.isFocused
-                                                          ? "#f3f4f6"   // hover
-                                                          : "#f9fafb",  // normal
-                                                      color: "#6b7280",
-                                                    }),
-                                                  }}
-                                                  menuPortalTarget={
-                                                    typeof document !==
-                                                      "undefined"
-                                                      ? document.body
-                                                      : null
-                                                  }
-                                                  isClearable
-                                                />
-                                              </div>
-                                              <div className="w-1/4">
-                                                <label className="block text-xs font-bold text-slate-600 mb-1">
-                                                  Quantity{" "}
-                                                  {item.unit
-                                                    ? `(${item.unit})`
-                                                    : ""}
-                                                  {item.product_code && (
-                                                    <span className={`font-normal ml-1 ${
-                                                      (() => {
-                                                        const totalNeeded = expandedItems
-                                                          .filter(i => i.product_code === item.product_code)
-                                                          .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
-                                                        const product = products.find(p => p.product_code === item.product_code);
-                                                        const oldQty = (s.items || [])
-                                                          .filter(oi => oi.product_code === item.product_code)
-                                                          .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
-                                                        const virtualStock = (product?.quantity || 0) + oldQty;
-                                                        return totalNeeded > virtualStock ? "text-red-500 font-bold" : "text-blue-500";
-                                                      })()
-                                                    }`}>
-                                                      (Avail:{" "}
-                                                      {(() => {
-                                                        const product = products.find(p => p.product_code === item.product_code);
-                                                        const oldQty = (s.items || [])
-                                                          .filter(oi => oi.product_code === item.product_code)
-                                                          .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
-                                                        return (product?.quantity || 0) + oldQty;
-                                                      })()}
-                                                      )
-                                                    </span>
-                                                  )}
-                                                </label>
-                                                <input
-                                                  type="number"
-                                                  min="1"
-                                                  required
-                                                  value={item.quantity}
-                                                  onChange={(e) =>
-                                                    handleExpandedItemChange(
-                                                      idx,
-                                                      "quantity",
-                                                      parseInt(
-                                                        e.target.value,
-                                                      ) || "",
-                                                    )
-                                                  }
-                                                  onKeyDown={(e) => {
-                                                    if (e.key === "Enter") {
-                                                      e.preventDefault();
-
-                                                      // Stock check
-                                                      const totalNeeded = expandedItems
-                                                        .filter(i => i.product_code === item.product_code)
-                                                        .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
-                                                      const product = products.find(p => p.product_code === item.product_code);
-                                                      const oldQty = (s.items || [])
-                                                        .filter(oi => oi.product_code === item.product_code)
-                                                        .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
-                                                      const virtualStock = (product?.quantity || 0) + oldQty;
-
-                                                      if (totalNeeded > virtualStock) {
-                                                        toast.error(`Insufficient stock for ${product?.product_name || "this item"}! Available: ${virtualStock}`);
-                                                        return;
-                                                      }
-
-                                                      if (
-                                                        item.product_code &&
-                                                        item.quantity > 0
-                                                      ) {
-                                                        handleExpandedItemChange(
-                                                          idx,
-                                                          "isEditing",
-                                                          false,
-                                                        );
-                                                        addExpandedItemRow();
-                                                      }
-                                                    }
-                                                  }}
-                                                  className={`w-full px-3 py-2.5 rounded-lg border text-black focus:outline-none bg-white ${
-                                                    (() => {
-                                                      const totalNeeded = expandedItems
-                                                        .filter(i => i.product_code === item.product_code)
-                                                        .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
-                                                      const product = products.find(p => p.product_code === item.product_code);
-                                                      const oldQty = (s.items || [])
-                                                        .filter(oi => oi.product_code === item.product_code)
-                                                        .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
-                                                      const virtualStock = (product?.quantity || 0) + oldQty;
-                                                      return totalNeeded > virtualStock ? "border-red-500 ring-1 ring-red-500" : "border-[#D2A185]";
-                                                    })()
-                                                  }`}
-                                                  placeholder="Enter Qty (Press Enter)"
-                                                />
-                                              </div>
-                                              <div className="flex items-end pb-1">
-                                                <button
-                                                  type="button"
-                                                  onClick={() =>
-                                                    removeExpandedItemRow(idx)
-                                                  }
-                                                  className="px-4 py-2.5 border border-red-300 text-red-500 hover:bg-red-50 hover:border-red-400 rounded-lg transition font-bold bg-white shadow-sm h-[46px]"
-                                                >
-                                                  X
-                                                </button>
-                                              </div>
-                                            </>
-                                          )}
-                                        </div>
-                                      ))}
-                                    </div>
-
-                                    <div className="flex justify-end items-center mt-6 pt-5 border-t border-slate-100">
-                                      <button
-                                        type="button"
-                                        disabled={
-                                          isSavingProducts ||
-                                          (() => {
-                                            const validItems = expandedItems.filter(i => i.product_code && Number(i.quantity) > 0);
-                                            const aggregatedNewQuantities = {};
-                                            for (const item of validItems) {
-                                              const q = Number(item.quantity) || 0;
-                                              aggregatedNewQuantities[item.product_code] = (aggregatedNewQuantities[item.product_code] || 0) + q;
-                                            }
-
-                                            for (const code in aggregatedNewQuantities) {
-                                              const totalNeeded = aggregatedNewQuantities[code];
-                                              const product = products.find(p => p.product_code === code);
-                                              const oldQty = (s.items || [])
-                                                .filter(oi => oi.product_code === code)
-                                                .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
-                                              const virtualStock = (product?.quantity || 0) + oldQty;
-                                              if (totalNeeded > virtualStock) return true;
-                                            }
-                                            return false;
-                                          })()
-                                        }
-                                        onClick={() =>
-                                          handleSaveExpandedItems(s)
-                                        }
-                                        className={`px-8 py-2.5 rounded-lg font-bold transition shadow-md ${
-                                          isSavingProducts || 
-                                          (() => {
-                                            const validItems = expandedItems.filter(i => i.product_code && Number(i.quantity) > 0);
-                                            const aggregatedNewQuantities = {};
-                                            for (const item of validItems) {
-                                              const q = Number(item.quantity) || 0;
-                                              aggregatedNewQuantities[item.product_code] = (aggregatedNewQuantities[item.product_code] || 0) + q;
-                                            }
-                                            for (const code in aggregatedNewQuantities) {
-                                              const totalNeeded = aggregatedNewQuantities[code];
-                                              const product = products.find(p => p.product_code === code);
-                                              const oldQty = (s.items || [])
-                                                .filter(oi => oi.product_code === code)
-                                                .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
-                                              const virtualStock = (product?.quantity || 0) + oldQty;
-                                              if (totalNeeded > virtualStock) return true;
-                                            }
-                                            return false;
-                                          })()
-                                            ? "bg-gray-400 cursor-not-allowed text-gray-200" 
-                                            : "bg-black text-white hover:bg-gray-800 shadow-black/20"
-                                        }`}
-                                      >
-                                       {isSavingProducts ? "Saving..." : "Save Products"}
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                        </React.Fragment>
-                      ))}
-                      {filteredSales.length === 0 && (
-                        <tr>
-                          <td
-                            colSpan="10"
-                            className="py-8 text-center text-slate-500"
-                          >
-                            No sales found.
+                            ) : (
+                              <span className="text-xs text-slate-400 mx-3 font-medium">
+                                Pending
+                              </span>
+                            )}
                           </td>
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
+
+                        {expandedRowId === s.id && (
+                          <tr className="bg-slate-50 border-b border-slate-200">
+                            <td colSpan="9" className="p-0">
+                              <div className="px-8 py-6 bg-slate-50/80 border-t border-slate-200 shadow-inner">
+                                <div className="flex justify-between items-center mb-4">
+                                  <h4 className="font-bold text-slate-800">
+                                    Dispatched Products (Bill: {s.bill_no})
+                                  </h4>
+                                </div>
+
+                                <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+                                  <div className="flex flex-col gap-4 max-h-[350px] overflow-y-auto pr-4 custom-scrollbar">
+                                    {expandedItems.map((item, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="flex items-end gap-3 py-3 border-b border-slate-100 last:border-0"
+                                      >
+                                        {!item.isEditing ? (
+                                          <div className="flex-1 flex justify-between items-center text-slate-700">
+                                            <div>
+                                              <p className="font-semibold">
+                                                {item.product_name ||
+                                                  item.product_code}
+                                              </p>
+                                              <p className="text-xs text-slate-500">
+                                                Gradation:{" "}
+                                                {item.gradation || "N/A"}
+                                              </p>
+                                            </div>
+                                            <div className="flex gap-4 items-center">
+                                              <div className="text-center px-4 py-2 bg-orange-50 rounded text-orange-800 font-bold border border-orange-100">
+                                                Qty: {item.quantity}{" "}
+                                                {item.unit || "Kg"}
+                                              </div>
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  handleExpandedItemChange(
+                                                    idx,
+                                                    "isEditing",
+                                                    true,
+                                                  )
+                                                }
+                                                className="text-blue-500 hover:text-blue-700 text-sm font-semibold flex gap-1 items-center px-2 py-1 transition"
+                                              >
+                                                <i>✏️</i> Edit
+                                              </button>
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  removeExpandedItemRow(idx)
+                                                }
+                                                className="text-red-500 hover:text-red-700 px-2 py-1 transition font-bold"
+                                              >
+                                                Drop
+                                              </button>
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <>
+                                            <div className="flex-1">
+                                              <label className="block text-xs font-bold text-slate-600 mb-1">
+                                                Select Product
+                                              </label>
+                                              <Select
+                                                options={products
+                                                  .filter(p => {
+                                                    const oldQty = (s.items || [])
+                                                      .filter(oi => oi.product_code === p.product_code)
+                                                      .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                    return (p.quantity || 0) + oldQty > 0;
+                                                  })
+                                                  .map((prod) => ({
+                                                    value: prod.product_code,
+                                                    label: `${prod.product_name} (${prod.gradation}) - [Stock: ${prod.quantity}]`,
+                                                  }))}
+                                                value={
+                                                  item.product_code
+                                                    ? {
+                                                      value:
+                                                        item.product_code,
+                                                      label: `${item.product_name || item.product_code} (${item.gradation || ""})`,
+                                                    }
+                                                    : null
+                                                }
+                                                onChange={(
+                                                  selectedOption,
+                                                ) => {
+                                                  handleExpandedItemChange(
+                                                    idx,
+                                                    "product_code",
+                                                    selectedOption
+                                                      ? selectedOption.value
+                                                      : "",
+                                                  );
+                                                  const prod = products.find(
+                                                    (p) =>
+                                                      p.product_code ===
+                                                      (selectedOption
+                                                        ? selectedOption.value
+                                                        : ""),
+                                                  );
+                                                  if (prod)
+                                                    handleExpandedItemChange(
+                                                      idx,
+                                                      "unit",
+                                                      prod.unit || "Kg",
+                                                    );
+                                                }}
+                                                placeholder="Search Product..."
+                                                menuPosition="fixed"
+                                                styles={{
+                                                  control: (base, state) => ({
+                                                    ...base,
+                                                    padding: "2px",
+                                                    borderRadius: "0.5rem",
+
+                                                    // 👇 same border color
+                                                    borderColor: "#D2A185",
+
+                                                    // ❌ remove blue focus ring
+                                                    boxShadow: "none",
+
+                                                    // 👇 focus ma pan same border
+                                                    "&:hover": {
+                                                      borderColor: "#D2A185",
+                                                    },
+
+                                                    // 👇 IMPORTANT (focus state handle)
+                                                    borderWidth: "1px",
+                                                  }),
+
+                                                  menu: (base) => ({
+                                                    ...base,
+                                                    zIndex: 9999,
+                                                  }),
+
+                                                  menuPortal: (base) => ({
+                                                    ...base,
+                                                    zIndex: 9999,
+                                                  }),
+
+                                                  // 👇 Ahiya navi line add kari che (IMPORTANT)
+                                                  option: (base, state) => ({
+                                                    ...base,
+                                                    backgroundColor: state.isSelected
+                                                      ? "#e5e7eb"   // selected
+                                                      : state.isFocused
+                                                        ? "#f3f4f6"   // hover
+                                                        : "#f9fafb",  // normal
+                                                    color: "#6b7280",
+                                                  }),
+                                                }}
+                                                menuPortalTarget={
+                                                  typeof document !==
+                                                    "undefined"
+                                                    ? document.body
+                                                    : null
+                                                }
+                                                isClearable
+                                              />
+                                            </div>
+                                            <div className="w-1/4">
+                                              <label className="block text-xs font-bold text-slate-600 mb-1">
+                                                Quantity{" "}
+                                                {item.unit
+                                                  ? `(${item.unit})`
+                                                  : ""}
+                                                {item.product_code && (
+                                                  <span className={`font-normal ml-1 ${(() => {
+                                                    const totalNeeded = expandedItems
+                                                      .filter(i => i.product_code === item.product_code)
+                                                      .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
+                                                    const product = products.find(p => p.product_code === item.product_code);
+                                                    const oldQty = (s.items || [])
+                                                      .filter(oi => oi.product_code === item.product_code)
+                                                      .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                    const virtualStock = (product?.quantity || 0) + oldQty;
+                                                    return totalNeeded > virtualStock ? "text-red-500 font-bold" : "text-blue-500";
+                                                  })()
+                                                    }`}>
+                                                    (Avail:{" "}
+                                                    {(() => {
+                                                      const product = products.find(p => p.product_code === item.product_code);
+                                                      const oldQty = (s.items || [])
+                                                        .filter(oi => oi.product_code === item.product_code)
+                                                        .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                      return (product?.quantity || 0) + oldQty;
+                                                    })()}
+                                                    )
+                                                  </span>
+                                                )}
+                                              </label>
+                                              <input
+                                                type="number"
+                                                min="1"
+                                                required
+                                                value={item.quantity}
+                                                onChange={(e) =>
+                                                  handleExpandedItemChange(
+                                                    idx,
+                                                    "quantity",
+                                                    parseInt(
+                                                      e.target.value,
+                                                    ) || "",
+                                                  )
+                                                }
+                                                onKeyDown={(e) => {
+                                                  if (e.key === "Enter") {
+                                                    e.preventDefault();
+
+                                                    // Stock check
+                                                    const totalNeeded = expandedItems
+                                                      .filter(i => i.product_code === item.product_code)
+                                                      .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
+                                                    const product = products.find(p => p.product_code === item.product_code);
+                                                    const oldQty = (s.items || [])
+                                                      .filter(oi => oi.product_code === item.product_code)
+                                                      .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                    const virtualStock = (product?.quantity || 0) + oldQty;
+
+                                                    if (totalNeeded > virtualStock) {
+                                                      toast.error(`Insufficient stock for ${product?.product_name || "this item"}! Available: ${virtualStock}`);
+                                                      return;
+                                                    }
+
+                                                    if (
+                                                      item.product_code &&
+                                                      item.quantity > 0
+                                                    ) {
+                                                      handleExpandedItemChange(
+                                                        idx,
+                                                        "isEditing",
+                                                        false,
+                                                      );
+                                                      addExpandedItemRow();
+                                                    }
+                                                  }
+                                                }}
+                                                className={`w-full px-3 py-2.5 rounded-lg border text-black focus:outline-none bg-white ${(() => {
+                                                  const totalNeeded = expandedItems
+                                                    .filter(i => i.product_code === item.product_code)
+                                                    .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
+                                                  const product = products.find(p => p.product_code === item.product_code);
+                                                  const oldQty = (s.items || [])
+                                                    .filter(oi => oi.product_code === item.product_code)
+                                                    .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                  const virtualStock = (product?.quantity || 0) + oldQty;
+                                                  return totalNeeded > virtualStock ? "border-red-500 ring-1 ring-red-500" : "border-[#D2A185]";
+                                                })()
+                                                  }`}
+                                                placeholder="Enter Qty (Press Enter)"
+                                              />
+                                            </div>
+                                            <div className="flex items-end pb-1">
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  removeExpandedItemRow(idx)
+                                                }
+                                                className="px-4 py-2.5 border border-red-300 text-red-500 hover:bg-red-50 hover:border-red-400 rounded-lg transition font-bold bg-white shadow-sm h-[46px]"
+                                              >
+                                                X
+                                              </button>
+                                            </div>
+                                          </>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  <div className="flex justify-end items-center mt-6 pt-5 border-t border-slate-100">
+                                    <button
+                                      type="button"
+                                      disabled={
+                                        isSavingProducts ||
+                                        (() => {
+                                          const validItems = expandedItems.filter(i => i.product_code && Number(i.quantity) > 0);
+                                          const aggregatedNewQuantities = {};
+                                          for (const item of validItems) {
+                                            const q = Number(item.quantity) || 0;
+                                            aggregatedNewQuantities[item.product_code] = (aggregatedNewQuantities[item.product_code] || 0) + q;
+                                          }
+
+                                          for (const code in aggregatedNewQuantities) {
+                                            const totalNeeded = aggregatedNewQuantities[code];
+                                            const product = products.find(p => p.product_code === code);
+                                            const oldQty = (s.items || [])
+                                              .filter(oi => oi.product_code === code)
+                                              .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                            const virtualStock = (product?.quantity || 0) + oldQty;
+                                            if (totalNeeded > virtualStock) return true;
+                                          }
+                                          return false;
+                                        })()
+                                      }
+                                      onClick={() =>
+                                        handleSaveExpandedItems(s)
+                                      }
+                                      className={`px-8 py-2.5 rounded-lg font-bold transition shadow-md ${isSavingProducts ||
+                                        (() => {
+                                          const validItems = expandedItems.filter(i => i.product_code && Number(i.quantity) > 0);
+                                          const aggregatedNewQuantities = {};
+                                          for (const item of validItems) {
+                                            const q = Number(item.quantity) || 0;
+                                            aggregatedNewQuantities[item.product_code] = (aggregatedNewQuantities[item.product_code] || 0) + q;
+                                          }
+                                          for (const code in aggregatedNewQuantities) {
+                                            const totalNeeded = aggregatedNewQuantities[code];
+                                            const product = products.find(p => p.product_code === code);
+                                            const oldQty = (s.items || [])
+                                              .filter(oi => oi.product_code === code)
+                                              .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                            const virtualStock = (product?.quantity || 0) + oldQty;
+                                            if (totalNeeded > virtualStock) return true;
+                                          }
+                                          return false;
+                                        })()
+                                        ? "bg-gray-400 cursor-not-allowed text-gray-200"
+                                        : "bg-black text-white hover:bg-gray-800 shadow-black/20"
+                                        }`}
+                                    >
+                                      {isSavingProducts ? "Saving..." : "Save Products"}
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    ))}
+                    {filteredSales.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan="10"
+                          className="py-8 text-center text-slate-500"
+                        >
+                          No sales found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-500">
+                    Rows per page:
+                  </span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                      setItemsPerPage(Number(e.target.value));
+                      setCurrentPage(1);
+                    }}
+                    className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={100}>100</option>
+                    <option value={200}>200</option>
+                  </select>
                 </div>
 
-                <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-white border-t border-slate-200 gap-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-500">
-                      Rows per page:
-                    </span>
-                    <select
-                      value={itemsPerPage}
-                      onChange={(e) => {
-                        setItemsPerPage(Number(e.target.value));
-                        setCurrentPage(1);
-                      }}
-                      className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                    {/* Prev */}
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) => Math.max(prev - 1, 1))
+                      }
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
                     >
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={100}>100</option>
-                      <option value={200}>200</option>
-                    </select>
-                  </div>
+                      &lt;
+                    </button>
 
-                  {totalPages > 1 && (
-                    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-                      {/* Prev */}
+                    {/* Sliding Pages */}
+                    {getSlidingPages().map((page) => (
                       <button
-                        onClick={() =>
-                          setCurrentPage((prev) => Math.max(prev - 1, 1))
-                        }
-                        disabled={currentPage === 1}
-                        className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
+                          ? "bg-[#212121] text-white"
+                          : "border border-slate-200 text-slate-600"
+                          }`}
                       >
-                        &lt;
+                        {page}
                       </button>
+                    ))}
 
-                      {/* Sliding Pages */}
-                      {getSlidingPages().map((page) => (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
-                            ? "bg-[#212121] text-white"
-                            : "border border-slate-200 text-slate-600"
+                    {/* Next */}
+                    <button
+                      onClick={() =>
+                        setCurrentPage((prev) =>
+                          Math.min(prev + 1, totalPages),
+                        )
+                      }
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                    >
+                      &gt;
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Edit Modal */}
+            {isModalOpen && (
+              <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+                <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl overflow-y-auto max-h-[90vh]">
+                  <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555] rounded-t-2xl -mx-8 -mt-8 mb-6">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+                        <svg
+                          className="w-4 h-4 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                          />
+                        </svg>
+                      </div>
+
+                      <h2 className="text-base font-semibold text-white">
+                        {currentSalesId
+                          ? "Edit Sales Invoice"
+                          : "Create Sales Invoice"}
+                      </h2>
+                    </div>
+
+                    <button
+                      onClick={handleCloseModal}
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-colors"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <form
+                    onSubmit={handleSubmit}
+                    className="flex flex-col gap-6"
+                  >
+                    {/* Header Information */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                          Date
+                        </label>
+                        <input
+                          type="date"
+                          required
+                          value={formData.date}
+                          onChange={(e) =>
+                            setFormData({ ...formData, date: e.target.value })
+                          }
+                          className={`w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium bg-white focus:outline-none ${formData.date ? "text-black" : "text-slate-400"
+                            }`}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                          Bill No
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={formData.bill_no}
+                          onChange={(e) =>
+                            setFormData({ ...formData, bill_no: e.target.value })
+                          }
+                          placeholder="e.g. S-2039"
+                          className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                          Sales Party
+                        </label>
+
+                        <select
+                          required
+                          value={formData.customer_name || ""}
+                          onChange={(e) =>
+                            setFormData({ ...formData, customer_name: e.target.value })
+                          }
+                          className={`w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium bg-white focus:outline-none ${!formData.customer_name ? "text-slate-400" : "text-black"
                             }`}
                         >
-                          {page}
-                        </button>
-                      ))}
+                          <option value="" className="text-slate-400">
+                            -- Select Customer --
+                          </option>
 
-                      {/* Next */}
+                          {salesParties.map((p) => (
+                            <option key={p.id} value={p.name} className="text-slate-400">
+                              {p.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-slate-700 mb-1 ">
+                          Vehicle No
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.vehicle_no}
+                          onChange={(e) =>
+                            setFormData({ ...formData, vehicle_no: e.target.value })
+                          }
+                          placeholder="e.g. GJ05 1234"
+                          className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white uppercase focus:outline-none placeholder-slate-400"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                          Driver Name
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={formData.driver_name}
+                          onChange={(e) =>
+                            setFormData({ ...formData, driver_name: e.target.value })
+                          }
+                          placeholder="e.g. John Doe"
+                          className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                          Driver Number
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.driver_number}
+                          onChange={(e) =>
+                            setFormData({ ...formData, driver_number: e.target.value })
+                          }
+                          placeholder="e.g. 1234567890"
+                          className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                          Transporter Name
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.transporter_name}
+                          onChange={(e) =>
+                            setFormData({ ...formData, transporter_name: e.target.value })
+                          }
+                          placeholder="e.g. ABC Logistics"
+                          className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                          LR Number
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.lr_number}
+                          onChange={(e) =>
+                            setFormData({ ...formData, lr_number: e.target.value })
+                          }
+                          placeholder="e.g. LR-98765"
+                          className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Items Section */}
+                    <div className="flex justify-end gap-3 mt-8 border-t border-slate-100 pt-6">
                       <button
-                        onClick={() =>
-                          setCurrentPage((prev) =>
-                            Math.min(prev + 1, totalPages),
-                          )
-                        }
-                        disabled={currentPage === totalPages}
-                        className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                        type="button"
+                        onClick={handleCloseModal}
+                        className="px-5 py-2.5 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition"
                       >
-                        &gt;
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="bg-[#212121] hover:bg-[#444444] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70"
+                      >
+                        {isSubmitting && (
+                          <svg
+                            className="animate-spin h-4 w-4 mr-2 inline"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v8z"
+                            />
+                          </svg>
+                        )}
+                        {isSubmitting
+                          ? "Saving..."
+                          : currentSalesId
+                            ? "Update Dispatch"
+                            : "Save Dispatch"}
                       </button>
                     </div>
-                  )}
+                  </form>
                 </div>
               </div>
-              {/* Edit Modal */}
-              {isModalOpen && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-                  <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl overflow-y-auto max-h-[90vh]">
-                    <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555] rounded-t-2xl -mx-8 -mt-8 mb-6">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
-                        </div>
+            )}
 
-                        <h2 className="text-base font-semibold text-white">
-                          {currentSalesId
-                            ? "Edit Sales Invoice"
-                            : "Create Sales Invoice"}
-                        </h2>
+            {/* Delete Confirmation Modal */}
+            {isDeleteModalOpen && (
+              <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+                <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden">
+                  {/* HEADER (same as Edit Member) */}
+                  <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555]">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+                        <svg
+                          className="w-4 h-4 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 7h12M9 7v10m6-10v10M10 4h4a1 1 0 011 1v2H9V5a1 1 0 011-1zM5 7h14l-1 13a2 2 0 01-2 2H8a2 2 0 01-2-2L5 7z"
+                          />
+                        </svg>
                       </div>
 
-                      <button
-                        onClick={handleCloseModal}
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-colors"
-                      >
-                        ✕
-                      </button>
+                      <h2 className="text-white font-semibold text-base">
+                        Delete Sale
+                      </h2>
                     </div>
-                    <form
-                      onSubmit={handleSubmit}
-                      className="flex flex-col gap-6"
+
+                    <button
+                      onClick={() => setIsDeleteModalOpen(false)}
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition"
                     >
-                      {/* Header Information */}
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Date
-                          </label>
-                          <input
-                            type="date"
-                            required
-                            value={formData.date}
-                            onChange={(e) =>
-                              setFormData({ ...formData, date: e.target.value })
-                            }
-                            className={`w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium bg-white focus:outline-none ${formData.date ? "text-black" : "text-slate-400"
-                              }`}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Bill No
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={formData.bill_no}
-                            onChange={(e) =>
-                              setFormData({ ...formData, bill_no: e.target.value })
-                            }
-                            placeholder="e.g. S-2039"
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Sales Party
-                          </label>
-
-                          <select
-                            required
-                            value={formData.customer_name || ""}
-                            onChange={(e) =>
-                              setFormData({ ...formData, customer_name: e.target.value })
-                            }
-                            className={`w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium bg-white focus:outline-none ${!formData.customer_name ? "text-slate-400" : "text-black"
-                              }`}
-                          >
-                            <option value="" className="text-slate-400">
-                              -- Select Customer --
-                            </option>
-
-                            {salesParties.map((p) => (
-                              <option key={p.id} value={p.name} className="text-slate-400">
-                                {p.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Vehicle No
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.vehicle_no}
-                            onChange={(e) =>
-                              setFormData({ ...formData, vehicle_no: e.target.value })
-                            }
-                            placeholder="e.g. GJ05 1234"
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white uppercase focus:outline-none placeholder-slate-400"
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Driver Name
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={formData.driver_name}
-                            onChange={(e) =>
-                              setFormData({ ...formData, driver_name: e.target.value })
-                            }
-                            placeholder="e.g. John Doe"
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Driver Number
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.driver_number}
-                            onChange={(e) =>
-                              setFormData({ ...formData, driver_number: e.target.value })
-                            }
-                            placeholder="e.g. 1234567890"
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            Transporter Name
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.transporter_name}
-                            onChange={(e) =>
-                              setFormData({ ...formData, transporter_name: e.target.value })
-                            }
-                            placeholder="e.g. ABC Logistics"
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-slate-700 mb-1">
-                            LR Number
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.lr_number}
-                            onChange={(e) =>
-                              setFormData({ ...formData, lr_number: e.target.value })
-                            }
-                            placeholder="e.g. LR-98765"
-                            className="w-full border border-[#C19A6B] rounded-xl px-3 py-2 text-sm font-medium text-black bg-white focus:outline-none placeholder-slate-400"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Items Section */}
-                      <div className="flex justify-end gap-3 mt-8 border-t border-slate-100 pt-6">
-                        <button
-                          type="button"
-                          onClick={handleCloseModal}
-                          className="px-5 py-2.5 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="bg-[#212121] hover:bg-[#444444] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70"
-                        >
-                          {isSubmitting && (
-                            <svg
-                              className="animate-spin h-4 w-4 mr-2 inline"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8v8z"
-                              />
-                            </svg>
-                          )}
-                          {isSubmitting
-                            ? "Saving..."
-                            : currentSalesId
-                              ? "Update Dispatch"
-                              : "Save Dispatch"}
-                        </button>
-                      </div>
-                    </form>
+                      ✕
+                    </button>
                   </div>
-                </div>
-              )}
 
-              {/* Delete Confirmation Modal */}
-              {isDeleteModalOpen && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-                  <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden">
-                    {/* HEADER (same as Edit Member) */}
-                    <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555]">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 7h12M9 7v10m6-10v10M10 4h4a1 1 0 011 1v2H9V5a1 1 0 011-1zM5 7h14l-1 13a2 2 0 01-2 2H8a2 2 0 01-2-2L5 7z"
-                            />
-                          </svg>
-                        </div>
+                  {/* BODY */}
+                  <div className="p-6 text-center">
+                    <p className="text-sm text-slate-600 mb-6">
+                      Are you sure you want to delete this sale? Inventory
+                      will be reverted.
+                    </p>
 
-                        <h2 className="text-white font-semibold text-base">
-                          Delete Sale
-                        </h2>
-                      </div>
-
+                    <div className="flex gap-3">
                       <button
                         onClick={() => setIsDeleteModalOpen(false)}
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition"
+                        disabled={isDeleting}
+                        className="w-full px-4 py-2.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition"
                       >
-                        ✕
+                        Cancel
                       </button>
-                    </div>
 
-                    {/* BODY */}
-                    <div className="p-6 text-center">
-                      <p className="text-sm text-slate-600 mb-6">
-                        Are you sure you want to delete this sale? Inventory
-                        will be reverted.
-                      </p>
-
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => setIsDeleteModalOpen(false)}
-                          disabled={isDeleting}
-                          className="w-full px-4 py-2.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition"
-                        >
-                          Cancel
-                        </button>
-
-                        <button
-                          onClick={executeDelete}
-                          disabled={isDeleting}
-                          className="w-full px-4 py-2.5 rounded-lg bg-[#212121] text-white font-semibold hover:bg-[#444444] transition flex justify-center items-center"
-                        >
-                          {isDeleting ? "Deleting..." : "Yes, Delete"}
-                        </button>
-                      </div>
+                      <button
+                        onClick={executeDelete}
+                        disabled={isDeleting}
+                        className="w-full px-4 py-2.5 rounded-lg bg-[#212121] text-white font-semibold hover:bg-[#444444] transition flex justify-center items-center"
+                      >
+                        {isDeleting ? "Deleting..." : "Yes, Delete"}
+                      </button>
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* View Details Modal */}
-              {isViewModalOpen && viewSale && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
-                  <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl max-h-[90vh] overflow-hidden">
-                    <div className="flex items-center justify-between px-6 py-4 
-  bg-gradient-to-r from-[#2c2c2c] to-[#555555] 
-  rounded-t-2xl -mx-8 -mt-8 mb-0">
+            {/* View Details Modal */}
+            {isViewModalOpen && viewSale && (
+              <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+                <div className="bg-white p-8 rounded-2xl w-full max-w-4xl shadow-xl max-h-[90vh] overflow-hidden">
+                  <div className="flex items-center justify-between px-6 py-4 
+                   bg-gradient-to-r from-[#2c2c2c] to-[#555555] 
+                   rounded-t-2xl -mx-8 -mt-8 mb-0">
 
-                      {/* Left Side */}
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 flex items-center justify-center">
-                          {/* Eye Icon */}
-                          <svg
-                            className="w-5 h-5 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                        </div>
-
-                        <h2 className="text-lg font-semibold text-white">
-                          Sales Order Details
-                        </h2>
-                      </div>
-
-                      {/* Close Button */}
-                      <button
-                        onClick={() => {
-                          setIsViewModalOpen(false);
-                          setViewSale(null);
-                        }}
-                        className="w-9 h-9 flex items-center justify-center text-white hover:text-gray-300 transition"
-                      >
+                    {/* Left Side */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 flex items-center justify-center">
+                        {/* Eye Icon */}
                         <svg
-                          className="w-5 h-5"
+                          className="w-5 h-5 text-white"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
                         >
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12" />
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
-                      </button>
+                      </div>
+
+                      <h2 className="text-lg font-semibold text-white">
+                        Sales Order Details
+                      </h2>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2 mb-3">
-                          General Information
-                        </h3>
-                        <div className="space-y-2 text-sm">
-                          <p>
-                            <span className="text-slate-500 w-32 inline-block">
-                              Date:
-                            </span>{" "}
-                            <span className="font-medium text-slate-800">
-                              {new Date(viewSale.date).toLocaleDateString()}
-                            </span>
-                          </p>
-                          <p>
-                            <span className="text-slate-500 w-32 inline-block">
-                              Bill No:
-                            </span>{" "}
-                            <span className="font-medium text-slate-800">
-                              {viewSale.bill_no}
-                            </span>
-                          </p>
-                          <p>
-                            <span className="text-slate-500 w-32 inline-block">
-                              Customer:
-                            </span>{" "}
-                            <span className="font-medium text-slate-800">
-                              {viewSale.customer_name || "-"}
-                            </span>
-                          </p>
-                          <p>
-                            <span className="text-slate-500 w-32 inline-block">
-                              Created By:
-                            </span>{" "}
-                            <span className="font-medium text-slate-800">
-                              {viewSale.created_by || "-"}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2 mb-3">
-                          Logistics Information
-                        </h3>
-                        <div className="space-y-2 text-sm">
-                          <p>
-                            <span className="text-slate-500 w-32 inline-block">
-                              Vehicle No:
-                            </span>{" "}
-                            <span className="font-medium text-slate-800">
-                              {viewSale.vehicle_no || "-"}
-                            </span>
-                          </p>
-                          <p>
-                            <span className="text-slate-500 w-32 inline-block">
-                              Driver Name:
-                            </span>{" "}
-                            <span className="font-medium text-slate-800">
-                              {viewSale.driver_name || "-"}
-                            </span>
-                          </p>
-                          <p>
-                            <span className="text-slate-500 w-32 inline-block">
-                              Driver No:
-                            </span>{" "}
-                            <span className="font-medium text-slate-800">
-                              {viewSale.driver_number || "-"}
-                            </span>
-                          </p>
-                          <p>
-                            <span className="text-slate-500 w-32 inline-block">
-                              Transporter Name:
-                            </span>{" "}
-                            <span className="font-medium text-slate-800">
-                              {viewSale.transporter_name || "-"}
-                            </span>
-                          </p>
-                        </div>
+                    {/* Close Button */}
+                    <button
+                      onClick={() => {
+                        setIsViewModalOpen(false);
+                        setViewSale(null);
+                      }}
+                      className="w-9 h-9 flex items-center justify-center text-white hover:text-gray-300 transition"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2 mb-3">
+                        General Information
+                      </h3>
+                      <div className="space-y-2 text-sm">
+                        <p>
+                          <span className="text-slate-500 w-32 inline-block">
+                            Date:
+                          </span>{" "}
+                          <span className="font-medium text-slate-800">
+                            {new Date(viewSale.date).toLocaleDateString()}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-slate-500 w-32 inline-block">
+                            Bill No:
+                          </span>{" "}
+                          <span className="font-medium text-slate-800">
+                            {viewSale.bill_no}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-slate-500 w-32 inline-block">
+                            Customer:
+                          </span>{" "}
+                          <span className="font-medium text-slate-800">
+                            {viewSale.customer_name || "-"}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-slate-500 w-32 inline-block">
+                            Created By:
+                          </span>{" "}
+                          <span className="font-medium text-slate-800">
+                            {viewSale.created_by || "-"}
+                          </span>
+                        </p>
                       </div>
                     </div>
-
-                    <h3 className="text-md font-bold text-slate-800 mb-3">
-                      Products
-                    </h3>
-                    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-                      <div className="max-h-64 overflow-y-auto custom-scrollbar">
-                        <table className="w-full text-left text-sm">
-                          <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
-                            <tr>
-                              <th className="py-2 px-4 font-semibold w-12 text-center">
-                                #
-                              </th>
-                              <th className="py-2 px-4 font-semibold">
-                                Product Code
-                              </th>
-                              <th className="py-2 px-4 font-semibold">
-                                Product Name
-                              </th>
-                              <th className="py-2 px-4 font-semibold">
-                                Gradation
-                              </th>
-                              <th className="py-2 px-4 font-semibold text-right">
-                                Quantity
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {viewSale.items && viewSale.items.length > 0 ? (
-                              viewSale.items.map((item, idx) => (
-                                <tr
-                                  key={idx}
-                                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
-                                >
-                                  <td className="py-2 px-4 text-center text-slate-500">
-                                    {idx + 1}
-                                  </td>
-                                  <td className="py-2 px-4 font-medium">
-                                    {item.product_code}
-                                  </td>
-                                  <td className="py-2 px-4 text-slate-600">
-                                    {item.product_name}
-                                  </td>
-                                  <td className="py-2 px-4 text-slate-600">
-                                    {item.gradation || "-"}
-                                  </td>
-                                  <td className="py-2 px-4 text-right font-bold text-slate-800">
-                                    {item.quantity}
-                                  </td>
-                                </tr>
-                              ))
-                            ) : viewSale.product_code ? (
-                              <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
-                                <td className="py-2 px-4 text-center text-slate-500">
-                                  1
-                                </td>
-                                <td className="py-2 px-4 font-medium">
-                                  {viewSale.product_code}
-                                </td>
-                                <td className="py-2 px-4 text-slate-600">
-                                  {viewSale.product_name || "-"}
-                                </td>
-                                <td className="py-2 px-4 text-slate-600">
-                                  {viewSale.gradation || "-"}
-                                </td>
-                                <td className="py-2 px-4 text-right font-bold text-slate-800">
-                                  {viewSale.quantity}
-                                </td>
-                              </tr>
-                            ) : (
-                              <tr>
-                                <td
-                                  colSpan="5"
-                                  className="py-4 text-center text-slate-500"
-                                >
-                                  No products found.
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2 mb-3">
+                        Logistics Information
+                      </h3>
+                      <div className="space-y-2 text-sm">
+                        <p>
+                          <span className="text-slate-500 w-32 inline-block">
+                            Vehicle No:
+                          </span>{" "}
+                          <span className="font-medium text-slate-800">
+                            {viewSale.vehicle_no || "-"}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-slate-500 w-32 inline-block">
+                            Driver Name:
+                          </span>{" "}
+                          <span className="font-medium text-slate-800">
+                            {viewSale.driver_name || "-"}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-slate-500 w-32 inline-block">
+                            Driver No:
+                          </span>{" "}
+                          <span className="font-medium text-slate-800">
+                            {viewSale.driver_number || "-"}
+                          </span>
+                        </p>
+                        <p>
+                          <span className="text-slate-500 w-32 inline-block">
+                            Transporter Name:
+                          </span>{" "}
+                          <span className="font-medium text-slate-800">
+                            {viewSale.transporter_name || "-"}
+                          </span>
+                        </p>
                       </div>
                     </div>
                   </div>
+
+                  <h3 className="text-md font-bold text-slate-800 mb-3">
+                    Products
+                  </h3>
+                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                    <div className="max-h-64 overflow-y-auto custom-scrollbar">
+                      <table className="w-full text-left text-sm">
+                        <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+                          <tr>
+                            <th className="py-2 px-4 font-semibold w-12 text-center">
+                              #
+                            </th>
+                            <th className="py-2 px-4 font-semibold">
+                              Product Code
+                            </th>
+                            <th className="py-2 px-4 font-semibold">
+                              Product Name
+                            </th>
+                            <th className="py-2 px-4 font-semibold">
+                              Gradation
+                            </th>
+                            <th className="py-2 px-4 font-semibold text-right">
+                              Quantity
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {viewSale.items && viewSale.items.length > 0 ? (
+                            viewSale.items.map((item, idx) => (
+                              <tr
+                                key={idx}
+                                className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
+                              >
+                                <td className="py-2 px-4 text-center text-slate-500">
+                                  {idx + 1}
+                                </td>
+                                <td className="py-2 px-4 font-medium">
+                                  {item.product_code}
+                                </td>
+                                <td className="py-2 px-4 text-slate-600">
+                                  {item.product_name}
+                                </td>
+                                <td className="py-2 px-4 text-slate-600">
+                                  {item.gradation || "-"}
+                                </td>
+                                <td className="py-2 px-4 text-right font-bold text-slate-800">
+                                  {item.quantity}
+                                </td>
+                              </tr>
+                            ))
+                          ) : viewSale.product_code ? (
+                            <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                              <td className="py-2 px-4 text-center text-slate-500">
+                                1
+                              </td>
+                              <td className="py-2 px-4 font-medium">
+                                {viewSale.product_code}
+                              </td>
+                              <td className="py-2 px-4 text-slate-600">
+                                {viewSale.product_name || "-"}
+                              </td>
+                              <td className="py-2 px-4 text-slate-600">
+                                {viewSale.gradation || "-"}
+                              </td>
+                              <td className="py-2 px-4 text-right font-bold text-slate-800">
+                                {viewSale.quantity}
+                              </td>
+                            </tr>
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan="5"
+                                className="py-4 text-center text-slate-500"
+                              >
+                                No products found.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </>
-        
+              </div>
+            )}
+          </>
+
         </div>
       </div>
-    </div>
+    </div >
   );
 }

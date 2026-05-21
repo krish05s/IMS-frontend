@@ -257,7 +257,7 @@ export default function Products() {
 
               {/* Filter Bar */}
               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-wrap gap-4">
-                <input
+                {/* <input
                   type="text"
                   placeholder="Filter by Product Code..."
                   value={filters.product_code}
@@ -265,7 +265,7 @@ export default function Products() {
                     setFilters({ ...filters, product_code: e.target.value })
                   }
                   className="flex-1 min-w-[150px] px-4 py-2 border border-[#EADBC8] rounded-xl text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-0 focus:border-[#D2A185]"
-                />
+                /> */}
                 <input
                   type="text"
                   placeholder="Filter by Product Name..."
@@ -294,9 +294,9 @@ export default function Products() {
                         <th className="py-3 px-4 font-semibold whitespace-nowrap">
                           ID
                         </th>
-                        <th className="py-3 px-4 font-semibold whitespace-nowrap">
+                        {/* <th className="py-3 px-4 font-semibold whitespace-nowrap">
                           Product Code
-                        </th>
+                        </th> */}
                         <th className="py-3 px-4 font-semibold whitespace-nowrap">
                           Product Name
                         </th>
@@ -322,9 +322,9 @@ export default function Products() {
                           <td className="py-1.5 px-4 text-slate-600 font-medium whitespace-nowrap">
                             {indexOfFirstItem + index + 1}
                           </td>
-                          <td className="py-1.5 px-4 text-orange-600 font-semibold">
+                          {/* <td className="py-1.5 px-4 text-orange-600 font-semibold">
                             {p.product_code}
-                          </td>
+                          </td> */}
                           <td className="py-1.5 px-4 text-slate-800 font-medium">
                             {p.product_name}
                           </td>
@@ -386,7 +386,7 @@ export default function Products() {
                       {filteredProducts.length === 0 && (
                         <tr>
                           <td
-                            colSpan="6"
+                            colSpan="5"
                             className="py-8 text-center text-slate-500"
                           >
                             No products found.

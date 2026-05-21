@@ -19,6 +19,21 @@ const Icons = {
       />
     </svg>
   ),
+  Todo: (
+    <svg
+      className="w-4 h-4"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 4v16m8-8H4"
+      />
+    </svg>
+  ),
   Gradations: (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -125,6 +140,7 @@ const Icons = {
 // Route to label + icon mapping
 const routeMap = {
   "/dashboard": { label: "Dashboard", icon: Icons.Dashboard },
+  "/todolist": { label: "To Do", icon: Icons.Todo },
   "/gradations": { label: "Gradations", icon: Icons.Gradations },
   "/products": { label: "Products", icon: Icons.Products },
   "/purchase": { label: "Purchase", icon: Icons.Purchase },
