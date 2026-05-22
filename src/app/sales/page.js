@@ -381,7 +381,8 @@ export default function Sales() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Validate Items
+    // Validate Items and check status
+    
     try {
       const submissionData = {
         ...formData,
