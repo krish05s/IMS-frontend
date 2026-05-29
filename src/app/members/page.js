@@ -536,7 +536,7 @@ function Members() {
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-[#212121] to-[#555555] rounded-t-2xl">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center ">
                     <svg
                       className="w-4 h-4 text-white"
                       fill="none"
@@ -557,7 +557,7 @@ function Members() {
                 </div>
                 <button
                   onClick={() => setAddModal(false)}
-                  className="w-7 h-7 flex items-center justify-center text-white hover:opacity-70"
+                  className="w-7 h-7 flex items-center justify-center text-white hover:opacity-70 cursor-pointer"
                 >
                   ✕
                 </button>
@@ -711,7 +711,7 @@ function Members() {
                   <button
                     type="submit"
                     disabled={addLoading}
-                    className="px-5 py-2 bg-[#212121] hover:bg-[#444444] text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-60 flex items-center gap-2"
+                    className="px-5 py-2 bg-[#212121] hover:bg-[#444444] text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-60 flex items-center gap-2 cursor-pointer"
                   >
                     {addLoading && (
                       <svg
