@@ -197,7 +197,7 @@ export default function Page() {
           actions={
             <button
               onClick={() => handleOpenModal()}
-              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl transition-all whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl transition-all whitespace-nowrap cursor-pointer"
             >
               <svg
                 className="w-4 h-4"
@@ -233,10 +233,10 @@ export default function Page() {
         </div> */}
 
           {/* Custom Tab Switcher */}
-          <div className="bg-white p-2 rounded-xl shadow-sm border border-slate-200 mb-6 inline-flex w-full md:w-auto overflow-x-auto">
+          <div className="bg-white p-2 rounded-xl shadow-sm border border-slate-200 mb-6 inline-flex w-full md:w-auto overflow-x-auto ">
             <button
               onClick={() => setActiveTab("purchase")}
-              className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${activeTab === "purchase"
+              className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${activeTab === "purchase"
                 ? "bg-[#212121] text-white "
                 : "text-slate-600 hover:bg-slate-100"
                 }`}
@@ -245,7 +245,7 @@ export default function Page() {
             </button>
             <button
               onClick={() => setActiveTab("sales")}
-              className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${activeTab === "sales"
+              className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all whitespace-nowrap cursor-pointer ${activeTab === "sales"
                 ? "bg-[#212121] text-white"
                 : "text-slate-600 hover:bg-slate-100"
                 }`}
@@ -300,7 +300,7 @@ export default function Page() {
                           <button
                             onClick={() => handleOpenModal(p)}
                             title="Edit"
-                            className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
+                            className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors cursor-pointer"
                           >
                             <svg
                               className="w-4 h-4"
@@ -319,7 +319,7 @@ export default function Page() {
                           <button
                             onClick={() => confirmDelete(p)}
                             title="Delete"
-                            className="p-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg transition-colors"
+                            className="p-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg transition-colors cursor-pointer"
                           >
                             <svg
                               className="w-4 h-4"
@@ -364,7 +364,7 @@ export default function Page() {
                     setItemsPerPage(Number(e.target.value));
                     setCurrentPage(1);
                   }}
-                  className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 cursor-pointer"
                 >
                   <option value={10}>10</option>
                   <option value={20}>20</option>
@@ -381,7 +381,7 @@ export default function Page() {
                       setCurrentPage((prev) => Math.max(prev - 1, 1))
                     }
                     disabled={currentPage === 1}
-                    className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                    className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors cursor-pointer"
                   >
                     &lt;
                   </button>
@@ -391,7 +391,7 @@ export default function Page() {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
+                      className={`px-3 py-1 rounded-lg text-sm font-medium cursor-pointer ${currentPage === page
                         ? "bg-[#212121] text-white"
                         : "border border-slate-200 text-slate-600"
                         }`}
@@ -406,7 +406,7 @@ export default function Page() {
                       setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                     }
                     disabled={currentPage === totalPages}
-                    className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                    className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors cursor-pointer"
                   >
                     &gt;
                   </button>
@@ -446,7 +446,7 @@ export default function Page() {
 
                   <button
                     onClick={handleCloseModal}
-                    className="text-white hover:text-gray-200"
+                    className="text-white hover:text-gray-200 cursor-pointer"
                   >
                     ✕
                   </button>
@@ -499,7 +499,7 @@ export default function Page() {
                       }
                       className="w-full px-4 py-2.5 rounded-lg border border-[#C19A6B] 
     focus:outline-none focus:ring-0 focus:border-[#C19A6B] 
-    bg-white text-black placeholder:text-gray-400"
+    bg-white text-black placeholder:text-gray-400 "
                       placeholder="Enter complete address"
                     />
                   </div>
@@ -509,14 +509,14 @@ export default function Page() {
                       type="button"
                       onClick={handleCloseModal}
                       disabled={isSubmitting}
-                      className="px-5 py-2.5 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition disabled:opacity-50"
+                      className="px-5 py-2.5 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition disabled:opacity-50 cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="bg-[#212121] text-white px-6 py-2.5 rounded-lg font-bold hover:bg-[#444] transition shadow-md shadow-black/20 disabled:opacity-70 flex items-center"
+                      className="bg-[#212121] text-white px-6 py-2.5 rounded-lg font-bold hover:bg-[#444] transition shadow-md shadow-black/20 disabled:opacity-70 flex items-center cursor-pointer"
                     >
                       {isSubmitting && (
                         <svg
@@ -585,7 +585,7 @@ export default function Page() {
                   {/* CLOSE BUTTON */}
                   <button
                     onClick={() => setIsDeleteModalOpen(false)}
-                    className="text-white hover:text-gray-200 text-xl"
+                    className="text-white hover:text-gray-200 text-xl cursor-pointer"
                   >
                     ✕
                   </button>
@@ -606,7 +606,7 @@ export default function Page() {
                     <button
                       onClick={() => setIsDeleteModalOpen(false)}
                       disabled={isDeleting}
-                      className="px-5 py-2.5 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition disabled:opacity-50"
+                      className="px-5 py-2.5 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition disabled:opacity-50 cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -614,7 +614,7 @@ export default function Page() {
                     <button
                       onClick={executeDelete}
                       disabled={isDeleting}
-                      className="px-6 py-2.5 rounded-lg bg-black text-white font-bold hover:bg-gray-800 transition shadow-md shadow-black/20 flex items-center"
+                      className="px-6 py-2.5 rounded-lg bg-black text-white font-bold hover:bg-gray-800 transition shadow-md shadow-black/20 flex items-center cursor-pointer"
                     >
                       {isDeleting && (
                         <svg

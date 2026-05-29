@@ -342,7 +342,7 @@ export default function Dashboard() {
               </div>
 
               {/* Dynamic Analytics Charts Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 ">
                 {(role === "admin" ||
                   role === "super admin" ||
                   role === "sales" ||
@@ -352,12 +352,12 @@ export default function Dashboard() {
                         <h2 className="text-lg font-bold text-slate-800">
                           Activity Overview
                         </h2>
-                        <div className="flex bg-slate-100 p-1 rounded-lg">
+                        <div className="flex bg-slate-100 p-1 rounded-lg ">
                           {["Daily", "Monthly", "Yearly"].map((filter) => (
                             <button
                               key={filter}
                               onClick={() => setTimeFilter(filter)}
-                              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${timeFilter === filter ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all  cursor-pointer ${timeFilter === filter ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
                             >
                               {filter}
                             </button>

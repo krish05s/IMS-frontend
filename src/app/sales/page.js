@@ -762,7 +762,7 @@ export default function Sales() {
           actions={
             <button
               onClick={() => handleOpenModal()}
-              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap cursor-pointer"
             >
               <svg
                 className="w-4 h-4"
@@ -900,7 +900,7 @@ export default function Sales() {
                               onChange={(e) =>
                                 handleStatusChange(s.id, e.target.value)
                               }
-                              className={`px-1 py-1 rounded-lg text-xs font-semibold outline-none
+                              className={`px-1 py-1 rounded-lg text-xs font-semibold outline-none cursor-pointer
                                ${s.status === "pending"
                                   ? "bg-gray-200 text-black"
                                   : s.status === "stock_out"
@@ -955,7 +955,7 @@ export default function Sales() {
 
                                   toggleItemsExpansion(s);
                                 }}
-                                className="flex items-center justify-center w-7 h-7 bg-orange-50 text-orange-600 hover:bg-orange-100 font-bold rounded-lg transition-colors shadow-sm"
+                                className="flex items-center justify-center w-7 h-7 bg-orange-50 text-orange-600 hover:bg-orange-100 font-bold rounded-lg transition-colors shadow-sm cursor-pointer"
                               >
                                 {expandedRowId === s.id ? "-" : "+"}
                               </button>
@@ -979,7 +979,7 @@ export default function Sales() {
                                   setIsViewModalOpen(true);
                                 }}
                                 title="View Details"
-                                className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-500 rounded-lg transition-colors"
+                                className="p-2 bg-blue-50 hover:bg-blue-100 text-blue-500 rounded-lg transition-colors cursor-pointer"
                               >
                                 <svg
                                   className="w-4 h-4"
@@ -1005,7 +1005,7 @@ export default function Sales() {
                                 onClick={() => handleOpenModal(s)}
                                 title="Edit"
                                 disabled={s.status === "completed"}
-                                className={`p-2 bg-emerald-50 hover:bg-emerald-100
+                                className={`p-2 bg-emerald-50 hover:bg-emerald-100 cursor-pointer
                                 ${s.status === "completed"
                                     ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
                                     : "bg-emerald-50 hover:bg-emerald-100 text-emerald-600"
@@ -1030,7 +1030,7 @@ export default function Sales() {
                                 onClick={() => handleDelete(s.id)}
                                 title="Delete"
                                 disabled={s.status === "completed"}
-                                className={`p-2 bg-red-50 hover:bg-red-100
+                                className={`p-2 bg-red-50 hover:bg-red-100 cursor-pointer
                                 ${s.status === "completed"
                                     ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
                                     : "bg-emerald-50 hover:bg-emerald-100 text-emerald-600"
@@ -1057,7 +1057,7 @@ export default function Sales() {
                             {s.status === "completed" ? (
                               <button
                                 onClick={() => printInvoice(s)}
-                                className="flex items-center justify-center mx-auto gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 font-semibold rounded-lg transition-colors text-xs"
+                                className="flex items-center justify-center mx-auto gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 font-semibold rounded-lg transition-colors text-xs cursor-pointer"
                                 title="Generate Bill"
                               >
                                 <svg
@@ -1126,7 +1126,7 @@ export default function Sales() {
                                                     true,
                                                   )
                                                 }
-                                                className="text-blue-500 hover:text-blue-700 text-sm font-semibold flex gap-1 items-center px-2 py-1 transition"
+                                                className="text-blue-500 hover:text-blue-700 text-sm font-semibold flex gap-1 items-center px-2 py-1 transition cursor-pointer"
                                               >
                                                 <i>✏️</i> Edit
                                               </button>
@@ -1135,7 +1135,7 @@ export default function Sales() {
                                                 onClick={() =>
                                                   removeExpandedItemRow(idx)
                                                 }
-                                                className="text-red-500 hover:text-red-700 px-2 py-1 transition font-bold"
+                                                className="text-red-500 hover:text-red-700 px-2 py-1 transition font-bold cursor-pointer"
                                               >
                                                 Drop
                                               </button>
@@ -1343,7 +1343,7 @@ export default function Sales() {
                                                 onClick={() =>
                                                   removeExpandedItemRow(idx)
                                                 }
-                                                className="px-4 py-2.5 border border-red-300 text-red-500 hover:bg-red-50 hover:border-red-400 rounded-lg transition font-bold bg-white shadow-sm h-[46px]"
+                                                className="px-4 py-2.5 border border-red-300 text-red-500 hover:bg-red-50 hover:border-red-400 rounded-lg transition font-bold bg-white shadow-sm h-[46px]  cursor-pointer"
                                               >
                                                 X
                                               </button>
@@ -1382,7 +1382,7 @@ export default function Sales() {
                                       onClick={() =>
                                         handleSaveExpandedItems(s)
                                       }
-                                      className={`px-8 py-2.5 rounded-lg font-bold transition shadow-md ${isSavingProducts ||
+                                      className={`px-8 py-2.5 rounded-lg font-bold transition shadow-md cursor-pointer ${isSavingProducts ||
                                         (() => {
                                           const validItems = expandedItems.filter(i => i.product_code && Number(i.quantity) > 0);
                                           const aggregatedNewQuantities = {};
@@ -1440,7 +1440,7 @@ export default function Sales() {
                       setItemsPerPage(Number(e.target.value));
                       setCurrentPage(1);
                     }}
-                    className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   >
                     <option value={10}>10</option>
                     <option value={20}>20</option>
@@ -1457,7 +1457,7 @@ export default function Sales() {
                         setCurrentPage((prev) => Math.max(prev - 1, 1))
                       }
                       disabled={currentPage === 1}
-                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors cursor-pointer"
                     >
                       &lt;
                     </button>
@@ -1467,7 +1467,7 @@ export default function Sales() {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
+                        className={`px-3 py-1 rounded-lg text-sm font-medium cursor-pointer ${currentPage === page
                           ? "bg-[#212121] text-white"
                           : "border border-slate-200 text-slate-600"
                           }`}
@@ -1484,7 +1484,7 @@ export default function Sales() {
                         )
                       }
                       disabled={currentPage === totalPages}
-                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors cursor-pointer"
                     >
                       &gt;
                     </button>
@@ -1523,7 +1523,7 @@ export default function Sales() {
 
                     <button
                       onClick={handleCloseModal}
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-colors"
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-colors cursor-pointer"
                     >
                       ✕
                     </button>
@@ -1667,14 +1667,14 @@ export default function Sales() {
                       <button
                         type="button"
                         onClick={handleCloseModal}
-                        className="px-5 py-2.5 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition"
+                        className="px-5 py-2.5 rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 font-bold transition cursor-pointer"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="bg-[#212121] hover:bg-[#444444] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70"
+                        className="bg-[#212121] hover:bg-[#444444] text-white px-6 py-2.5 rounded-lg font-bold  transition  flex items-center disabled:opacity-70 cursor-pointer"
                       >
                         {isSubmitting && (
                           <svg
@@ -1739,7 +1739,7 @@ export default function Sales() {
 
                     <button
                       onClick={() => setIsDeleteModalOpen(false)}
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition"
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition cursor-pointer"
                     >
                       ✕
                     </button>
@@ -1756,7 +1756,7 @@ export default function Sales() {
                       <button
                         onClick={() => setIsDeleteModalOpen(false)}
                         disabled={isDeleting}
-                        className="w-full px-4 py-2.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition"
+                        className="w-full px-4 py-2.5 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -1764,7 +1764,7 @@ export default function Sales() {
                       <button
                         onClick={executeDelete}
                         disabled={isDeleting}
-                        className="w-full px-4 py-2.5 rounded-lg bg-[#212121] text-white font-semibold hover:bg-[#444444] transition flex justify-center items-center"
+                        className="w-full px-4 py-2.5 rounded-lg bg-[#212121] text-white font-semibold hover:bg-[#444444] transition flex justify-center items-center cursor-pointer"
                       >
                         {isDeleting ? "Deleting..." : "Yes, Delete"}
                       </button>
@@ -1810,7 +1810,7 @@ export default function Sales() {
                         setIsViewModalOpen(false);
                         setViewSale(null);
                       }}
-                      className="w-9 h-9 flex items-center justify-center text-white hover:text-gray-300 transition"
+                      className="w-9 h-9 flex items-center justify-center text-white hover:text-gray-300 transition cursor-pointer"
                     >
                       <svg
                         className="w-5 h-5"

@@ -231,7 +231,7 @@ export default function Products() {
           actions={
             <button
               onClick={() => handleOpenModal()}
-              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap  cursor-pointer"
             >
               <svg
                 className="w-4 h-4"
@@ -408,7 +408,7 @@ export default function Products() {
                         setItemsPerPage(Number(e.target.value));
                         setCurrentPage(1);
                       }}
-                      className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                      className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 cursor-pointer"
                     >
                       <option value={10}>10</option>
                       <option value={50}>50</option>
@@ -425,7 +425,7 @@ export default function Products() {
                           setCurrentPage((prev) => Math.max(prev - 1, 1))
                         }
                         disabled={currentPage === 1}
-                        className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                        className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors cursor-pointer"
                       >
                         &lt;
                       </button>
@@ -435,7 +435,7 @@ export default function Products() {
                         <button
                           key={page}
                           onClick={() => setCurrentPage(page)}
-                          className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                          className={`px-3 py-1 rounded-lg text-sm font-medium cursor-pointer ${
                             currentPage === page
                               ? "bg-[#212121] text-white"
                               : "border border-slate-200 text-slate-600"
@@ -453,7 +453,7 @@ export default function Products() {
                           )
                         }
                         disabled={currentPage === totalPages}
-                        className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                        className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors cursor-pointer"
                       >
                         &gt;
                       </button>
@@ -491,7 +491,7 @@ export default function Products() {
 
                       <button
                         onClick={handleCloseModal}
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-colors"
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-white transition-colors cursor-pointer"
                       >
                         ✕
                       </button>
@@ -582,7 +582,7 @@ export default function Products() {
                         <button
                           type="button"
                           onClick={handleCloseModal}
-                          className="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 font-medium transition"
+                          className="px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 font-medium transition cursor-pointer"
                         >
                           Cancel
                         </button>
@@ -590,7 +590,7 @@ export default function Products() {
                         <button
                           type="submit"
                           disabled={isSaving}
-                          className="px-5 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl hover:bg-[#444] flex items-center gap-2 disabled:opacity-70"
+                          className="px-5 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl hover:bg-[#444] flex items-center gap-2 disabled:opacity-70 cursor-pointer"
                         >
                           {isSaving ? (
                             <>

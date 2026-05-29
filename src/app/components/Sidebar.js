@@ -371,7 +371,7 @@ export default function Sidebar() {
 
           <button
             onClick={handleLogout}
-            className="w-full text-left px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition font-semibold flex items-center justify-center gap-2"
+            className="w-full text-left px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition font-semibold flex items-center justify-center gap-2 cursor-pointer"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

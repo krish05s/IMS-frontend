@@ -251,12 +251,12 @@ function Members() {
                   setAddModal(true);
                   setShowAddPassword(false);
                 }}
-                className="flex items-center gap-2 px-2 py-2 bg-[#212121] text-white  text-sm font-semibold rounded-xl shadow-md whitespace-nowrap"
+                className="flex items-center gap-2 px-2 py-2 bg-[#212121] text-white  text-sm font-semibold rounded-xl shadow-md whitespace-nowrap cursor-pointer"
               >
                 <svg
                   className="w-4 h-4"
                   fill="none"
-                  stroke="currentColor"
+                  stroke="currentColor" 
                   viewBox="0 0 24 24"
                 >
                   <path
@@ -475,7 +475,7 @@ function Members() {
                       setItemsPerPage(Number(e.target.value));
                       setCurrentPage(1);
                     }}
-                    className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500  cursor-pointer"
                   >
                     <option value={10}>10</option>
                     <option value={20}>20</option>
@@ -492,7 +492,7 @@ function Members() {
                         setCurrentPage((prev) => Math.max(prev - 1, 1))
                       }
                       disabled={currentPage === 1}
-                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors cursor-pointer"
                     >
                       &lt;
                     </button>
@@ -502,7 +502,7 @@ function Members() {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                        className={`px-3 py-1 rounded-lg text-sm font-medium cursor-pointer ${
                           currentPage === page
                             ? "bg-[#212121] text-white"
                             : "border border-slate-200 text-slate-600"
@@ -518,7 +518,7 @@ function Members() {
                         setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                       }
                       disabled={currentPage === totalPages}
-                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors cursor-pointer"
                     >
                       &gt;
                     </button>
@@ -704,7 +704,7 @@ function Members() {
                   <button
                     type="button"
                     onClick={() => setAddModal(false)}
-                    className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -925,7 +925,7 @@ function Members() {
                   <button
                     type="button"
                     onClick={() => setEditModal(false)}
-                    className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -983,7 +983,7 @@ function Members() {
                       d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                     />
                   </svg>
-                  <h2 className="text-base font-semibold text-white">
+                  <h2 className="text-base font-semibold text-white cursor-pointer">
                     Delete User
                   </h2>
                 </div>
@@ -991,7 +991,7 @@ function Members() {
                 {/* Close Button */}
                 <button
                   onClick={() => setDeleteModal(false)}
-                  className="text-white text-lg hover:opacity-70"
+                  className="text-white text-lg hover:opacity-70 cursor-pointer"
                 >
                   ✕
                 </button>
@@ -1015,7 +1015,7 @@ function Members() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setDeleteModal(false)}
-                    className="flex-1 px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition"
+                    className="flex-1 px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -1023,7 +1023,7 @@ function Members() {
                   <button
                     onClick={handleDelete}
                     disabled={deleteLoading}
-                    className="flex-1 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 cursor-pointer"
                   >
                     {deleteLoading && (
                       <svg
