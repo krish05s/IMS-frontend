@@ -306,7 +306,7 @@ export default function Products() {
                         <th className="py-3 px-4 font-semibold text-center whitespace-nowrap">
                           Qty / Unit
                         </th>
-                        {role === "admin" || role === "super admin" && (
+                        {(role === "admin" || role === "super admin") && (
                           <th className="py-3 px-4 font-semibold text-right whitespace-nowrap">
                             Actions
                           </th>
@@ -334,7 +334,7 @@ export default function Products() {
                           <td className="py-1.5 px-4 text-slate-600 text-center font-medium">
                             {p.quantity || 0} {p.unit || "Pieces"}
                           </td>
-                          {role === "admin" || role === "super admin" && (
+                          {(role === "admin" || role === "super admin") && (
                             <td className="py-1.5 px-4 text-right">
                               <div className="flex justify-end gap-2">
                                 <button
