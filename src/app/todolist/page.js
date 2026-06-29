@@ -248,7 +248,7 @@ export default function Page() {
               onClick={() => {
                 openModal();
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl shadow-sm transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-xl shadow-sm transition-all  cursor-pointer"
             >
               <svg
                 className="w-4 h-4"
@@ -339,7 +339,7 @@ export default function Page() {
                         <div className="flex items-center gap-2 transition-all">
                           <button
                             onClick={() => openModal(t)}
-                            className="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition-all"
+                            className="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition-all cursor-pointer"
                           >
                             <svg
                               className="w-4 h-4"
@@ -358,7 +358,7 @@ export default function Page() {
 
                           <button
                             onClick={() => handleDelete(t.id)}
-                            className="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition-all"
+                            className="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition-all cursor-pointer"
                           >
                             <svg
                               className="w-4 h-4"
@@ -447,7 +447,7 @@ export default function Page() {
 
                         <button
                           onClick={() => handleDelete(t.id)}
-                          className="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition-all"
+                          className="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition-all cursor-pointer"
                         >
                           <svg
                               className="w-4 h-4"
@@ -502,7 +502,7 @@ export default function Page() {
 
                 <button
                   onClick={closeModal}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-all"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-all cursor-pointer"
                 >
                   ✕
                 </button>
@@ -534,7 +534,7 @@ export default function Page() {
                   <button
                     type="button"
                     onClick={closeModal}
-                    className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all"
+                    className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -542,7 +542,7 @@ export default function Page() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-all flex items-center gap-2
+                    className={`px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 transition-all flex items-center gap-2 cursor-pointer
                     ${isSubmitting
                         ? "opacity-70 cursor-not-allowed"
                         : ""

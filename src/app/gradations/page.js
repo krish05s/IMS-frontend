@@ -187,7 +187,7 @@ export default function Gradations() {
               onClick={() => {
                 setIsModalOpen(true);
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl shadow-md whitespace-nowrap  cursor-pointer"
             >
               <svg
                 className="w-4 h-4"
@@ -256,7 +256,7 @@ export default function Gradations() {
                         <td className="py-1.5 px-4">
                           <button
                             onClick={() => handleToggleStatus(g.id, g.status)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${g.status === 1 ? "bg-green-500" : "bg-slate-300"
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${g.status === 1 ? "bg-green-500" : "bg-slate-300"
                               }`}
                           >
                             <span
@@ -267,12 +267,12 @@ export default function Gradations() {
                             />
                           </button>
                         </td>
-                        <td className="py-1.5 px-4 text-right whitespace-nowrap">
+                        <td className="py-1.5 px-4 text-right whitespace-nowrap ">
                           <div className="flex justify-end">
                             <button
                               onClick={() => handleOpenModal(g)}
                               title="Edit"
-                              className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors"
+                              className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg transition-colors cursor-pointer"
                             >
                               <svg
                                 className="w-4 h-4"
@@ -317,7 +317,7 @@ export default function Gradations() {
                       setItemsPerPage(Number(e.target.value));
                       setCurrentPage(1);
                     }}
-                    className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    className="border border-slate-200 rounded-lg px-2 py-1 text-sm text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 cursor-pointer"
                   >
                     <option value={10}>10</option>
                     <option value={20}>20</option>
@@ -327,14 +327,14 @@ export default function Gradations() {
                 </div>
 
                 {totalPages > 1 && (
-                  <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                  <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide ">
                     {/* Prev */}
                     <button
                       onClick={() =>
                         setCurrentPage((prev) => Math.max(prev - 1, 1))
                       }
                       disabled={currentPage === 1}
-                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors cursor-pointer"
                     >
                       &lt;
                     </button>
@@ -344,7 +344,7 @@ export default function Gradations() {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`px-3 py-1 rounded-lg text-sm font-medium ${currentPage === page
+                        className={`px-3 py-1 rounded-lg text-sm font-medium cursor-pointer ${currentPage === page
                           ? "bg-[#212121] text-white"
                           : "border border-slate-200 text-slate-600"
                           }`}
@@ -361,7 +361,7 @@ export default function Gradations() {
                         )
                       }
                       disabled={currentPage === totalPages}
-                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 text-sm font-medium transition-colors cursor-pointer"
                     >
                       &gt;
                     </button>
@@ -403,7 +403,7 @@ export default function Gradations() {
 
                   <button
                     onClick={handleCloseModal}
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-white transition"
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-white transition cursor-pointer"
                   >
                     ✕
                   </button>
@@ -447,7 +447,7 @@ export default function Gradations() {
                     <button
                       type="button"
                       onClick={handleCloseModal}
-                      className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
+                      className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -455,7 +455,7 @@ export default function Gradations() {
                     <button
                       type="submit"
                       disabled={isSaving}
-                      className="px-5 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl hover:bg-[#444] flex items-center gap-2 disabled:opacity-70"
+                      className="px-5 py-2 bg-[#212121] text-white text-sm font-semibold rounded-xl hover:bg-[#444] flex items-center gap-2 disabled:opacity-70 cursor-pointer"
                     >
                       {isSaving ? (
                         <>

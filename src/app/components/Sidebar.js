@@ -122,6 +122,11 @@ const Icons = {
       />
     </svg>
   ),
+  Export: (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+    </svg>
+  ),
 };
 
 // --- Reusable Navigation Link Component ---
@@ -336,6 +341,17 @@ export default function Sidebar() {
             />
           )}
 
+          {/* Export - admin only */}
+          {(role === "super admin" || role === "admin") && (
+            <NavItem
+              href="/export"
+              currentPath={pathname}
+              onClick={() => setIsOpen(false)}
+              icon={Icons.Export}
+              label="Export"
+            />
+          )}
+
           {/* Setup - admin only */}
           {(role === "admin" || role === "super admin") && (
             <NavItem
@@ -371,7 +387,7 @@ export default function Sidebar() {
 
           <button
             onClick={handleLogout}
-            className="w-full text-left px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition font-semibold flex items-center justify-center gap-2"
+            className="w-full text-left px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition font-semibold flex items-center justify-center gap-2 cursor-pointer"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
