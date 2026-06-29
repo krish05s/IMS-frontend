@@ -297,6 +297,7 @@ export default function Purchases() {
       const submissionData = {
         date: purchase.date,
         bill_no: purchase.bill_no,
+        party_name: purchase.party_name,
         vehicle_no: purchase.vehicle_no,
         driver_name: purchase.driver_name,
         driver_number: purchase.driver_number,

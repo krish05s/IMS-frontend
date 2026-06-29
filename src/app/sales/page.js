@@ -382,7 +382,7 @@ export default function Sales() {
     setIsSubmitting(true);
 
     // Validate Items and check status
-    
+
     try {
       const submissionData = {
         ...formData,
@@ -850,7 +850,7 @@ export default function Sales() {
                         Date
                       </th>
                       <th className="py-3 px-4 font-semibold whitespace-nowrap">
-                        Customer Name
+                        Supplier
                       </th>
                       <th className="py-3 px-4 font-semibold whitespace-nowrap">
                         Vehicle No
