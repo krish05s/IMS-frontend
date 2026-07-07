@@ -239,7 +239,7 @@ export default function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex flex-col gap-3 flex-1 overflow-y-auto pr-2 pb-4">
+        <nav className="flex flex-col gap-3 flex-1 overflow-y-auto hide-scrollbar pr-2 pb-4">
           {/* Dashboard - admin, sales, purchase, user */}
           {(role === "admin" ||
             role === "super admin" ||
