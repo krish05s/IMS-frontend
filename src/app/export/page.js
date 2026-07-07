@@ -320,6 +320,8 @@ export default function ExportPage() {
                     onChange={setSelectedPurchaseParty}
                     placeholder="Select Purchase Party..."
                     className="text-sm"
+                    maxMenuHeight={200}
+                    classNames={{ menuList: () => "custom-scrollbar" }}
                   />
                 )}
               </div>
@@ -334,6 +336,8 @@ export default function ExportPage() {
                     onChange={setSelectedSalesParty}
                     placeholder="Select Sales Party..."
                     className="text-sm"
+                    maxMenuHeight={200}
+                    classNames={{ menuList: () => "custom-scrollbar" }}
                   />
                 )}
               </div>
@@ -348,6 +352,8 @@ export default function ExportPage() {
                     onChange={setSelectedProduct}
                     placeholder="Select Product..."
                     className="text-sm"
+                    maxMenuHeight={200}
+                    classNames={{ menuList: () => "custom-scrollbar" }}
                   />
                 )}
               </div>
@@ -362,6 +368,8 @@ export default function ExportPage() {
                     onChange={setSelectedGradation}
                     placeholder="Select Gradation..."
                     className="text-sm"
+                    maxMenuHeight={200}
+                    classNames={{ menuList: () => "custom-scrollbar" }}
                   />
                 )}
               </div>
