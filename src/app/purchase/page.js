@@ -42,6 +42,15 @@ export default function Purchases() {
   const [expandedRowId, setExpandedRowId] = useState(null);
   const [expandedItems, setExpandedItems] = useState([]);
 
+  // Receive Items Logic
+  const [isReceiveModalOpen, setIsReceiveModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [historyReceipts, setHistoryReceipts] = useState([]);
+  const [historyPurchase, setHistoryPurchase] = useState(null);
+  const [receivePurchase, setReceivePurchase] = useState(null);
+  const [receiveItems, setReceiveItems] = useState([]);
+  const [isReceiving, setIsReceiving] = useState(false);
+
   // Party Logic
   const [purchaseParties, setPurchaseParties] = useState([]);
 
@@ -50,6 +59,15 @@ export default function Purchases() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [purchaseToDelete, setPurchaseToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  // WhatsApp States
+  const [billActionModalOpen, setBillActionModalOpen] = useState(false);
+  const [whatsappInputModalOpen, setWhatsappInputModalOpen] = useState(false);
+  const [whatsappProgressModalOpen, setWhatsappProgressModalOpen] = useState(false);
+  const [whatsappProgress, setWhatsappProgress] = useState(0);
+  const [whatsappProgressText, setWhatsappProgressText] = useState("");
+  const [whatsappPhone, setWhatsappPhone] = useState("");
+  const [whatsappMessage, setWhatsappMessage] = useState("");
+  const [pendingBillData, setPendingBillData] = useState(null);
 
   const fetchPurchases = async () => {
     try {
@@ -97,6 +115,67 @@ export default function Purchases() {
       if (data.success) setPurchaseParties(data.data);
     } catch (e) {
       console.error("Error fetching purchase parties:", e);
+    }
+  };
+
+  const handleViewHistory = async (purchase) => {
+    setHistoryPurchase(purchase);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/purchase/receipts/${purchase.id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setHistoryReceipts(data.data);
+        setIsHistoryModalOpen(true);
+      } else {
+        toast.error("Failed to fetch history");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error fetching history");
+    }
+  };
+
+  const handleReceiveItems = async () => {
+    if (!receivePurchase) return;
+    const itemsToReceive = receiveItems.filter(i => parseInt(i.receive_qty) > 0);
+    if (itemsToReceive.length === 0) {
+      toast.error("Please enter a quantity to receive.");
+      return;
+    }
+
+    setIsReceiving(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/purchase/receive/${receivePurchase.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ items: itemsToReceive }),
+      });
+      let data;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        data = await response.json();
+      } else {
+        throw new Error("Server returned a non-JSON response. Ensure the backend server is restarted and running.");
+      }
+
+      if (data.success) {
+        toast.success(data.message);
+        fetchPurchases();
+        fetchProducts();
+        setIsReceiveModalOpen(false);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred");
+    } finally {
+      setIsReceiving(false);
     }
   };
 
@@ -479,53 +558,87 @@ export default function Purchases() {
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
 
-  const printInvoice = (purchase) => {
+  const handleBillClick = (purchase) => {
+    setPendingBillData(purchase);
+    setBillActionModalOpen(true);
+  };
+
+  const initiateWhatsApp = () => {
+    setBillActionModalOpen(false);
+    setWhatsappPhone("");
+    setWhatsappMessage(`Hello ${pendingBillData?.party_name || "Customer"},\n\nHere are the details for your purchase order #${pendingBillData?.bill_no} dated ${pendingBillData?.date ? new Date(pendingBillData.date).toLocaleDateString() : ""}.\n\nThank you for your business!`);
+    setWhatsappInputModalOpen(true);
+  };
+
+  const handleWhatsAppSend = async () => {
+    if (!whatsappPhone) {
+      toast.error("Please enter a phone number");
+      return;
+    }
+    setWhatsappInputModalOpen(false);
+    setWhatsappProgressModalOpen(true);
+    setWhatsappProgress(10);
+    setWhatsappProgressText("Generating PDF...");
+
+    const phone = whatsappPhone.replace(/\D/g, "");
+    const htmlContent = generateInvoiceHtml(pendingBillData);
+
+    // Artificial delay to allow UI to paint
+    await new Promise(r => setTimeout(r, 600));
+
+    setWhatsappProgress(40);
+    setWhatsappProgressText("Uploading to secure server...");
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/whatsapp/send-bill`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: phone,
+          htmlContent: htmlContent,
+          fileName: `PurchaseInvoice_${pendingBillData.bill_no}`,
+          message: whatsappMessage
+        })
+      });
+      const data = await res.json();
+      
+      setWhatsappProgress(80);
+      setWhatsappProgressText("Dispatching message...");
+
+      // Artificial delay for smooth UX
+      await new Promise(r => setTimeout(r, 600));
+
+      if(data.success) {
+        setWhatsappProgress(100);
+        setWhatsappProgressText("Delivered successfully!");
+        toast.success("WhatsApp sent successfully!");
+        setTimeout(() => {
+           setWhatsappProgressModalOpen(false);
+           setPendingBillData(null);
+        }, 1500);
+      } else {
+        toast.error(data.message || "Failed to send WhatsApp");
+        setTimeout(() => setWhatsappProgressModalOpen(false), 800);
+      }
+    } catch(err) {
+      console.error(err);
+      toast.error(err.message || "Error connecting to WhatsApp API");
+      setWhatsappProgressModalOpen(false);
+    }
+  };
+
+  const generateInvoiceHtml = (purchase) => {
     let totalKg = 0;
     let totalPieces = 0;
     const gradationTotals = {};
 
     let rowIndex = 1;
 
-    // SORT ITEMS
-    // COUNT SERIES OCCURRENCES
-    const seriesCount = {};
-
-    (purchase.items || []).forEach((item) => {
-
-      const grad = (item.gradation || "").toUpperCase();
-
-      const series = grad.split(" ")[0];
-
-      seriesCount[series] = (seriesCount[series] || 0) + 1;
-    });
-
-    // SORT ITEMS
+    // SORT ITEMS BY PRODUCT NAME (A-Z)
     const sortedItems = [...(purchase.items || [])].sort((a, b) => {
-
-      const gradA = (a.gradation || "").toUpperCase();
-      const gradB = (b.gradation || "").toUpperCase();
-
-      const seriesA = gradA.split(" ")[0];
-      const seriesB = gradB.split(" ")[0];
-
-      // MOST USED SERIES FIRST
-      const countA = seriesCount[seriesA] || 0;
-      const countB = seriesCount[seriesB] || 0;
-
-      if (countA !== countB) {
-        return countB - countA;
-      }
-
-      // SAME SERIES → SORT MM
-      const mmA = parseInt(
-        gradA.match(/(\d+)/)?.[1] || 999
-      );
-
-      const mmB = parseInt(
-        gradB.match(/(\d+)/)?.[1] || 999
-      );
-
-      return mmA - mmB;
+      const nameA = (a.product_name || "").toUpperCase();
+      const nameB = (b.product_name || "").toUpperCase();
+      return nameA.localeCompare(nameB);
     });
 
     const itemsHtml = sortedItems
@@ -588,8 +701,7 @@ export default function Purchases() {
       })
       .join("");
 
-    const printWindow = window.open("", "_blank");
-    printWindow.document.write(`
+    return `
       <html>
       <head>
         <title>Purchase Order - ${purchase.bill_no}</title>
@@ -709,17 +821,27 @@ export default function Purchases() {
              <p>&copy; ${new Date().getFullYear()} Micara Laminate. All rights reserved.</p>
           </div>
         </div>
-        <script>
-          window.onload = function() { 
-            setTimeout(() => {
-              window.print();
-              window.close();
-            }, 500);
-          }
-        </script>
-      </body>
+          <style>
+            @media print { .no-print { display: none !important; } }
+          </style>
+          <div class="no-print" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+            <button onclick="window.print()" style="background: #212121; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              🖨️ Print Invoice
+            </button>
+          </div>
+        </body>
       </html>
-    `);
+    `;
+  };
+
+  const printInvoice = (purchase) => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Popup blocked! Please allow popups for this site to generate the bill.");
+      return;
+    }
+    const htmlContent = generateInvoiceHtml(purchase);
+    printWindow.document.write(htmlContent);
     printWindow.document.close();
   };
 
@@ -911,12 +1033,18 @@ export default function Purchases() {
                               </option>
 
                               {/* Stock In */}
-                              <option value="stock_in">
+                              <option 
+                                value="stock_in" 
+                                disabled={p.status === "completed" || (p.items && p.items.some(i => (Number(i.received_quantity) || 0) < Number(i.quantity)))}
+                              >
                                 Stock In
                               </option>
 
                               {/* Completed */}
-                              <option value="completed">
+                              <option 
+                                value="completed"
+                                disabled={p.items && p.items.some(i => (Number(i.received_quantity) || 0) < Number(i.quantity))}
+                              >
                                 Completed
                               </option>
                             </select>
@@ -1023,6 +1151,25 @@ export default function Purchases() {
                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                                   />
                                 </svg>
+                                </button>
+                              <button
+                                disabled={p.status === "completed" || p.status === "stock_in"}
+                                onClick={() => {
+                                  setReceivePurchase(p);
+                                  setReceiveItems(p.items ? p.items.map(i => ({...i, receive_qty: ""})) : []);
+                                  setIsReceiveModalOpen(true);
+                                }}
+                                title="Receive Items"
+                                className={`p-2 rounded-lg transition-colors cursor-pointer
+                                  ${p.status === "completed" || p.status === "stock_in"
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
+                                    : "bg-purple-50 hover:bg-purple-100 text-purple-600"
+                                  }
+                                `}
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                                </svg>
                               </button>
                               <button
                                 disabled={p.status === "completed"}
@@ -1054,7 +1201,7 @@ export default function Purchases() {
                           <td className="py-1.5 px-4 text-center">
                             {p.status === "completed" ? (
                               <button
-                                onClick={() => printInvoice(p)}
+                                onClick={() => handleBillClick(p)}
                                 className="flex items-center justify-center mx-auto gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 font-semibold rounded-lg transition-colors text-xs cursor-pointer"
                                 title="Generate Bill"
                               >
@@ -1111,9 +1258,16 @@ export default function Purchases() {
                                               </p>
                                             </div>
                                             <div className="flex gap-4 items-center">
-                                              <div className="text-center px-4 py-2 bg-orange-50 rounded text-orange-800 font-bold border border-orange-100">
-                                                Qty: {item.quantity}{" "}
-                                                {item.unit || "Kg"}
+                                              <div className="flex gap-2 text-xs">
+                                                <div className="px-3 py-1.5 bg-blue-50 border border-blue-200 rounded text-blue-700 font-semibold text-center">
+                                                  Ordered<br/><span className="text-sm font-bold">{item.quantity}</span>
+                                                </div>
+                                                <div className="px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded text-emerald-700 font-semibold text-center">
+                                                  Received<br/><span className="text-sm font-bold">{item.received_quantity || 0}</span>
+                                                </div>
+                                                <div className="px-3 py-1.5 bg-rose-50 border border-rose-200 rounded text-rose-700 font-semibold text-center">
+                                                  Pending<br/><span className="text-sm font-bold">{Math.max(0, item.quantity - (item.received_quantity || 0))}</span>
+                                                </div>
                                               </div>
                                               <button
                                                 type="button"
@@ -1147,10 +1301,12 @@ export default function Purchases() {
                                               </label>
                                               <Select
                                                 options={products.map(
-                                                  (prod) => ({
-                                                    value: prod.product_code,
-                                                    label: `${prod.product_name} (${prod.gradation}) - [Stock: ${prod.quantity}]`,
-                                                  }),
+                                                  (prod) => {
+                                                    return {
+                                                      value: prod.product_code,
+                                                      label: `${prod.product_name} (${prod.gradation}) - [Stock: ${prod.quantity || 0}]`,
+                                                    };
+                                                  }
                                                 )}
                                                 value={
                                                   item.product_code
@@ -1233,9 +1389,10 @@ export default function Purchases() {
                                                       .filter(i => i.product_code === item.product_code)
                                                       .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
                                                     const product = products.find(prod => prod.product_code === item.product_code);
-                                                    const oldQty = (p.items || [])
+                                                    const isStockAdded = p.status === 'stock_in' || p.status === 'completed';
+                                                    const oldQty = isStockAdded ? (p.items || [])
                                                       .filter(oi => oi.product_code === item.product_code)
-                                                      .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                      .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0) : 0;
                                                     const virtualStock = (product?.quantity || 0) - oldQty;
                                                     return virtualStock + totalNewQty < 0 ? "text-red-500 font-bold" : "text-blue-500";
                                                   })()
@@ -1267,9 +1424,10 @@ export default function Purchases() {
                                                       .filter(i => i.product_code === item.product_code)
                                                       .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
                                                     const product = products.find(prod => prod.product_code === item.product_code);
-                                                    const oldQty = (p.items || [])
+                                                    const isStockAdded = p.status === 'stock_in' || p.status === 'completed';
+                                                    const oldQty = isStockAdded ? (p.items || [])
                                                       .filter(oi => oi.product_code === item.product_code)
-                                                      .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                      .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0) : 0;
                                                     const virtualStock = (product?.quantity || 0) - oldQty;
 
                                                     if (virtualStock + totalNewQty < 0) {
@@ -1295,9 +1453,10 @@ export default function Purchases() {
                                                     .filter(i => i.product_code === item.product_code)
                                                     .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
                                                   const product = products.find(prod => prod.product_code === item.product_code);
-                                                  const oldQty = (p.items || [])
+                                                  const isStockAdded = p.status === 'stock_in' || p.status === 'completed';
+                                                  const oldQty = isStockAdded ? (p.items || [])
                                                     .filter(oi => oi.product_code === item.product_code)
-                                                    .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                    .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0) : 0;
                                                   const virtualStock = (product?.quantity || 0) - oldQty;
                                                   return virtualStock + totalNewQty < 0 ? "border-red-500 ring-1 ring-red-500" : "border-[#D2A185]";
                                                 })()
@@ -1999,6 +2158,251 @@ export default function Purchases() {
                       </table>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+            {/* HISTORY MODAL */}
+            {isHistoryModalOpen && (
+              <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                <div className="bg-white rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+                  <div className="px-6 py-4 bg-[#212121] flex justify-between items-center">
+                    <div>
+                      <h3 className="text-lg font-bold text-white">Consignment History</h3>
+                      <p className="text-slate-300 text-sm">Bill: {historyPurchase?.bill_no}</p>
+                    </div>
+                    <button onClick={() => setIsHistoryModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors cursor-pointer text-white">
+                      ✕
+                    </button>
+                  </div>
+                  
+                  <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                    {historyReceipts.length === 0 ? (
+                      <div className="text-center text-slate-500 py-8">No receipt history found for this bill.</div>
+                    ) : (
+                      <table className="w-full text-left text-sm">
+                        <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+                          <tr>
+                            <th className="py-2 px-4 font-semibold">Date</th>
+                            <th className="py-2 px-4 font-semibold">Product</th>
+                            <th className="py-2 px-4 font-semibold">Gradation</th>
+                            <th className="py-2 px-4 font-semibold text-right">Received Qty</th>
+                            <th className="py-2 px-4 font-semibold text-center">Received By</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {historyReceipts.map((receipt, i) => (
+                            <tr key={i} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                              <td className="py-3 px-4 font-medium text-slate-700">{new Date(receipt.received_date).toLocaleString()}</td>
+                              <td className="py-3 px-4 font-bold text-slate-800">{receipt.product_name}</td>
+                              <td className="py-3 px-4 text-slate-600">{receipt.gradation || 'N/A'}</td>
+                              <td className="py-3 px-4 text-right font-black text-emerald-600">{receipt.quantity_received}</td>
+                              <td className="py-3 px-4 text-center text-slate-600">{receipt.received_by}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* RECEIVE MODAL */}
+            {isReceiveModalOpen && receivePurchase && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+                <div className="bg-white rounded-2xl w-full max-w-4xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+                  <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                    <div className="flex items-center gap-4">
+                      <h3 className="text-xl font-bold text-slate-800">
+                        Receive Delivery <span className="text-slate-500 text-sm font-normal ml-2">(Bill: {receivePurchase.bill_no})</span>
+                      </h3>
+                      <button
+                        onClick={() => handleViewHistory(receivePurchase)}
+                        title="View Consignment History"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 border border-orange-200 hover:bg-orange-100 text-orange-700 text-sm font-bold rounded-lg transition-colors cursor-pointer"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        View History
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => setIsReceiveModalOpen(false)}
+                      className="p-2 hover:bg-slate-200 rounded-full transition-colors cursor-pointer text-slate-500"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
+                        <tr>
+                          <th className="py-2 px-4 font-semibold">Product</th>
+                          <th className="py-2 px-4 font-semibold text-center">Ordered</th>
+                          <th className="py-2 px-4 font-semibold text-center">Received</th>
+                          <th className="py-2 px-4 font-semibold text-center">Pending</th>
+                          <th className="py-2 px-4 font-semibold text-center">Receive Now</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {receiveItems.map((item, idx) => {
+                          const pending = Math.max(0, item.quantity - (item.received_quantity || 0));
+                          return (
+                            <tr key={idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                              <td className="py-3 px-4">
+                                <div className="font-medium text-slate-800">{item.product_name}</div>
+                                <div className="text-xs text-slate-500">{item.gradation}</div>
+                              </td>
+                              <td className="py-3 px-4 text-center font-bold text-blue-600">{item.quantity}</td>
+                              <td className="py-3 px-4 text-center font-bold text-emerald-500">{item.received_quantity || 0}</td>
+                              <td className="py-3 px-4 text-center font-bold text-rose-500">{pending}</td>
+                              <td className="py-3 px-4 text-center">
+                                <input
+                                  type="text"
+                                  inputMode="numeric"
+                                  value={item.receive_qty}
+                                  onChange={(e) => {
+                                    let val = e.target.value.replace(/\D/g, "");
+                                    if (val !== "" && parseInt(val) > pending) {
+                                      val = pending.toString();
+                                    }
+                                    const newItems = [...receiveItems];
+                                    newItems[idx].receive_qty = val;
+                                    setReceiveItems(newItems);
+                                  }}
+                                  disabled={pending === 0}
+                                  className={`w-24 px-2 py-1 border rounded text-center focus:outline-none ${pending === 0 ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' : 'border-slate-300 focus:border-purple-500 focus:ring-1 focus:ring-purple-500'}`}
+                                  placeholder="0"
+                                />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                      <tfoot className="bg-slate-100 border-t-2 border-slate-200">
+                        <tr>
+                          <td className="py-3 px-4 font-bold text-right text-slate-700">Total:</td>
+                          <td className="py-3 px-4 text-center font-black text-blue-600 text-base">
+                            {receiveItems.reduce((acc, curr) => acc + (Number(curr.quantity) || 0), 0)}
+                          </td>
+                          <td className="py-3 px-4 text-center font-black text-emerald-500 text-base">
+                            {receiveItems.reduce((acc, curr) => acc + (Number(curr.received_quantity) || 0), 0)}
+                          </td>
+                          <td className="py-3 px-4 text-center font-black text-rose-500 text-base">
+                            {receiveItems.reduce((acc, curr) => acc + Math.max(0, (Number(curr.quantity) || 0) - (Number(curr.received_quantity) || 0)), 0)}
+                          </td>
+                          <td className="py-3 px-4 text-center font-black text-purple-600 text-base">
+                            {receiveItems.reduce((acc, curr) => acc + (Number(curr.receive_qty) || 0), 0)}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+
+                  <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                    <button
+                      onClick={() => setIsReceiveModalOpen(false)}
+                      className="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleReceiveItems}
+                      disabled={isReceiving}
+                      className="px-5 py-2.5 text-sm font-bold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-xl shadow-sm transition-all cursor-pointer"
+                    >
+                      {isReceiving ? "Saving..." : "Save Delivery"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Bill Action Modal */}
+            {billActionModalOpen && pendingBillData && (
+              <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[110] p-4">
+                <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-xl text-center">
+                  <h2 className="text-xl font-bold text-slate-800 mb-4">Generate Bill</h2>
+                  <p className="text-sm text-slate-500 mb-6">How would you like to process this bill?</p>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={() => {
+                        setBillActionModalOpen(false);
+                        printInvoice(pendingBillData);
+                        setPendingBillData(null);
+                      }}
+                      className="w-full px-4 py-3 font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                    >
+                      Print / Download PDF
+                    </button>
+                    <button
+                      onClick={initiateWhatsApp}
+                      className="w-full px-4 py-3 font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                      </svg>
+                      Send via WhatsApp
+                    </button>
+                    <button onClick={() => setBillActionModalOpen(false)} className="mt-2 text-sm text-slate-400 hover:text-slate-600">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* WhatsApp Input Modal */}
+            {whatsappInputModalOpen && pendingBillData && (
+              <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[110] p-4">
+                <div className="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl">
+                  <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <svg className="w-6 h-6 text-emerald-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                    </svg>
+                    Send to WhatsApp
+                  </h2>
+                  <div className="space-y-4 mb-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1">Phone Number (with country code)</label>
+                      <input type="text" placeholder="919876543210" value={whatsappPhone} onChange={(e) => setWhatsappPhone(e.target.value)} className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1">Message</label>
+                      <textarea rows={4} value={whatsappMessage} onChange={(e) => setWhatsappMessage(e.target.value)} className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none" />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3">
+                    <button onClick={() => setWhatsappInputModalOpen(false)} className="px-4 py-2 font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                    <button onClick={handleWhatsAppSend} className="px-5 py-2 font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg shadow-sm flex items-center gap-2">
+                      Send Document
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* WhatsApp Progress Modal */}
+            {whatsappProgressModalOpen && (
+              <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[120] p-4">
+                <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-xl text-center">
+                  <h3 className="text-lg font-bold text-slate-800 mb-2">{whatsappProgress === 100 ? "Sent Successfully!" : "Sending via WhatsApp"}</h3>
+                  <p className="text-sm text-slate-500 mb-6">{whatsappProgressText}</p>
+                  
+                  <div className="w-full bg-slate-100 rounded-full h-3 mb-2 overflow-hidden">
+                    <div className="bg-emerald-500 h-3 rounded-full transition-all duration-500 ease-out" style={{ width: `${whatsappProgress}%` }}></div>
+                  </div>
+                  <div className="text-xs font-semibold text-slate-400 text-right">{whatsappProgress}%</div>
+                  
+                  {whatsappProgress === 100 && (
+                    <div className="mt-4 animate-in zoom-in text-emerald-500 flex justify-center">
+                      <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

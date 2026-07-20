@@ -39,6 +39,7 @@ export default function Dashboard() {
   const [topSalesProducts, setTopSalesProducts] = useState([]);
   const [topPurchaseProducts, setTopPurchaseProducts] = useState([]);
   const [lowStockProducts, setLowStockProducts] = useState([]);
+  const [pendingDeliveries, setPendingDeliveries] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState("Daily");
@@ -94,7 +95,12 @@ export default function Dashboard() {
           topStock.push({ name: p.product_code, stock: qty });
 
           if (qty < 50) {
-            lowStock.push({ name: p.product_code, stock: qty });
+            lowStock.push({
+              name: p.product_code,
+              product_name: p.product_name,
+              gradation: p.gradation,
+              stock: qty
+            });
           }
         }
 
@@ -130,6 +136,27 @@ export default function Dashboard() {
         const sales = processItems(sData);
         const purchase = processItems(pData);
 
+        // ✅ Pending Deliveries
+        const pending = [];
+        for (let r of pData) {
+          if (r.status === 'pending' || r.status === 'partially_received') {
+            const items = r.items || [];
+            for (let item of items) {
+              const shortfall = (item.quantity || 0) - (item.received_quantity || 0);
+              if (shortfall > 0) {
+                pending.push({
+                  bill_no: r.bill_no,
+                  supplier: r.party_name || "Unknown",
+                  product: item.product_name || item.product_code,
+                  total: item.quantity || 0,
+                  received: item.received_quantity || 0,
+                  shortfall: shortfall
+                });
+              }
+            }
+          }
+        }
+
         // ✅ Batch state update (IMPORTANT for performance)
         setStats({
           products: pList.length,
@@ -139,9 +166,10 @@ export default function Dashboard() {
         });
 
         setTopProducts(topStock.slice(0, 5));
-        setLowStockProducts(lowStock.slice(0, 5));
+        setLowStockProducts(lowStock); // Show all low stock items
         setTopSalesProducts(sales.top);
         setTopPurchaseProducts(purchase.top);
+        setPendingDeliveries(pending);
 
         setRawSalesData(sData);
         setRawPurchaseData(pData);
@@ -605,29 +633,40 @@ export default function Dashboard() {
                   </h2>
                   <div className="h-80 overflow-y-auto pr-2 custom-scrollbar">
                     {lowStockProducts.length > 0 ? (
-                      <div className="space-y-3">
-                        {lowStockProducts.map((product, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl hover:border-red-200 transition-colors"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                              <span className="font-semibold text-slate-700">
-                                {product.name}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-medium text-slate-500">
-                                Remaining:
-                              </span>
-                              <span className="font-black text-red-500 text-lg">
-                                {product.stock}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      <table className="w-full text-left text-sm border-collapse">
+                        <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 sticky top-0 z-10 text-sm">
+                          <tr>
+                            <th className="py-2 px-3 font-semibold rounded-tl-xl w-6"></th>
+                            <th className="py-2 px-2 font-semibold">Product Name</th>
+                            <th className="py-2 px-3 font-semibold">Gradation</th>
+                            <th className="py-2 px-3 font-semibold text-center rounded-tr-xl">Remaining</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {lowStockProducts.map((product, idx) => (
+                            <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors last:border-0">
+                              <td className="py-1.5 px-3">
+                                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse mx-auto"></div>
+                              </td>
+                              <td className="py-1.5 px-2">
+                                <span className="font-semibold text-slate-800 text-sm">
+                                  {product.product_name || product.name}
+                                </span>
+                              </td>
+                              <td className="py-1.5 px-3">
+                                {product.gradation ? (
+                                  <span className="text-xs text-slate-500 font-medium">
+                                    {product.gradation}
+                                  </span>
+                                ) : (
+                                  <span className="text-xs text-slate-400 font-medium">-</span>
+                                )}
+                              </td>
+                              <td className="py-1.5 px-3 text-center font-bold text-red-500 text-lg">{product.stock}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     ) : (
                       <div className="flex flex-col items-center justify-center h-full text-slate-400 font-medium space-y-2">
                         <svg
@@ -711,23 +750,62 @@ export default function Dashboard() {
                   </div>
                 </div>
               )}
+
+              {/* Alert List: Pending Deliveries (Admin & Purchase) */}
+              {(role === "admin" || role === "super admin" || role === "purchase") && (
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                  <h2 className="text-lg font-bold text-slate-800 mb-6 flex justify-between items-center">
+                    Pending Deliveries
+                    <span className="text-xs font-bold bg-purple-100 text-purple-600 px-2.5 py-1 rounded-md">
+                      {pendingDeliveries.length} Pending
+                    </span>
+                  </h2>
+                  <div className="h-80 overflow-y-auto pr-2 custom-scrollbar">
+                    {pendingDeliveries.length > 0 ? (
+                      <table className="w-full text-left text-sm border-collapse">
+                        <thead className="bg-slate-50 text-slate-500 border-b border-slate-200 sticky top-0 z-10 text-sm">
+                          <tr>
+                            <th className="py-2 px-3 font-semibold rounded-tl-xl">Product Details</th>
+                            <th className="py-2 px-3 font-semibold text-center">Ordered</th>
+                            <th className="py-2 px-3 font-semibold text-center">Delivered</th>
+                            <th className="py-2 px-3 font-semibold text-center rounded-tr-xl">Pending</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {pendingDeliveries.map((delivery, idx) => (
+                            <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50 transition-colors last:border-0">
+                              <td className="py-1.5 px-3">
+                                <div className="flex flex-col">
+                                  <span className="font-semibold text-slate-800 text-sm">
+                                    {delivery.product}
+                                  </span>
+                                  <span className="text-[11px] text-slate-500 font-medium mt-0.5">
+                                    {delivery.supplier} <span className="text-slate-400">| Bill: {delivery.bill_no}</span>
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-1.5 px-3 text-center font-bold text-blue-600 text-base">{delivery.total}</td>
+                              <td className="py-1.5 px-3 text-center font-bold text-emerald-500 text-base">{delivery.received}</td>
+                              <td className="py-1.5 px-3 text-center font-bold text-rose-500 text-base">{delivery.shortfall}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full text-slate-400 font-medium space-y-2">
+                        <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>All deliveries received</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </>
         </div>
       </div>
-
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background-color: #cbd5e1;
-          border-radius: 20px;
-        }
-      `}</style>
     </div>
   );
 }

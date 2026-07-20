@@ -98,7 +98,11 @@ export default function LoginPage() {
         localStorage.setItem("token", data.token);
 
         setTimeout(() => {
-          router.push("/dashboard");
+          if (data.user && data.user.role === 'customer') {
+            router.push("/customer/dashboard");
+          } else {
+            router.push("/dashboard");
+          }
         }, 1500);
       } else {
         toast.error(data.message || "Invalid email or password.");
