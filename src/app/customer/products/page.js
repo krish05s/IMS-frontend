@@ -1,9 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 
-export default function CustomerProducts() {
+function CustomerProductsContent() {
   const router = useRouter();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -455,5 +455,13 @@ export default function CustomerProducts() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CustomerProducts() {
+  return (
+    <Suspense fallback={<div className="text-center py-20 text-slate-400 font-medium">Loading catalog...</div>}>
+      <CustomerProductsContent />
+    </Suspense>
   );
 }
