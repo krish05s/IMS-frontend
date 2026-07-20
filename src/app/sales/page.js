@@ -53,6 +53,18 @@ export default function Sales() {
   const [saleToDelete, setSaleToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // WhatsApp States
+  const [billActionModalOpen, setBillActionModalOpen] = useState(false);
+  const [whatsappInputModalOpen, setWhatsappInputModalOpen] = useState(false);
+  const [whatsappProgressModalOpen, setWhatsappProgressModalOpen] = useState(false);
+  const [whatsappProgress, setWhatsappProgress] = useState(0);
+  const [whatsappProgressText, setWhatsappProgressText] = useState("");
+  const [whatsappPhone, setWhatsappPhone] = useState("");
+  const [whatsappMessage, setWhatsappMessage] = useState("");
+  const [pendingBillData, setPendingBillData] = useState(null);
+
+
+
   const fetchSales = async () => {
     try {
       const response = await fetch(
@@ -479,53 +491,87 @@ export default function Sales() {
 
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
-  const printInvoice = (sale) => {
+  const handleBillClick = (sale) => {
+    setPendingBillData(sale);
+    setBillActionModalOpen(true);
+  };
+
+  const initiateWhatsApp = () => {
+    setBillActionModalOpen(false);
+    setWhatsappPhone("");
+    setWhatsappMessage(`Hello ${pendingBillData?.customer_name || "Customer"},\n\nHere are the details for your sales order #${pendingBillData?.bill_no} dated ${pendingBillData?.date ? new Date(pendingBillData.date).toLocaleDateString() : ""}.\n\nThank you for your business!`);
+    setWhatsappInputModalOpen(true);
+  };
+
+  const handleWhatsAppSend = async () => {
+    if (!whatsappPhone) {
+      toast.error("Please enter a phone number");
+      return;
+    }
+    setWhatsappInputModalOpen(false);
+    setWhatsappProgressModalOpen(true);
+    setWhatsappProgress(10);
+    setWhatsappProgressText("Generating PDF...");
+
+    const phone = whatsappPhone.replace(/\D/g, "");
+    const htmlContent = generateInvoiceHtml(pendingBillData);
+
+    // Artificial delay to allow UI to paint
+    await new Promise(r => setTimeout(r, 600));
+
+    setWhatsappProgress(40);
+    setWhatsappProgressText("Uploading to secure server...");
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/whatsapp/send-bill`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: phone,
+          htmlContent: htmlContent,
+          fileName: `SalesInvoice_${pendingBillData.bill_no}`,
+          message: whatsappMessage
+        })
+      });
+      const data = await res.json();
+      
+      setWhatsappProgress(80);
+      setWhatsappProgressText("Dispatching message...");
+
+      // Artificial delay for smooth UX
+      await new Promise(r => setTimeout(r, 600));
+
+      if(data.success) {
+        setWhatsappProgress(100);
+        setWhatsappProgressText("Delivered successfully!");
+        toast.success("WhatsApp sent successfully!");
+        setTimeout(() => {
+           setWhatsappProgressModalOpen(false);
+           setPendingBillData(null);
+        }, 1500);
+      } else {
+        toast.error(data.message || "Failed to send WhatsApp");
+        setTimeout(() => setWhatsappProgressModalOpen(false), 800);
+      }
+    } catch(err) {
+      console.error(err);
+      toast.error(err.message || "Error connecting to WhatsApp API");
+      setWhatsappProgressModalOpen(false);
+    }
+  };
+
+  const generateInvoiceHtml = (sale) => {
     let totalKg = 0;
     let totalPieces = 0;
     const gradationTotals = {};
 
     let rowIndex = 1;
 
-    // SORT ITEMS
-    // COUNT SERIES OCCURRENCES
-    const seriesCount = {};
-
-    (sale.items || []).forEach((item) => {
-
-      const grad = (item.gradation || "").toUpperCase();
-
-      const series = grad.split(" ")[0];
-
-      seriesCount[series] = (seriesCount[series] || 0) + 1;
-    });
-
-    // SORT ITEMS
+    // SORT ITEMS BY PRODUCT NAME (A-Z)
     const sortedItems = [...(sale.items || [])].sort((a, b) => {
-
-      const gradA = (a.gradation || "").toUpperCase();
-      const gradB = (b.gradation || "").toUpperCase();
-
-      const seriesA = gradA.split(" ")[0];
-      const seriesB = gradB.split(" ")[0];
-
-      // MOST USED SERIES FIRST
-      const countA = seriesCount[seriesA] || 0;
-      const countB = seriesCount[seriesB] || 0;
-
-      if (countA !== countB) {
-        return countB - countA;
-      }
-
-      // SAME SERIES → SORT MM
-      const mmA = parseInt(
-        gradA.match(/(\d+)/)?.[1] || 999
-      );
-
-      const mmB = parseInt(
-        gradB.match(/(\d+)/)?.[1] || 999
-      );
-
-      return mmA - mmB;
+      const nameA = (a.product_name || "").toUpperCase();
+      const nameB = (b.product_name || "").toUpperCase();
+      return nameA.localeCompare(nameB);
     });
 
     const itemsHtml = sortedItems
@@ -588,8 +634,7 @@ export default function Sales() {
       })
       .join("");
 
-    const printWindow = window.open("", "_blank");
-    printWindow.document.write(`
+    return `
       <html>
       <head>
         <title>Sales Invoice - ${sale.bill_no}</title>
@@ -709,17 +754,27 @@ export default function Sales() {
              <p>&copy; ${new Date().getFullYear()} Micara Laminate. All rights reserved.</p>
           </div>
         </div>
-        <script>
-          window.onload = function() { 
-            setTimeout(() => {
-              window.print();
-              window.close();
-            }, 500);
-          }
-        </script>
-      </body>
+          <style>
+            @media print { .no-print { display: none !important; } }
+          </style>
+          <div class="no-print" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+            <button onclick="window.print()" style="background: #212121; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              🖨️ Print Invoice
+            </button>
+          </div>
+        </body>
       </html>
-    `);
+    `;
+  };
+
+  const printInvoice = (sale) => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Popup blocked! Please allow popups for this site to generate the bill.");
+      return;
+    }
+    const htmlContent = generateInvoiceHtml(sale);
+    printWindow.document.write(htmlContent);
     printWindow.document.close();
   };
 
@@ -889,7 +944,14 @@ export default function Sales() {
                             {new Date(s.date).toLocaleDateString()}
                           </td>
                           <td className="py-1.5 px-4 text-slate-800 font-bold">
-                            {s.customer_name}
+                            <div className="flex items-center gap-2">
+                              {s.created_by?.includes("(Online)") && (
+                                <span className="text-blue-500 animate-pulse" title="Placed via Customer Portal">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                                </span>
+                              )}
+                              {s.customer_name}
+                            </div>
                           </td>
                           <td className="py-1.5 px-4 text-slate-600">
                             {s.vehicle_no || "-"}
@@ -901,27 +963,36 @@ export default function Sales() {
                                 handleStatusChange(s.id, e.target.value)
                               }
                               className={`px-1 py-1 rounded-lg text-xs font-semibold outline-none cursor-pointer
-                               ${s.status === "pending"
+                               ${s.status === "placed"
                                   ? "bg-gray-200 text-black"
-                                  : s.status === "stock_out"
-                                    ? "bg-blue-50 text-blue-700 border-blue-300"
-                                    : "bg-green-50 text-green-700 border-green-300"
+                                  : s.status === "pending"
+                                    ? "bg-gray-200 text-black"
+                                    : s.status === "approved" || s.status === "packed" || s.status === "stock_out"
+                                      ? "bg-yellow-50 text-yellow-700 border-yellow-300"
+                                      : s.status === "dispatched"
+                                        ? "bg-blue-50 text-blue-700 border-blue-300"
+                                        : s.status === "delivered" || s.status === "completed"
+                                          ? "bg-green-50 text-green-700 border-green-300"
+                                          : "bg-red-50 text-red-700 border-red-300"
                                 }
                                `}>
-                              <option
-                                value="pending"
-                                disabled={s.status !== "pending"}
-                              >
-                                Pending
-                              </option>
-
-                              <option value="stock_out">
-                                Stock Out
-                              </option>
-
-                              <option value="completed">
-                                Completed
-                              </option>
+                              
+                              {s.created_by?.includes("(Online)") ? (
+                                <>
+                                  <option value="placed" disabled={s.status !== "placed"}>Placed</option>
+                                  <option value="approved" disabled={s.status === "cancelled" || s.status === "delivered"}>Approved</option>
+                                  <option value="packed" disabled={s.status === "cancelled" || s.status === "delivered"}>Packed</option>
+                                  <option value="dispatched" disabled={s.status === "cancelled" || s.status === "delivered"}>Dispatched</option>
+                                  <option value="delivered" disabled={s.status === "cancelled"}>Delivered</option>
+                                  <option value="cancelled" disabled={s.status === "delivered"}>Cancelled</option>
+                                </>
+                              ) : (
+                                <>
+                                  <option value="pending" disabled={s.status !== "pending" && s.status !== "placed"}>Pending</option>
+                                  <option value="stock_out" disabled={s.status === "completed"}>Stock Out</option>
+                                  <option value="completed">Completed</option>
+                                </>
+                              )}
                             </select>
                           </td>
                           <td className="py-1.5 px-4 text-orange-600 font-medium text-center">
@@ -948,7 +1019,7 @@ export default function Sales() {
                             <div className="flex justify-center gap-2">
                               <button
                                 onClick={() => {
-                                  if (s.status === "completed") {
+                                  if (s.status === "completed" || s.status === "delivered") {
                                     toast.error("Completed sales cannot be modified!");
                                     return;
                                   }
@@ -1004,9 +1075,9 @@ export default function Sales() {
                               <button
                                 onClick={() => handleOpenModal(s)}
                                 title="Edit"
-                                disabled={s.status === "completed"}
+                                disabled={s.status === "completed" || s.status === "delivered"}
                                 className={`p-2 bg-emerald-50 hover:bg-emerald-100 cursor-pointer
-                                ${s.status === "completed"
+                                ${(s.status === "completed" || s.status === "delivered")
                                     ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
                                     : "bg-emerald-50 hover:bg-emerald-100 text-emerald-600"
                                   }
@@ -1029,9 +1100,9 @@ export default function Sales() {
                               <button
                                 onClick={() => handleDelete(s.id)}
                                 title="Delete"
-                                disabled={s.status === "completed"}
+                                disabled={s.status === "completed" || s.status === "delivered"}
                                 className={`p-2 bg-red-50 hover:bg-red-100 cursor-pointer
-                                ${s.status === "completed"
+                                ${(s.status === "completed" || s.status === "delivered")
                                     ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
                                     : "bg-emerald-50 hover:bg-emerald-100 text-emerald-600"
                                   }
@@ -1054,9 +1125,9 @@ export default function Sales() {
                             </div>
                           </td>
                           <td className="py-1.5 px-4 text-center">
-                            {s.status === "completed" ? (
+                            {(s.status === "completed" || s.status === "delivered") ? (
                               <button
-                                onClick={() => printInvoice(s)}
+                                onClick={() => handleBillClick(s)}
                                 className="flex items-center justify-center mx-auto gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100 font-semibold rounded-lg transition-colors text-xs cursor-pointer"
                                 title="Generate Bill"
                               >
@@ -1150,15 +1221,18 @@ export default function Sales() {
                                               <Select
                                                 options={products
                                                   .filter(p => {
-                                                    const oldQty = (s.items || [])
+                                                    const isStockDeducted = s.status === 'stock_out' || s.status === 'completed';
+                                                    const oldQty = isStockDeducted ? (s.items || [])
                                                       .filter(oi => oi.product_code === p.product_code)
-                                                      .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
+                                                      .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0) : 0;
                                                     return (p.quantity || 0) + oldQty > 0;
                                                   })
-                                                  .map((prod) => ({
-                                                    value: prod.product_code,
-                                                    label: `${prod.product_name} (${prod.gradation}) - [Stock: ${prod.quantity}]`,
-                                                  }))}
+                                                  .map((prod) => {
+                                                    return {
+                                                      value: prod.product_code,
+                                                      label: `${prod.product_name} (${prod.gradation}) - [Stock: ${prod.quantity || 0}]`,
+                                                    };
+                                                  })}
                                                 value={
                                                   item.product_code
                                                     ? {
@@ -1257,20 +1331,18 @@ export default function Sales() {
                                                       .filter(i => i.product_code === item.product_code)
                                                       .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
                                                     const product = products.find(p => p.product_code === item.product_code);
-                                                    const oldQty = (s.items || [])
+                                                    const isStockDeducted = s.status === 'stock_out' || s.status === 'completed';
+                                                    const oldQty = isStockDeducted ? (s.items || [])
                                                       .filter(oi => oi.product_code === item.product_code)
-                                                      .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
-                                                    const virtualStock = (product?.quantity || 0) + oldQty;
-                                                    return totalNeeded > virtualStock ? "text-red-500 font-bold" : "text-blue-500";
+                                                      .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0) : 0;
+                                                    const additionalNeeded = isStockDeducted ? (totalNeeded - oldQty) : totalNeeded;
+                                                    return additionalNeeded > (product?.quantity || 0) ? "text-red-500 font-bold" : "text-blue-500";
                                                   })()
                                                     }`}>
                                                     (Avail:{" "}
                                                     {(() => {
                                                       const product = products.find(p => p.product_code === item.product_code);
-                                                      const oldQty = (s.items || [])
-                                                        .filter(oi => oi.product_code === item.product_code)
-                                                        .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
-                                                      return (product?.quantity || 0) + oldQty;
+                                                      return product?.quantity || 0;
                                                     })()}
                                                     )
                                                   </span>
@@ -1299,13 +1371,14 @@ export default function Sales() {
                                                       .filter(i => i.product_code === item.product_code)
                                                       .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
                                                     const product = products.find(p => p.product_code === item.product_code);
-                                                    const oldQty = (s.items || [])
+                                                    const isStockDeducted = s.status === 'stock_out' || s.status === 'completed';
+                                                    const oldQty = isStockDeducted ? (s.items || [])
                                                       .filter(oi => oi.product_code === item.product_code)
-                                                      .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
-                                                    const virtualStock = (product?.quantity || 0) + oldQty;
+                                                      .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0) : 0;
+                                                    const additionalNeeded = isStockDeducted ? (totalNeeded - oldQty) : totalNeeded;
 
-                                                    if (totalNeeded > virtualStock) {
-                                                      toast.error(`Insufficient stock for ${product?.product_name || "this item"}! Available: ${virtualStock}`);
+                                                    if (additionalNeeded > (product?.quantity || 0)) {
+                                                      toast.error(`Insufficient stock for ${product?.product_name || "this item"}! You only have ${product?.quantity || 0} additional pieces available.`);
                                                       return;
                                                     }
 
@@ -1327,11 +1400,12 @@ export default function Sales() {
                                                     .filter(i => i.product_code === item.product_code)
                                                     .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0);
                                                   const product = products.find(p => p.product_code === item.product_code);
-                                                  const oldQty = (s.items || [])
+                                                  const isStockDeducted = s.status === 'stock_out' || s.status === 'completed';
+                                                  const oldQty = isStockDeducted ? (s.items || [])
                                                     .filter(oi => oi.product_code === item.product_code)
-                                                    .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0);
-                                                  const virtualStock = (product?.quantity || 0) + oldQty;
-                                                  return totalNeeded > virtualStock ? "border-red-500 ring-1 ring-red-500" : "border-[#D2A185]";
+                                                    .reduce((sum, oi) => sum + (Number(oi.quantity) || 0), 0) : 0;
+                                                  const additionalNeeded = isStockDeducted ? (totalNeeded - oldQty) : totalNeeded;
+                                                  return additionalNeeded > (product?.quantity || 0) ? "border-red-500 ring-1 ring-red-500" : "border-[#D2A185]";
                                                 })()
                                                   }`}
                                                 placeholder="Enter Qty (Press Enter)"
@@ -1986,6 +2060,91 @@ export default function Sales() {
                       </table>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Bill Action Modal */}
+            {billActionModalOpen && pendingBillData && (
+              <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[110] p-4">
+                <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-xl text-center">
+                  <h2 className="text-xl font-bold text-slate-800 mb-4">Generate Bill</h2>
+                  <p className="text-sm text-slate-500 mb-6">How would you like to process this bill?</p>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={() => {
+                        setBillActionModalOpen(false);
+                        printInvoice(pendingBillData);
+                        setPendingBillData(null);
+                      }}
+                      className="w-full px-4 py-3 font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                    >
+                      Print / Download PDF
+                    </button>
+                    <button
+                      onClick={initiateWhatsApp}
+                      className="w-full px-4 py-3 font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                      </svg>
+                      Send via WhatsApp
+                    </button>
+                    <button onClick={() => setBillActionModalOpen(false)} className="mt-2 text-sm text-slate-400 hover:text-slate-600">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* WhatsApp Input Modal */}
+            {whatsappInputModalOpen && pendingBillData && (
+              <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[110] p-4">
+                <div className="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl">
+                  <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <svg className="w-6 h-6 text-emerald-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                    </svg>
+                    Send to WhatsApp
+                  </h2>
+                  <div className="space-y-4 mb-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1">Phone Number (with country code)</label>
+                      <input type="text" placeholder="919876543210" value={whatsappPhone} onChange={(e) => setWhatsappPhone(e.target.value)} className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-700 mb-1">Message</label>
+                      <textarea rows={4} value={whatsappMessage} onChange={(e) => setWhatsappMessage(e.target.value)} className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none" />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3">
+                    <button onClick={() => setWhatsappInputModalOpen(false)} className="px-4 py-2 font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                    <button onClick={handleWhatsAppSend} className="px-5 py-2 font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg shadow-sm flex items-center gap-2">
+                      Send Document
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* WhatsApp Progress Modal */}
+            {whatsappProgressModalOpen && (
+              <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[120] p-4">
+                <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-xl text-center">
+                  <h3 className="text-lg font-bold text-slate-800 mb-2">{whatsappProgress === 100 ? "Sent Successfully!" : "Sending via WhatsApp"}</h3>
+                  <p className="text-sm text-slate-500 mb-6">{whatsappProgressText}</p>
+                  
+                  <div className="w-full bg-slate-100 rounded-full h-3 mb-2 overflow-hidden">
+                    <div className="bg-emerald-500 h-3 rounded-full transition-all duration-500 ease-out" style={{ width: `${whatsappProgress}%` }}></div>
+                  </div>
+                  <div className="text-xs font-semibold text-slate-400 text-right">{whatsappProgress}%</div>
+                  
+                  {whatsappProgress === 100 && (
+                    <div className="mt-4 animate-in zoom-in text-emerald-500 flex justify-center">
+                      <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

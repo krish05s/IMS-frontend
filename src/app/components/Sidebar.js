@@ -330,6 +330,7 @@ export default function Sidebar() {
             />
           )}
 
+
           {/* Members - admin only */}
           {(role === "super admin" || role === "admin") && (
             <NavItem

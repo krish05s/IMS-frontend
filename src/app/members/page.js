@@ -11,6 +11,11 @@ function Members() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Add Modal State
   const [addModal, setAddModal] = useState(false);
@@ -245,7 +250,7 @@ function Members() {
         {/* <Topbar /> */}
         <Topbar
           actions={
-            hasRoleAccess(["super admin"]) && (
+            isMounted && hasRoleAccess(["super admin"]) && (
               <button
                 onClick={() => {
                   setAddModal(true);
@@ -347,13 +352,13 @@ function Members() {
                         Role
                       </th>
 
-                      {hasRoleAccess(["super admin"]) && (
+                      {isMounted && hasRoleAccess(["super admin"]) && (
                         <th className="px-4 py-4 text-left font-semibold">
                           Status
                         </th>
                       )}
 
-                      {hasRoleAccess(["super admin"]) && (
+                      {isMounted && hasRoleAccess(["super admin"]) && (
                         <th className="px-4 py-4 text-center font-semibold">
                           Actions
                         </th>
@@ -392,7 +397,7 @@ function Members() {
                             {user.role}
                           </span>
                         </td>
-                        {hasRoleAccess(["super admin"]) && (
+                        {isMounted && hasRoleAccess(["super admin"]) && (
                           <td className="px-4 py-1.5">
                             <div className="flex items-center gap-2">
                               <button
@@ -411,7 +416,7 @@ function Members() {
                             </div>
                           </td>
                         )}
-                        {hasRoleAccess(["super admin"]) && (
+                        {isMounted && hasRoleAccess(["super admin"]) && (
                           <td className="px-4 py-1.5">
                             <div className="flex items-center gap-2">
                               <button
@@ -627,6 +632,7 @@ function Members() {
                       className={inputCls}
                     >
                       <option value="user">User</option>
+                      <option value="customer">Customer</option>
                       <option value="super admin">Super Admin</option>
                       <option value="admin">Admin</option>
                       <option value="sales">Sales</option>
@@ -841,6 +847,9 @@ function Members() {
 
                       <option value="user" className="text-slate-400">
                         User
+                      </option>
+                      <option value="customer" className="text-slate-400">
+                        Customer
                       </option>
                       <option value="admin" className="text-slate-400">
                         Admin
