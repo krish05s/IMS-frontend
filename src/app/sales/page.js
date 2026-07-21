@@ -511,6 +511,29 @@ export default function Sales() {
 
     const htmlContent = generateInvoiceHtml(pendingBillData);
 
+    let pdfBase64 = "";
+    try {
+      const html2pdf = (await import("html2pdf.js")).default;
+      const element = document.createElement("div");
+      element.innerHTML = htmlContent;
+      const opt = {
+        margin:       0.5,
+        filename:     `SalesInvoice_${pendingBillData.bill_no}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+      
+      const pdfDataUri = await html2pdf().from(element).set(opt).outputPdf('datauristring');
+      pdfBase64 = pdfDataUri.substring(pdfDataUri.indexOf(',') + 1);
+    } catch (e) {
+      console.error("Error generating PDF locally:", e);
+      toast.error("Failed to generate PDF");
+      setIsSendingBill(false);
+      setWhatsappProgress(0);
+      return;
+    }
+
     await new Promise(r => setTimeout(r, 600));
 
     setWhatsappProgress(40);
@@ -526,10 +549,9 @@ export default function Sales() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           phone: whatsappPhone,
-          htmlContent: htmlContent,
+          pdfBase64: pdfBase64,
           fileName: `SalesInvoice_${pendingBillData.bill_no}`,
-          message: textToShare,
-          returnBase64: false
+          message: textToShare
         })
       });
       const data = await res.json();
