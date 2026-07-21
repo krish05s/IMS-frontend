@@ -32,7 +32,11 @@ export default function useRoleCheck(allowedRoles) {
 
       // Check role access
       if (!allowedRoles.includes(userRole)) {
-        router.push("/dashboard");
+        if (userRole === "customer") {
+          router.push("/customer/dashboard");
+        } else {
+          router.push("/dashboard");
+        }
       } else {
         setRole(userRole);
       }

@@ -62,6 +62,9 @@ export default function Sales() {
   const [whatsappPhone, setWhatsappPhone] = useState("");
   const [whatsappMessage, setWhatsappMessage] = useState("");
   const [pendingBillData, setPendingBillData] = useState(null);
+  const [whatsappStatus, setWhatsappStatus] = useState({ isReady: false, qrCode: null });
+  const [isCheckingWhatsapp, setIsCheckingWhatsapp] = useState(false);
+  const [isSendingBill, setIsSendingBill] = useState(false);
 
 
 
@@ -496,67 +499,69 @@ export default function Sales() {
     setBillActionModalOpen(true);
   };
 
-  const initiateWhatsApp = () => {
-    setBillActionModalOpen(false);
-    setWhatsappPhone("");
-    setWhatsappMessage(`Hello ${pendingBillData?.customer_name || "Customer"},\n\nHere are the details for your sales order #${pendingBillData?.bill_no} dated ${pendingBillData?.date ? new Date(pendingBillData.date).toLocaleDateString() : ""}.\n\nThank you for your business!`);
-    setWhatsappInputModalOpen(true);
-  };
-
-  const handleWhatsAppSend = async () => {
+  const initiateWhatsApp = async () => {
     if (!whatsappPhone) {
-      toast.error("Please enter a phone number");
+      toast.error("Please enter a valid phone number.");
       return;
     }
-    setWhatsappInputModalOpen(false);
-    setWhatsappProgressModalOpen(true);
+    
+    setIsSendingBill(true);
     setWhatsappProgress(10);
     setWhatsappProgressText("Generating PDF...");
 
-    const phone = whatsappPhone.replace(/\D/g, "");
     const htmlContent = generateInvoiceHtml(pendingBillData);
 
-    // Artificial delay to allow UI to paint
     await new Promise(r => setTimeout(r, 600));
 
     setWhatsappProgress(40);
-    setWhatsappProgressText("Uploading to secure server...");
+    setWhatsappProgressText("Sending via WhatsApp Server...");
+
+    const formattedDate = pendingBillData?.date ? new Date(pendingBillData.date).toLocaleDateString("en-GB") : "";
+    const customerName = pendingBillData?.customer_name || "Customer";
+    const textToShare = `Hello ${customerName},\n\nThank you for choosing *Micara Laminate*! 🌟\n\nWe are pleased to share the details of your recent Sales Order with us.\n\n🧾 *Order Details:*\n▪️ *Bill No:* #${pendingBillData?.bill_no}\n▪️ *Date:* ${formattedDate}\n\nPlease find your official invoice attached below. 📎\n\nIf you have any questions or need further assistance, please feel free to reach out. We are always here to help.\n\nWarm regards,\n*Micara Laminate*\n_Where Premium Surfaces Meet Timeless Elegance_`;
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/whatsapp/send-bill`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          phone: phone,
+          phone: whatsappPhone,
           htmlContent: htmlContent,
           fileName: `SalesInvoice_${pendingBillData.bill_no}`,
-          message: whatsappMessage
+          message: textToShare,
+          returnBase64: false
         })
       });
       const data = await res.json();
       
       setWhatsappProgress(80);
-      setWhatsappProgressText("Dispatching message...");
+      setWhatsappProgressText("Finalizing...");
 
-      // Artificial delay for smooth UX
       await new Promise(r => setTimeout(r, 600));
 
       if(data.success) {
         setWhatsappProgress(100);
-        setWhatsappProgressText("Delivered successfully!");
-        toast.success("WhatsApp sent successfully!");
+        setWhatsappProgressText("Sent successfully!");
+        
         setTimeout(() => {
-           setWhatsappProgressModalOpen(false);
+           setWhatsappInputModalOpen(false);
+           setIsSendingBill(false);
            setPendingBillData(null);
+           setWhatsappPhone("");
+           setWhatsappProgress(0);
         }, 1500);
       } else {
-        toast.error(data.message || "Failed to send WhatsApp");
-        setTimeout(() => setWhatsappProgressModalOpen(false), 800);
+        toast.error(data.message || "Failed to send PDF");
+        setTimeout(() => {
+          setIsSendingBill(false);
+          setWhatsappProgress(0);
+        }, 800);
       }
     } catch(err) {
       console.error(err);
-      toast.error(err.message || "Error connecting to WhatsApp API");
-      setWhatsappProgressModalOpen(false);
+      toast.error(err.message || "Error generating bill");
+      setIsSendingBill(false);
+      setWhatsappProgress(0);
     }
   };
 
@@ -2082,13 +2087,53 @@ export default function Sales() {
                       Print / Download PDF
                     </button>
                     <button
-                      onClick={initiateWhatsApp}
-                      className="w-full px-4 py-3 font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
+                      onClick={async () => {
+                        setIsCheckingWhatsapp(true);
+                        
+                        // Initial check
+                        const checkStatus = async () => {
+                          try {
+                            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/whatsapp/status`);
+                            const data = await res.json();
+                            if (data.success) {
+                              setWhatsappStatus({ isReady: data.isReady, qrCode: data.qrCode });
+                              return data;
+                            }
+                          } catch (e) {
+                            console.error(e);
+                          }
+                          return null;
+                        };
+
+                        const initialData = await checkStatus();
+                        setIsCheckingWhatsapp(false);
+                        setBillActionModalOpen(false);
+                        setWhatsappInputModalOpen(true);
+                        
+                        // If not ready, start polling
+                        if (initialData && !initialData.isReady) {
+                          const interval = setInterval(async () => {
+                            const data = await checkStatus();
+                            if (data && data.isReady) {
+                              clearInterval(interval);
+                            }
+                          }, 2000);
+                          
+                          // Store interval to clear on close
+                          window.whatsappPollInterval = interval;
+                        }
+                      }}
+                      disabled={isCheckingWhatsapp}
+                      className="w-full px-4 py-3 font-bold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
                     >
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                      </svg>
-                      Send via WhatsApp
+                      {isCheckingWhatsapp ? (
+                        <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                        </svg>
+                      )}
+                      {isCheckingWhatsapp ? "Connecting..." : "Send via WhatsApp"}
                     </button>
                     <button onClick={() => setBillActionModalOpen(false)} className="mt-2 text-sm text-slate-400 hover:text-slate-600">Cancel</button>
                   </div>
@@ -2096,35 +2141,87 @@ export default function Sales() {
               </div>
             )}
 
-            {/* WhatsApp Input Modal */}
-            {whatsappInputModalOpen && pendingBillData && (
+            {/* WhatsApp Input Modal (QR Code or Phone Number) */}
+            {whatsappInputModalOpen && (
               <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[110] p-4">
-                <div className="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl">
-                  <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <svg className="w-6 h-6 text-emerald-500" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                    </svg>
-                    Send to WhatsApp
-                  </h2>
-                  <div className="space-y-4 mb-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-1">Phone Number (with country code)</label>
-                      <input type="text" placeholder="919876543210" value={whatsappPhone} onChange={(e) => setWhatsappPhone(e.target.value)} className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-1">Message</label>
-                      <textarea rows={4} value={whatsappMessage} onChange={(e) => setWhatsappMessage(e.target.value)} className="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none" />
-                    </div>
-                  </div>
-                  <div className="flex justify-end gap-3">
-                    <button onClick={() => setWhatsappInputModalOpen(false)} className="px-4 py-2 font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
-                    <button onClick={handleWhatsAppSend} className="px-5 py-2 font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg shadow-sm flex items-center gap-2">
-                      Send Document
-                    </button>
-                  </div>
+                <div className="bg-white p-6 rounded-2xl w-full max-w-sm shadow-xl text-center">
+                  {!whatsappStatus.isReady ? (
+                    <>
+                      <h2 className="text-xl font-bold text-slate-800 mb-2">WhatsApp Login Required</h2>
+                      <p className="text-sm text-slate-500 mb-4">Please scan the QR code with your WhatsApp to link the server.</p>
+                      {whatsappStatus.qrCode ? (
+                        <div className="flex justify-center mb-4">
+                          <img src={whatsappStatus.qrCode} alt="WhatsApp QR Code" className="w-48 h-48 border rounded-lg p-2" />
+                        </div>
+                      ) : (
+                        <p className="text-sm text-orange-500 mb-4 animate-pulse font-medium">Generating QR Code... Please wait a few seconds and try again.</p>
+                      )}
+                      <button onClick={() => {
+                        if (window.whatsappPollInterval) clearInterval(window.whatsappPollInterval);
+                        setWhatsappInputModalOpen(false);
+                      }} className="w-full px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Close</button>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="text-xl font-bold text-slate-800 mb-2">Send WhatsApp Bill</h2>
+                      <p className="text-sm text-slate-500 mb-4">Enter the customer's WhatsApp number.</p>
+                      
+                      <div className="text-left mb-4">
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Phone Number (with Country Code)</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g. 919876543210" 
+                          value={whatsappPhone}
+                          onChange={(e) => setWhatsappPhone(e.target.value)}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
+                        />
+                      </div>
+                      
+                      <div className="flex gap-3 mt-6">
+                        <button 
+                          onClick={() => {
+                            if (window.whatsappPollInterval) clearInterval(window.whatsappPollInterval);
+                            setWhatsappInputModalOpen(false);
+                          }} 
+                          className="flex-1 py-3 text-slate-500 font-bold hover:bg-slate-50 rounded-xl"
+                          disabled={isSendingBill}
+                        >
+                          Cancel
+                        </button>
+                        <button 
+                          onClick={initiateWhatsApp} 
+                          disabled={isSendingBill || !whatsappPhone}
+                          className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                        >
+                          {isSendingBill ? (
+                            <>
+                              <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                              Sending...
+                            </>
+                          ) : (
+                            "Send Bill"
+                          )}
+                        </button>
+                      </div>
+                      
+                      {isSendingBill && (
+                        <div className="mt-6 text-left">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-xs font-bold text-slate-500 uppercase">{whatsappProgressText}</span>
+                            <span className="text-xs font-bold text-emerald-500">{whatsappProgress}%</span>
+                          </div>
+                          <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                            <div className="bg-emerald-500 h-2 rounded-full transition-all duration-300 ease-out" style={{ width: `${whatsappProgress}%` }}></div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             )}
+
+
 
             {/* WhatsApp Progress Modal */}
             {whatsappProgressModalOpen && (

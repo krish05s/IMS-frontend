@@ -62,22 +62,18 @@ export default function Dashboard() {
         }
 
         // ✅ Parallel API calls (optimized)
-        const endpoints = [
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/product/read`, { headers }),
-          (role === "admin" || role === "super admin" || role === "sales")
-            ? fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sales/read`, { headers })
-            : null,
-          (role === "admin" || role === "super admin" || role === "purchase")
-            ? fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/purchase/read`, { headers })
-            : null,
-        ].filter(Boolean);
-
-        const responses = await Promise.all(endpoints);
+        const prodReq = fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/product/read`, { headers }).then(r => r.json());
+        
+        const salesReq = (role === "admin" || role === "super admin" || role === "sales")
+          ? fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/sales/read`, { headers }).then(r => r.json())
+          : Promise.resolve({ data: [] });
+          
+        const purchaseReq = (role === "admin" || role === "super admin" || role === "purchase")
+          ? fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/purchase/read`, { headers }).then(r => r.json())
+          : Promise.resolve({ data: [] });
 
         // ✅ Parse once
-        const [prodRes, salesRes, purchaseRes] = await Promise.all(
-          responses.map((r) => r.json())
-        );
+        const [prodRes, salesRes, purchaseRes] = await Promise.all([prodReq, salesReq, purchaseReq]);
 
         const pList = prodRes?.data || [];
         const sData = salesRes?.data || [];
