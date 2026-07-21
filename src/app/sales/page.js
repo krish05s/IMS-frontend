@@ -2111,6 +2111,8 @@ export default function Sales() {
                     <button
                       onClick={async () => {
                         setIsCheckingWhatsapp(true);
+                        const matchedParty = salesParties.find(p => p.name === pendingBillData?.customer_name);
+                        setWhatsappPhone(matchedParty?.phone || "91");
                         
                         // Initial check
                         const checkStatus = async () => {
@@ -2189,6 +2191,22 @@ export default function Sales() {
                       <p className="text-sm text-slate-500 mb-4">Enter the customer's WhatsApp number.</p>
                       
                       <div className="text-left mb-4">
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Select Customer</label>
+                        <select 
+                          value={salesParties.find(p => p.phone === whatsappPhone) ? whatsappPhone : "custom"}
+                          onChange={(e) => {
+                            if(e.target.value !== "custom") {
+                              setWhatsappPhone(e.target.value);
+                            }
+                          }}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium mb-3"
+                        >
+                          <option value="custom">-- Custom / Manual Entry --</option>
+                          {salesParties.filter(p => p.phone).map(p => (
+                            <option key={p.id} value={p.phone}>{p.name}</option>
+                          ))}
+                        </select>
+                        
                         <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Phone Number (with Country Code)</label>
                         <input 
                           type="text" 
