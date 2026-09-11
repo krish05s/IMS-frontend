@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Select from "react-select";
 import * as XLSX from "xlsx";
-import { FiDownload } from "react-icons/fi";
+import { FiDownload, FiX } from "react-icons/fi";
 import Topbar from "../components/Topbar";
 import Sidebar from "../components/Sidebar";
 
@@ -21,6 +21,19 @@ export default function ExportPage() {
   const [selectedSalesParty, setSelectedSalesParty] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedGradation, setSelectedGradation] = useState(null);
+
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
+  const handleClearFilter = () => {
+    setSelectedPurchaseParty(null);
+    setSelectedSalesParty(null);
+    setSelectedProduct(null);
+    setSelectedGradation(null);
+    setFromDate("");
+    setToDate("");
+  };
+
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -31,48 +44,110 @@ export default function ExportPage() {
 
   const fetchFilterOptions = async () => {
     try {
-      const config = { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } };
-      const [partyRes, productRes, gradationRes] = await Promise.all([
+      const token = localStorage.getItem("token");
+      const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+
+      const [partyRes, productRes, gradationRes, purchaseRes, salesRes] = await Promise.allSettled([
         axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/party/read`, config),
         axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/product/read`, config),
         axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/gradation/read`, config),
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/purchase/read`, config),
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/sales/read`, config),
       ]);
 
-      const purchaseList = (partyRes.data.data || []).filter(p => p.type === "purchase").map(p => ({ value: p.name, label: p.name }));
-      const salesList = (partyRes.data.data || []).filter(p => p.type === "sales").map(p => ({ value: p.name, label: p.name }));
-      const productList = (productRes.data.data || []).map(p => ({ value: p.product_name, label: p.product_name }));
-      const gradationList = (gradationRes.data.data || []).map(g => ({ value: g.gradation, label: g.gradation }));
+      const parties = partyRes.status === "fulfilled" ? (partyRes.value.data.data || partyRes.value.data || []) : [];
+      const productsData = productRes.status === "fulfilled" ? (productRes.value.data.data || productRes.value.data || []) : [];
+      const gradationsData = gradationRes.status === "fulfilled" ? (gradationRes.value.data.data || gradationRes.value.data || []) : [];
+      const purchasesData = purchaseRes.status === "fulfilled" ? (purchaseRes.value.data.data || purchaseRes.value.data || []) : [];
+      const salesData = salesRes.status === "fulfilled" ? (salesRes.value.data.data || salesRes.value.data || []) : [];
 
-      // remove duplicates
-      setPurchaseParties([...new Map(purchaseList.map(item => [item.value, item])).values()]);
-      setSalesParties([...new Map(salesList.map(item => [item.value, item])).values()]);
-      setProducts([...new Map(productList.map(item => [item.value, item])).values()]);
-      setGradations([...new Map(gradationList.map(item => [item.value, item])).values()]);
+      // Collect purchase parties
+      const purchasePartySet = new Set([
+        ...parties.filter(p => p.type && p.type.toLowerCase() === "purchase").map(p => p.name),
+        ...purchasesData.map(p => p.party_name).filter(Boolean)
+      ]);
+
+      // Collect sales parties
+      const salesPartySet = new Set([
+        ...parties.filter(p => p.type && p.type.toLowerCase() === "sales").map(p => p.name),
+        ...salesData.map(s => s.customer_name || s.party_name).filter(Boolean)
+      ]);
+
+      // Collect products
+      const productSet = new Set([
+        ...productsData.map(p => p.product_name).filter(Boolean)
+      ]);
+
+      // Collect gradations
+      const gradationSet = new Set([
+        ...gradationsData.map(g => g.gradation).filter(Boolean)
+      ]);
+
+      setPurchaseParties(Array.from(purchasePartySet).map(name => ({ value: name, label: name })));
+      setSalesParties(Array.from(salesPartySet).map(name => ({ value: name, label: name })));
+      setProducts(Array.from(productSet).map(name => ({ value: name, label: name })));
+      setGradations(Array.from(gradationSet).map(name => ({ value: name, label: name })));
 
     } catch (error) {
       console.error("Error fetching filter options", error);
     }
   };
 
+  const hasFilter = Boolean(
+    selectedPurchaseParty ||
+    selectedSalesParty ||
+    selectedProduct ||
+    selectedGradation ||
+    fromDate ||
+    toDate
+  );
+
   const fetchData = async () => {
-    // Return early and clear data if NO filters are selected
-    if (!selectedPurchaseParty && !selectedSalesParty && !selectedProduct && !selectedGradation) {
+    if (!hasFilter) {
       setData([]);
       setFilteredData([]);
+      setLoading(false);
       return;
     }
 
     setLoading(true);
     try {
       const params = {};
-      if (selectedPurchaseParty) params.purchaseParty = selectedPurchaseParty.value;
-      if (selectedSalesParty) params.salesParty = selectedSalesParty.value;
-      if (selectedProduct) params.productName = selectedProduct.value;
-      if (selectedGradation) params.gradation = selectedGradation.value;
 
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/export`, { params });
-      setData(res.data);
-      setFilteredData(res.data);
+      if (selectedPurchaseParty) {
+        params.purchaseParty = selectedPurchaseParty.value;
+      }
+
+      if (selectedSalesParty) {
+        params.salesParty = selectedSalesParty.value;
+      }
+
+      if (selectedProduct) {
+        params.productName = selectedProduct.value;
+      }
+
+      if (selectedGradation) {
+        params.gradation = selectedGradation.value;
+      }
+
+      if (fromDate) {
+        params.fromDate = fromDate;
+      }
+
+      if (toDate) {
+        params.toDate = toDate;
+      }
+
+      const token = localStorage.getItem("token");
+      const config = {
+        params,
+        ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {})
+      };
+
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/export`, config);
+      const resData = Array.isArray(res.data) ? res.data : (res.data.data || []);
+      setData(resData);
+      setFilteredData(resData);
     } catch (error) {
       console.error("Error fetching export data", error);
     } finally {
@@ -80,9 +155,17 @@ export default function ExportPage() {
     }
   };
 
+
   useEffect(() => {
     fetchData();
-  }, [selectedPurchaseParty, selectedSalesParty, selectedProduct, selectedGradation]);
+  }, [
+    selectedPurchaseParty,
+    selectedSalesParty,
+    selectedProduct,
+    selectedGradation,
+    fromDate,
+    toDate
+  ]);
 
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(filteredData.map(row => ({
@@ -140,10 +223,30 @@ export default function ExportPage() {
       `).join("");
 
     const filterDetails = [
-      selectedPurchaseParty ? `Purchase Party: ${selectedPurchaseParty.label}` : null,
-      selectedSalesParty ? `Sales Party: ${selectedSalesParty.label}` : null,
-      selectedProduct ? `Product: ${selectedProduct.label}` : null,
-      selectedGradation ? `Gradation: ${selectedGradation.label}` : null,
+      selectedPurchaseParty
+        ? `Purchase Party: ${selectedPurchaseParty.label}`
+        : null,
+
+      selectedSalesParty
+        ? `Sales Party: ${selectedSalesParty.label}`
+        : null,
+
+      selectedProduct
+        ? `Product: ${selectedProduct.label}`
+        : null,
+
+      selectedGradation
+        ? `Gradation: ${selectedGradation.label}`
+        : null,
+
+      fromDate
+        ? `From: ${new Date(fromDate).toLocaleDateString("en-GB")}`
+        : null,
+
+      toDate
+        ? `To: ${new Date(toDate).toLocaleDateString("en-GB")}`
+        : null,
+
     ].filter(Boolean).join(" | ") || "All Data";
 
     const printWindow = window.open("", "_blank");
@@ -293,13 +396,23 @@ export default function ExportPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={exportToPDF}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl font-medium shadow-sm transition-all"
+                disabled={filteredData.length === 0}
+                className={`px-4 py-2 rounded-xl font-medium shadow-sm transition-all ${
+                  filteredData.length === 0
+                    ? "bg-red-300 text-white cursor-not-allowed opacity-60"
+                    : "bg-red-500 hover:bg-red-600 text-white"
+                }`}
               >
                 Export PDF
               </button>
               <button
                 onClick={exportToExcel}
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl font-medium shadow-sm transition-all"
+                disabled={filteredData.length === 0}
+                className={`px-4 py-2 rounded-xl font-medium shadow-sm transition-all ${
+                  filteredData.length === 0
+                    ? "bg-green-300 text-white cursor-not-allowed opacity-60"
+                    : "bg-green-500 hover:bg-green-600 text-white"
+                }`}
               >
                 Export Excel
               </button>
@@ -308,9 +421,14 @@ export default function ExportPage() {
 
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
             <h2 className="text-lg font-semibold text-slate-800 mb-4">Filters</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+
+              {/* Purchase Party */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Purchase Party</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Purchase Party
+                </label>
+
                 {isMounted && (
                   <Select
                     instanceId="purchase-party-select"
@@ -318,15 +436,21 @@ export default function ExportPage() {
                     options={purchaseParties}
                     value={selectedPurchaseParty}
                     onChange={setSelectedPurchaseParty}
-                    placeholder="Select Purchase Party..."
+                    placeholder="Select"
                     className="text-sm"
                     maxMenuHeight={200}
                     classNames={{ menuList: () => "custom-scrollbar" }}
                   />
                 )}
               </div>
+
+
+              {/* Sales Party */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Sales Party</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Sales Party
+                </label>
+
                 {isMounted && (
                   <Select
                     instanceId="sales-party-select"
@@ -334,15 +458,21 @@ export default function ExportPage() {
                     options={salesParties}
                     value={selectedSalesParty}
                     onChange={setSelectedSalesParty}
-                    placeholder="Select Sales Party..."
+                    placeholder="Select"
                     className="text-sm"
                     maxMenuHeight={200}
                     classNames={{ menuList: () => "custom-scrollbar" }}
                   />
                 )}
               </div>
+
+
+              {/* Product */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Product</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Product
+                </label>
+
                 {isMounted && (
                   <Select
                     instanceId="product-select"
@@ -357,8 +487,14 @@ export default function ExportPage() {
                   />
                 )}
               </div>
+
+
+              {/* Gradation */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Gradation</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Gradation
+                </label>
+
                 {isMounted && (
                   <Select
                     instanceId="gradation-select"
@@ -373,6 +509,48 @@ export default function ExportPage() {
                   />
                 )}
               </div>
+
+
+              {/* From Date */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  From Date
+                </label>
+
+                <input
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="w-full h-[38px] px-3 border border-slate-300 rounded-md text-sm text-slate-600 outline-none focus:border-[#D2A185] focus:ring-1 focus:ring-[#D2A185]"
+                />
+              </div>
+
+
+              {/* To Date */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  To Date
+                </label>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={toDate}
+                    min={fromDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                    className="w-full h-[38px] px-3 border border-slate-300 rounded-md text-sm text-slate-600 outline-none focus:border-[#D2A185] focus:ring-1 focus:ring-[#D2A185]"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleClearFilter}
+                    title="Clear Filters"
+                    className="w-[38px] h-[38px] shrink-0 border border-slate-300 rounded-md bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-300 text-slate-600 flex items-center justify-center transition-all shadow-sm focus:outline-none focus:ring-1 focus:ring-red-400 cursor-pointer"
+                  >
+                    <FiX className="text-lg" />
+                  </button>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -398,7 +576,11 @@ export default function ExportPage() {
                     </tr>
                   ) : filteredData.length === 0 ? (
                     <tr>
-                      <td colSpan="8" className="py-8 text-center text-slate-500">No data found.</td>
+                      <td colSpan="8" className="py-8 text-center text-slate-500">
+                        {hasFilter
+                          ? "No data found matching your selected filters."
+                          : "Please select at least one filter option above to view export data."}
+                      </td>
                     </tr>
                   ) : (
                     filteredData.map((row, index) => (

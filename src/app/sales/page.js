@@ -718,7 +718,7 @@ export default function Sales() {
               <p>Where Premium Surfaces Meet Timeless Elegance</p>
             </div>
             <div class="header-right">
-              <h2>Sales Order</h2>
+              <h2>DELIVERY CHALLAN</h2>
               <p><strong>Date:</strong> ${new Date(sale.date).toLocaleDateString("en-GB")}</p>
             </div>
           </div>
@@ -726,9 +726,9 @@ export default function Sales() {
           <div class="details-container">
             <div class="details-box">
               <h3>Company Info</h3>
-              <p><strong>Name:</strong> Micara Laminate</p>
+              <p><strong>Name:</strong> Paras Decorative Panels</p>
               <p><strong>Address:</strong> Ahmedabad, Gujarat</p>
-              <p><strong>Contact:</strong> +91 9876543210</p>
+              <p><strong>Contact:</strong> +91 92740 52718</p>
               <p><strong>Email:</strong> info@micara.in</p>
               <p><strong>Website:</strong> www.micara.in</p>
             </div>
