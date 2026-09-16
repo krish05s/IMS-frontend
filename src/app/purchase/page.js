@@ -5,6 +5,7 @@ import useRoleCheck from "../hooks/useRoleCheck";
 import Select from "react-select";
 import { toast } from "react-toastify";
 import Topbar from "../components/Topbar";
+import * as XLSX from "xlsx";
 
 export default function Purchases() {
   useRoleCheck(["super admin", "admin", "purchase"]);
@@ -180,6 +181,350 @@ export default function Purchases() {
     } finally {
       setIsReceiving(false);
     }
+  };
+
+  const exportReceiveDeliveryToExcel = (purchase, items) => {
+    if (!items || items.length === 0) {
+      toast.error("No items available to export.");
+      return;
+    }
+
+    const titleRow = [["MICARA LAMINATE - RECEIVE DELIVERY REPORT"]];
+    const infoRows = [
+      [`Bill No: ${purchase?.bill_no || '-'}`, `Party: ${purchase?.party_name || '-'}`, `Date: ${new Date().toLocaleDateString("en-GB")}`],
+      [`Vehicle No: ${purchase?.vehicle_no || '-'}`, `Transporter: ${purchase?.transporter_name || '-'}`, `LR No: ${purchase?.lr_number || '-'}`],
+      []
+    ];
+
+    const headers = [["#", "Product Name", "Gradation", "Ordered Qty", "Received Qty", "Pending Qty"]];
+
+    let totalOrdered = 0;
+    let totalReceived = 0;
+    let totalPending = 0;
+
+    const dataRows = items.map((item, idx) => {
+      const ordered = Number(item.quantity) || 0;
+      const received = Number(item.received_quantity) || 0;
+      const pending = Math.max(0, ordered - received);
+
+      totalOrdered += ordered;
+      totalReceived += received;
+      totalPending += pending;
+
+      return [
+        idx + 1,
+        item.product_name || "-",
+        item.gradation || "-",
+        ordered,
+        received,
+        pending
+      ];
+    });
+
+    const totalRow = [
+      ["Total", "", "", totalOrdered, totalReceived, totalPending]
+    ];
+
+    const worksheetData = [
+      ...titleRow,
+      ...infoRows,
+      ...headers,
+      ...dataRows,
+      ...totalRow
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Receive Delivery");
+
+    const fileName = `Receive_Delivery_Bill_${purchase?.bill_no || 'Report'}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    toast.success("Excel exported successfully!");
+  };
+
+  const exportReceiveDeliveryToPDF = (purchase, items) => {
+    if (!items || items.length === 0) {
+      toast.error("No items available to export.");
+      return;
+    }
+
+    let totalOrdered = 0;
+    let totalReceived = 0;
+    let totalPending = 0;
+
+    const itemsHtml = items.map((item, idx) => {
+      const ordered = Number(item.quantity) || 0;
+      const received = Number(item.received_quantity) || 0;
+      const pending = Math.max(0, ordered - received);
+
+      totalOrdered += ordered;
+      totalReceived += received;
+      totalPending += pending;
+
+      return `
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">${idx + 1}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">
+            <div style="font-weight: 600; color: #1e293b;">${item.product_name || "-"}</div>
+            <div style="font-size: 11px; color: #64748b;">${item.gradation || "-"}</div>
+          </td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #2563eb;">${ordered}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #10b981;">${received}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 700; color: #f43f5e;">${pending}</td>
+        </tr>
+      `;
+    }).join("");
+
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <html>
+      <head>
+        <title>Receive Delivery Report - Bill ${purchase?.bill_no}</title>
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #1e293b; background: #f8fafc; }
+          .invoice-box { max-width: 850px; margin: auto; padding: 24px; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; }
+          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #9333ea; padding-bottom: 15px; margin-bottom: 20px; }
+          .header-left h1 { margin: 0; color: #9333ea; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+          .header-left p { margin: 4px 0 0; font-size: 13px; color: #64748b; }
+          .header-right { text-align: right; }
+          .header-right h2 { margin: 0; color: #0f172a; font-size: 20px; font-weight: 700; }
+          .header-right p { margin: 4px 0 0; font-size: 13px; color: #64748b; }
+          .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+          .details-item { font-size: 13px; color: #475569; margin-bottom: 4px; }
+          .details-item strong { color: #0f172a; display: inline-block; width: 110px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th { background: #f1f5f9; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 12px; padding: 10px; text-align: left; border-bottom: 2px solid #cbd5e1; }
+          th.text-center { text-align: center; }
+          .total-row { background: #f8fafc; font-weight: 800; font-size: 14px; border-top: 2px solid #cbd5e1; }
+          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+          @media print {
+            @page { margin: 10mm; }
+            body { background: #fff; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .invoice-box { box-shadow: none; border: none; padding: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-box">
+          <div class="header">
+            <div class="header-left">
+              <img src="${window.location.origin}/FINAL_MICARA_LOGO_OPEN%20black.png" alt="Micara Laminate" style="height: 48px; margin-bottom: 6px;" onerror="this.onerror=null; this.src='${window.location.origin}/mikara.png';" />
+              <p>Where Premium Surfaces Meet Timeless Elegance</p>
+            </div>
+            <div class="header-right">
+              <h2>RECEIVE DELIVERY</h2>
+              <p><strong>Bill No:</strong> ${purchase?.bill_no || '-'}</p>
+              <p><strong>Date:</strong> ${new Date().toLocaleDateString("en-GB")}</p>
+            </div>
+          </div>
+
+          <div class="details-grid">
+            <div>
+              <div class="details-item"><strong>Party Name:</strong> ${purchase?.party_name || '-'}</div>
+              <div class="details-item"><strong>Vehicle No:</strong> ${purchase?.vehicle_no || '-'}</div>
+            </div>
+            <div>
+              <div class="details-item"><strong>Transporter:</strong> ${purchase?.transporter_name || '-'}</div>
+              <div class="details-item"><strong>LR Number:</strong> ${purchase?.lr_number || '-'}</div>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th width="8%" class="text-center">#</th>
+                <th>Product</th>
+                <th width="18%" class="text-center">Ordered</th>
+                <th width="18%" class="text-center">Received</th>
+                <th width="18%" class="text-center">Pending</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="2" style="padding: 12px; text-align: right; color: #334155;">Total:</td>
+                <td style="padding: 12px; text-align: center; color: #2563eb;">${totalOrdered}</td>
+                <td style="padding: 12px; text-align: center; color: #10b981;">${totalReceived}</td>
+                <td style="padding: 12px; text-align: center; color: #f43f5e;">${totalPending}</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div class="footer">
+            <p>This is a computer-generated delivery receive summary.</p>
+            <p>&copy; ${new Date().getFullYear()} Micara Laminate. All rights reserved.</p>
+          </div>
+        </div>
+        <script>
+          window.onload = function() {
+            setTimeout(() => {
+              window.print();
+              window.close();
+            }, 500);
+          };
+        </script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const exportHistoryToExcel = (purchase, receipts) => {
+    if (!receipts || receipts.length === 0) {
+      toast.error("No consignment history available to export.");
+      return;
+    }
+
+    const titleRow = [["MICARA LAMINATE - CONSIGNMENT HISTORY REPORT"]];
+    const infoRows = [
+      [`Bill No: ${purchase?.bill_no || '-'}`, `Date: ${new Date().toLocaleDateString("en-GB")}`],
+      []
+    ];
+
+    const headers = [["#", "Date & Time", "Product Name", "Gradation", "Received Qty", "Received By"]];
+
+    let totalReceived = 0;
+
+    const dataRows = receipts.map((r, idx) => {
+      const qty = Number(r.quantity_received) || 0;
+      totalReceived += qty;
+      return [
+        idx + 1,
+        new Date(r.received_date).toLocaleString(),
+        r.product_name || "-",
+        r.gradation || "-",
+        qty,
+        r.received_by || "-"
+      ];
+    });
+
+    const totalRow = [
+      ["Total", "", "", "", totalReceived, ""]
+    ];
+
+    const worksheetData = [
+      ...titleRow,
+      ...infoRows,
+      ...headers,
+      ...dataRows,
+      ...totalRow
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Consignment History");
+
+    const fileName = `Consignment_History_Bill_${purchase?.bill_no || 'Report'}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    toast.success("Excel exported successfully!");
+  };
+
+  const exportHistoryToPDF = (purchase, receipts) => {
+    if (!receipts || receipts.length === 0) {
+      toast.error("No consignment history available to export.");
+      return;
+    }
+
+    let totalReceived = 0;
+
+    const itemsHtml = receipts.map((r, idx) => {
+      const qty = Number(r.quantity_received) || 0;
+      totalReceived += qty;
+      return `
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">${idx + 1}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">${new Date(r.received_date).toLocaleString()}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: 600;">${r.product_name || "-"}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">${r.gradation || "N/A"}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 700; color: #10b981;">${qty}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center;">${r.received_by || "-"}</td>
+        </tr>
+      `;
+    }).join("");
+
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write(`
+      <html>
+      <head>
+        <title>Consignment History - Bill ${purchase?.bill_no}</title>
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #1e293b; background: #f8fafc; }
+          .invoice-box { max-width: 850px; margin: auto; padding: 24px; background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; }
+          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #ea580c; padding-bottom: 15px; margin-bottom: 20px; }
+          .header-left h1 { margin: 0; color: #ea580c; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+          .header-left p { margin: 4px 0 0; font-size: 13px; color: #64748b; }
+          .header-right { text-align: right; }
+          .header-right h2 { margin: 0; color: #0f172a; font-size: 20px; font-weight: 700; }
+          .header-right p { margin: 4px 0 0; font-size: 13px; color: #64748b; }
+          table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+          th { background: #f1f5f9; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 12px; padding: 10px; text-align: left; border-bottom: 2px solid #cbd5e1; }
+          th.text-center { text-align: center; }
+          th.text-right { text-align: right; }
+          .total-row { background: #f8fafc; font-weight: 800; font-size: 14px; border-top: 2px solid #cbd5e1; }
+          .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+          @media print {
+            @page { margin: 10mm; }
+            body { background: #fff; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .invoice-box { box-shadow: none; border: none; padding: 0; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-box">
+          <div class="header">
+            <div class="header-left">
+              <img src="${window.location.origin}/FINAL_MICARA_LOGO_OPEN%20black.png" alt="Micara Laminate" style="height: 48px; margin-bottom: 6px;" onerror="this.onerror=null; this.src='${window.location.origin}/mikara.png';" />
+              <p>Where Premium Surfaces Meet Timeless Elegance</p>
+            </div>
+            <div class="header-right">
+              <h2>CONSIGNMENT HISTORY</h2>
+              <p><strong>Bill No:</strong> ${purchase?.bill_no || '-'}</p>
+              <p><strong>Date:</strong> ${new Date().toLocaleDateString("en-GB")}</p>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th width="8%" class="text-center">#</th>
+                <th>Date & Time</th>
+                <th>Product</th>
+                <th>Gradation</th>
+                <th width="15%" class="text-right">Received Qty</th>
+                <th width="18%" class="text-center">Received By</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td colspan="4" style="padding: 12px; text-align: right; color: #334155;">Total Received:</td>
+                <td style="padding: 12px; text-align: right; color: #10b981;">${totalReceived}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div class="footer">
+            <p>This is a computer-generated consignment receipt history summary.</p>
+            <p>&copy; ${new Date().getFullYear()} Micara Laminate. All rights reserved.</p>
+          </div>
+        </div>
+        <script>
+          window.onload = function() {
+            setTimeout(() => {
+              window.print();
+              window.close();
+            }, 500);
+          };
+        </script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   useEffect(() => {
@@ -2193,9 +2538,35 @@ export default function Purchases() {
               <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                 <div className="bg-white rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
                   <div className="px-6 py-4 bg-[#212121] flex justify-between items-center">
-                    <div>
-                      <h3 className="text-lg font-bold text-white">Consignment History</h3>
-                      <p className="text-slate-300 text-sm">Bill: {historyPurchase?.bill_no}</p>
+                    <div className="flex items-center gap-4 flex-wrap">
+                      <div>
+                        <h3 className="text-lg font-bold text-white">Consignment History</h3>
+                        <p className="text-slate-300 text-sm">Bill: {historyPurchase?.bill_no}</p>
+                      </div>
+                      {historyReceipts.length > 0 && (
+                        <div className="flex items-center gap-2 ml-4">
+                          <button
+                            onClick={() => exportHistoryToExcel(historyPurchase, historyReceipts)}
+                            title="Export History to Excel"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer shadow-sm"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Excel
+                          </button>
+                          <button
+                            onClick={() => exportHistoryToPDF(historyPurchase, historyReceipts)}
+                            title="Export History to PDF"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer shadow-sm"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            PDF
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <button onClick={() => setIsHistoryModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors cursor-pointer text-white">
                       ✕
@@ -2239,7 +2610,7 @@ export default function Purchases() {
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
                 <div className="bg-white rounded-2xl w-full max-w-4xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
                   <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 flex-wrap">
                       <h3 className="text-xl font-bold text-slate-800">
                         Receive Delivery <span className="text-slate-500 text-sm font-normal ml-2">(Bill: {receivePurchase.bill_no})</span>
                       </h3>
@@ -2252,6 +2623,26 @@ export default function Purchases() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         View History
+                      </button>
+                      <button
+                        onClick={() => exportReceiveDeliveryToExcel(receivePurchase, receiveItems)}
+                        title="Export Receive Delivery to Excel"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-700 text-sm font-bold rounded-lg transition-colors cursor-pointer"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Excel
+                      </button>
+                      <button
+                        onClick={() => exportReceiveDeliveryToPDF(receivePurchase, receiveItems)}
+                        title="Export Receive Delivery to PDF"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 text-sm font-bold rounded-lg transition-colors cursor-pointer"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        PDF
                       </button>
                     </div>
                     <button
